@@ -1,0 +1,50 @@
+package kr.or.ddit.club.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.club.service.ClubService;
+import kr.or.ddit.club.vo.ClubVO;
+
+@Controller
+public class ClubPRequestRetrieve {
+	@Inject
+	private ClubService service;
+	
+	
+	@RequestMapping("/club/clubPRequestListView.do")
+	public String clubRequestListView(
+			Model model
+			,HttpSession session
+			) {
+		String cd="1000001";
+		session.setAttribute("userId", cd);
+		List<ClubVO> InsertRequest = service.insertListClub(Integer.parseInt(cd));//세션 id 값
+		model.addAttribute("club",InsertRequest);
+		return "club/clubInsertRequestListView";
+	}
+	
+	
+	
+	
+	@RequestMapping("/club/clubPRequestView.do")
+	public ModelAndView clubRequestView(
+			@RequestParam(name = "who", required = true) String clubCd
+			
+			)
+	{
+		ModelAndView mav =new ModelAndView();
+		ClubVO InsertRequest = service.InsertViewClub(clubCd);
+		mav.addObject("club", InsertRequest);
+		mav.setViewName("club/clubInsertView");
+		return mav;
+	}
+}

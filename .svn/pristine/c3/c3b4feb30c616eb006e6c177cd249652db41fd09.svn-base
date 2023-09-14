@@ -1,0 +1,51 @@
+package kr.or.ddit.staff.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.staff.service.StaffService;
+import kr.or.ddit.staff.vo.StaffVO;
+
+@Controller
+public class StaffDeleteController {
+	@Inject
+	private StaffService service;
+	
+	@PostMapping("/staff/staffDelete.do")
+	public String postHandler(
+		@RequestParam("who") String tsCd
+		, @RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, SimpleCondition simpleCondition
+		, HttpSession session
+		, Model model
+	){
+		String logicalViewName = null;
+		ServiceResult result = service.removeStaff(tsCd);
+		if(ServiceResult.OK == result) {
+			PaginationInfo<StaffVO> paging = new PaginationInfo<>(10, 5);
+			paging.setSimpleCondition(simpleCondition);
+			paging.setCurrentPage(currentPage);
+			
+			List<StaffVO> staffList = service.retrieveStaffList(paging);
+			paging.setDataList(staffList);
+			
+			model.addAttribute("paging", paging);
+			session.setAttribute("message", "삭제가 완료되었습니다.");
+			logicalViewName = "redirect:/staff/staffList.do";
+		}else {
+			session.setAttribute("message", "오류, 삭제 실패");
+			logicalViewName = "redirect:/staff/staffView.do?who="+tsCd;
+		}
+		return logicalViewName;
+	}
+}

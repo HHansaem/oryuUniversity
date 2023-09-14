@@ -1,0 +1,72 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<div class="card">
+	<div class="card-body">
+		<table class="table table-border">
+			<tr>
+				<th>이름</th>
+				<td>${clubMemberView.stNm }</td>
+				<th>학번</th>
+				<td>${clubMemberView.stCd }</td>
+			</tr>
+			<tr>
+				<th>학과</th>
+				<td>${clubMemberView.dtNm }</td>
+				<th>전화번호</th>
+				<td>${clubMemberView.stPh }</td>
+			</tr>
+			<tr>
+				<th>이메일</th>
+				<td>${clubMemberView.stEmail }</td>
+				<th>신청일자</th>
+				<td>${clubMemberView.clubAppDate }</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<form:form modelAttribute="clubMem" method="post"
+			enctype="multipart/form-data" class="form">
+
+			<table class="table table-border">
+				<tr>
+					<th>신청한 이유</th>
+					<td>${clubMemberView.clubAppCon }</td>
+				</tr>
+				<tr>
+					<th>활동 계획</th>
+					<td>${clubMemberView.clubMemPlan }</td>
+				</tr>
+				
+				<tr>
+					<td colspan="2">
+						<div class="d-flex justify-content-left">
+							<input type= button class="btn btn-success" value="승인" onclick="pass()" > 
+							<input class="btn btn-danger" type=button value="거절" onclick="noPass()">
+							<input class="btn btn-secondary" type="reset" value="뒤로가기" onclick="history.back();">
+						</div>
+					</td>
+				</tr>
+			</table>
+		</form:form>
+	</div>
+</div>
+
+<script>
+function pass(){
+	window.location.href = "${pageContext.request.contextPath}/clubMember/clubMemberInsertPass.do?who=${clubMemberView.stCd}&club=${clubMemberView.clubCd}";  
+}
+
+function noPass(){
+	window.location.href = "${pageContext.request.contextPath}/clubMember/clubMemberInsertNoPass.do?who=${clubMemberView.stCd}&club=${clubMemberView.clubCd}";  
+}
+
+if(message)
+{
+	alert(message);
+	}
+</script>

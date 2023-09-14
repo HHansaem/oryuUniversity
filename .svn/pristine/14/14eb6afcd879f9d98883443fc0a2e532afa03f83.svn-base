@@ -1,0 +1,21 @@
+package kr.or.ddit.professor.vo;
+
+import java.io.Serializable;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+
+@Data
+public class ProfessorVO implements Serializable {
+	@NotBlank private Integer prCd;
+	@NotBlank private String dtCd;
+	@NotBlank private String clubCd;
+	 private String prNm;
+	 private String prAddr;
+	 private String prPh;
+	 private String prEmail;
+	 private String prSsnum;
+	@NotBlank private String prPass;
+	 private String prPic;
+}

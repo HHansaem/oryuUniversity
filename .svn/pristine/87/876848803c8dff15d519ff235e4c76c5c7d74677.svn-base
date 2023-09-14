@@ -1,0 +1,133 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<form:form method="post" modelAttribute="club">
+	<p>인증된 사용자 이름: <sec:authentication property="name" /></p>
+	<p>확인 :${fn:substring(sessionScope.userId, 0, 1) eq 1}</p>
+	<table class="table table-border">
+			<!-- 학생 -->
+				<tr>
+			<th>동아리 대표 성명</th>
+			<td><input type="text" name="clubCd" value="${info.stNm}" readonly></td>
+			</tr>
+			<tr>
+				<th>동아리 대표 학번</th>
+				<td><input type="text" name="StCd" value="${info.stCd}" readonly></td>
+			</tr>
+			<tr>
+				<th>동아리명</th>
+				<td><input class="form-control" type="text" name="clubNm"
+					value="${clubNm }" /><span class="error">${errors["clubNm"]}</span></td>
+			</tr>
+			<tr>
+				<th>동아리 지도 교수</th>
+			<td>
+   				<button type="button" class="btn btn-primary narrow-modal-button" id="openModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">
+				동아리 지도 교수 검색
+				</button>
+			</td>
+			</tr>
+			<tr>
+				<th>동아리 계획서</th>
+				<td><textarea class="form-control" name="clubPlan">${clubPlan }</textarea>
+					<span class="error">${errors["clubPlan"]}</span></td>
+			</tr>
+
+			<tr>
+				<th>동아리 상태</th>
+				<td><select name="clubStatus">
+						<option value="개설신청">개설신청</option>
+				</select></td>
+			</tr>
+		<tr>
+			<td colspan="2">
+				<input class="btn btn-success" type="submit" value="확인"> 
+				<input class="btn btn-danger" type="reset"value="취소" onclick="history.back();">
+			</td>
+		</tr>
+	</table>
+</form:form>
+
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">장학 신청</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<div id="searchUI" class="row justify-content-center">
+		<div  class="col-auto">
+			<form:select path="simpleCondition.searchType" class="form-select">
+				<form:option value="" label="전체" />
+				<form:option value="prNm" label="교수이름" />
+				<form:option value="prCd" label="교수코드" />
+				<form:option value="dtNm" label="학과" />
+			</form:select>
+		</div>
+		<div  class="col-auto">
+			<form:input path="simpleCondition.searchWord" class="form-control"/>
+		</div>
+		<div  class="col-auto">
+			<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+		</div>
+	</div>
+	<div class="paging-info">
+                <p>총 ${totalRecord}건의 게시물이 있습니다.</p>
+                <p>페이지 ${paging.currentPage}/${paging.endPage}</p>
+            </div>
+            <table class="table">
+<tr><td><h4><br>인턴십 신청 목록</h4></td></tr>
+</table>
+<table class="table">
+	<thead class="table-light">
+	
+		<tr>
+			<th>교수이름</th>
+			<th>교수코드</th>
+			<th>학과</th>
+			<th>교수전화번호</th>
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="proList" value="${paging.dataList }" />
+		<c:choose>
+			<c:when test="${empty proList }">
+				<tr>
+					<td colspan="4">조건에 맞는 게시글 없음.</td>
+				</tr>
+			</c:when>
+			<c:otherwise>
+				<c:forEach items="${internList }" var="intern">
+					<tr>
+						<c:url value="/internshipAPC/internshipAPCView.do" var="viewURL">
+							<c:param name="what" value="${intern.iaCd }"></c:param>
+						</c:url>
+						<td>${pro.PrNm }</td>
+						<td><a href="${viewURL }">${intern.internshipVO.inteTitle }</a></td>
+						<td>${intern.studentVO.stCd }</td>
+						<td>${intern.studentVO.stNm }</td>
+						<td>${intern.studentVO.stPh }</td>
+						<td>${intern.iaStat }</td>
+					</tr>
+				</c:forEach>
+			</c:otherwise>
+		</c:choose>
+	</tbody>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	        <button type="submit" class="btn btn-primary">제출</button>
+	      </div>
+	    </form>
+    </div>
+  </div>
+</div>
+
+

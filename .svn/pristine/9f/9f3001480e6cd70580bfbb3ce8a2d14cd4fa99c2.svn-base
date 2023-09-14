@@ -1,0 +1,88 @@
+package kr.or.ddit.subject.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.college.dao.CollegeDAO;
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.vo.ClassificationVO;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.service.SubjectService;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+@RequestMapping("/subject/subjectUpdate.do")
+public class SubjectUpdateController {
+	
+	@Inject
+	private SubjectService service;
+	@Inject 
+	private DepartmentDAO departmentDAO;
+	@Inject
+	private CommonDAO commonDAO;
+	@Inject
+	private CollegeDAO collegeDAO;
+	
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		return departmentDAO.selectDepartmentList();
+	}
+	@ModelAttribute("classificationList")
+	public List<ClassificationVO> classificationList(){
+		return commonDAO.selectClassificationList();
+	}
+	@ModelAttribute("collegeList")
+	public List<CollegeVO> collegeList(){
+		return collegeDAO.selectCollegeList();
+	}
+	
+	
+	
+	@GetMapping
+	public String sujectForm(
+			@RequestParam String what, Model model
+	) {
+		SubjectVO subject = service.retrieveSubject(what);
+		model.addAttribute("subject",subject);
+		return "subject/subjectForm";
+	}
+	
+	@PostMapping
+	public String subjectUpdate(
+		@ModelAttribute("subject") SubjectVO subject
+		, Errors errors
+		, Model model
+			
+	) {
+		String logicalViewName = null;
+	
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifySubject(subject);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/subject/subjectList.do";
+			}else {
+				model.addAttribute("message", "과목 수정 중 문제 발생");
+				logicalViewName = "subject/subjectForm";
+			}
+		}else {
+			logicalViewName = "subject/subjectForm";
+		}
+		return logicalViewName;
+	}
+		
+}
+	
+

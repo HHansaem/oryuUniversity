@@ -1,0 +1,156 @@
+package kr.or.ddit.graduation.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.graduation.service.GraduationService;
+import kr.or.ddit.graduation.vo.GraduationVO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.validate.groups.UpdateGroup;
+
+@Controller
+public class GraduationRetrieveController {
+
+	@Inject
+	private GraduationService service;
+	@Inject
+	private StudentService stService;
+	
+	@ModelAttribute("graduation")
+	public GraduationVO graduation() {
+		return new GraduationVO();
+	}
+	
+	@RequestMapping("/graduation/graduationList.do")
+	public String getHandler(Model model) {
+		
+		List<GraduationVO> graduationTypeList = service.retrieveGraduationTypeList();
+		List<CollegeVO> collegeTypeList = service.retrieveCollegeTypeList();
+		List<GraduationVO> graduationConditionList = service.retrieveGraduationConditionList();
+
+		model.addAttribute("graduationTypeList", graduationTypeList);
+		model.addAttribute("collegeTypeList", collegeTypeList);
+		model.addAttribute("graduationConditionList", graduationConditionList);
+		
+		return "graduation/graduationList";
+	}
+	
+	@RequestMapping("/graduation/studentList.do")
+	public String getHandler2(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, SimpleCondition simpleCondition
+		, Model model
+	){
+		PaginationInfo<StudentVO> paging = new PaginationInfo<>(10, 5);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		
+		List<StudentVO> studentList = stService.retrieveStudentList(paging);
+		paging.setDataList(studentList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "graduation/graduationStaffList";
+	}
+	
+	@PostMapping("/graduation/updateGraduation.do")
+	public String postHandler(
+		@Validated(UpdateGroup.class) @ModelAttribute("graduation") GraduationVO graduation
+		, Errors errors
+		, Model model
+		, HttpSession session
+	){
+		String gradCondType = graduation.getGeGradCondType();
+		String gradCond = graduation.getGradCond();
+		String colgeCd = graduation.getColgeCd();
+		
+		String[] gradCondTypeList = gradCondType.split(",");
+		String[] gradCondList = gradCond.split(",");
+		
+		if(!errors.hasErrors() && gradCondList.length != 0) {
+			
+			for (int i = 0; i < gradCondTypeList.length; i++) {
+				String condType = gradCondTypeList[i];
+				String cond = gradCondList[i];
+				
+				GraduationVO gradVO = new GraduationVO();
+				gradVO.setGeGradCondType(condType);
+				gradVO.setGradCond(cond);
+				gradVO.setColgeCd(colgeCd);
+				
+				service.modifyGraduation(gradVO);
+				session.setAttribute("message", "수정이 완료되었습니다.");
+			}
+		}else {
+			session.setAttribute("message", "수정중 오류가 발생했습니다.");
+		}
+			return "redirect:/graduation/graduationList.do";
+	}
+	
+	@PostMapping("/graduation/insertGraduation.do")
+	public String postHandler2(
+		@ModelAttribute("graduation") GraduationVO graduation
+		, Errors errors
+		, Model model
+		, HttpSession session
+	){
+		String gradCondType = graduation.getGeGradCondType();
+		String gradCond = graduation.getGradCond();
+		String colgeCd = graduation.getColgeCd();
+		
+		String[] colgeCdList = colgeCd.split(",");
+		String[] gradCondList = gradCond.split(",");
+		
+		if(!errors.hasErrors() && gradCondList.length != 0) {
+			
+			for(int i = 0; i < colgeCdList.length; i++) {
+				String colCd = colgeCdList[i];
+				String cond = gradCondList[i];
+				
+				GraduationVO gradVO = new GraduationVO();
+				gradVO.setGeGradCondType(gradCondType);
+				gradVO.setColgeCd(colCd);
+				gradVO.setGradCond(cond);
+				
+				service.createGraduation(gradVO);
+				session.setAttribute("message", "등록이 완료되었습니다.");
+			}
+		}else {
+			session.setAttribute("message", "등록중 오류가 발생했습니다.");
+		}
+		return "redirect:/graduation/graduationList.do";
+	}
+	
+	@RequestMapping("/graduation/deleteGraduation.do")
+	public String postHandler3(
+		@ModelAttribute("geGradCondType") String geGradCondType
+		, Errors errors
+		, Model model
+		, HttpSession session
+	){
+		if(!errors.hasErrors()) {
+			service.removeGraduation(geGradCondType);
+			session.setAttribute("message", "삭제가 완료되었습니다.");
+		}else {
+			session.setAttribute("message", "삭제중 오류가 발생했씁니다.");
+		}
+		
+		return "redirect:/graduation/graduationList.do";
+	}
+	
+}

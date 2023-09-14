@@ -1,0 +1,36 @@
+package kr.or.ddit.lectureContents.vo;
+
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.common.validate.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "attCd")
+public class AttendanceVO {
+	@NotBlank(groups=UpdateGroup.class)
+	private String attCd;
+	@NotBlank(groups=InsertGroup.class)
+	private String lecCd;
+	@NotBlank(groups=InsertGroup.class)
+	private String stCd;
+	private Integer atteLecDays;
+	private Integer atteDays;
+	private Integer atteAbseDays;
+	private Integer atteTardDays;
+	private Integer atteScore;
+	
+	private String attsCd;
+	private String dtNm;
+	private String stNm;
+	private String attsSche;
+	private String attsState;
+	private String attsWeek;
+	
+	private List<AttendanceStateVO> attendanceStateList;
+
+}

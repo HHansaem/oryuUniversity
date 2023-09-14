@@ -1,0 +1,89 @@
+package kr.or.ddit.tuition.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.tuition.service.TuitionService;
+import kr.or.ddit.tuition.vo.TuitionVO;
+
+@Controller
+public class ScholarshipApplyRetrieveController {
+
+	@Inject
+	private TuitionService service;
+	
+	@RequestMapping("/scholarship/scholarshipApplyRetrieve.do")
+	public String getHandler(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, SimpleCondition simpleCondition
+		, Model model
+	){
+		PaginationInfo<TuitionVO> paging = new PaginationInfo<>(10, 5);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		
+		List<TuitionVO> tuitionList = service.retrieveStaffApplyScholarship(paging);
+		paging.setDataList(tuitionList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "tuition/scholarshipStaffList";
+	}
+	
+	@RequestMapping("/scholarship/scholarshipApplyView.do")
+	public String getHandler2(
+		@RequestParam(name="when") String semesterCd
+		, @RequestParam(name="who") String stCd
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		TuitionVO seletedTuition = service.retrieveScholarship(tuition);
+		model.addAttribute("tuition", seletedTuition);
+		return "tuition/scholarshipView";
+	}
+	
+	@PostMapping("/scholarship/scholarshipAccept.do")
+	public String postHandler(
+		@RequestParam(name="semesterCd") String semesterCd
+		, @RequestParam(name="stCd") String stCd
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		
+		service.acceptScholarship(tuition);
+		
+		return "tuition/scholarshipView";
+	}
+	
+	@PostMapping("/scholarship/scholarshipReject.do")
+	public String postHandler2(
+		@RequestParam(name="semesterCd") String semesterCd
+		, @RequestParam(name="stCd") String stCd
+		, @RequestParam(name="tuRea") String tuRea
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		tuition.setTuRea(tuRea);
+		
+		service.refuseScholarship(tuition);
+		
+		return "tuition/scholarshipView";
+	}
+	
+}

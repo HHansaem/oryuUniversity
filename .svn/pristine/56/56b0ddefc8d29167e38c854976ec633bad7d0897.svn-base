@@ -1,0 +1,21 @@
+package kr.or.ddit.lecture.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.vo.NoticeVO;
+
+@Mapper
+public interface NoticeDAO {
+	
+	public long selectTotalRecord(PaginationInfo paging);
+	
+	public List<NoticeVO> selectNoticeList(PaginationInfo paging);
+	public NoticeVO selectNotice(String lnNum);
+	
+	public int insertNotice(NoticeVO lecNotice);
+	public int updateNotice(NoticeVO lecNotice);
+	public int deleteNotice(NoticeVO lecNotice);
+}

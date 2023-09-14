@@ -1,0 +1,42 @@
+package kr.or.ddit.staff.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.staff.service.StaffService;
+import kr.or.ddit.staff.vo.StaffVO;
+
+@Controller
+public class StaffMypageDeleteController {
+	
+	@Inject
+	private StaffService service;
+	@Inject
+	private PasswordEncoder encoder;
+	
+	@PostMapping("/mypage/staffDelete.do")
+	public String postHandler(
+		@RequestParam("who") String tsCd
+		, @RequestParam("password") String password
+		, HttpSession session
+	){
+		String logicalViewName = null;
+		StaffVO staff = service.retrieveStaff(tsCd);
+		String originPass = staff.getTsPass();
+		
+		if(encoder.matches(password, originPass)) {
+			service.removeStaff(tsCd);
+			session.setAttribute("message", "삭제가 완료되었습니다.");
+			logicalViewName = "redirect:/";
+		}else {
+			session.setAttribute("message", "비밀번호가 일치하지 않습니다.");
+			logicalViewName = "redirect:/mypage/staffView.do?who="+tsCd;
+		}
+		return logicalViewName;
+	}
+}

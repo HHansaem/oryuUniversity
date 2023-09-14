@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.exam.dao.ExamViewDAO">
+	<insert id="InsertExamView" parameterType="java.util.List">s
+		<foreach collection="list" item="examView" open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
+			INTO exam_view (
+    		ev_cd, eq_cd, ev_cont
+			) VALUES (
+  			#{evCd,jdbcType=VARCHAR}
+ 			,#{eqCd,jdbcType=VARCHAR}
+ 			,#{evCont,jdbcType=VARCHAR}
+			);
+		</foreach>
+	</insert>
+</mapper>

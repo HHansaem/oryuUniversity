@@ -1,0 +1,130 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<div class="col-md-9" style="padding:0;">
+	<form id="examScoreForm">
+	<c:set var="esCd" value="${examQueSubmitList[0].esCd}"/>
+	<input type="hidden" name="esScore" id="totalScore"/>
+	<input type="hidden" name="esCd" value="${esCd}"/>
+	<input type="hidden" name="examCd" id="examCode"/>
+	<input type="hidden" name="lecCd" value="${lecCd}"/>
+	<input type="hidden" name="stCd" id="stuId"/>
+	<c:forEach items="${examQueSubmitList}" var="examQueSubmit" varStatus="cnt">
+		<input type="hidden" name="examQueSubmitList[${cnt.index}].esCd" id="es" value="${examQueSubmit.esCd}"/>
+		<input type="hidden" name="examQueSubmitList[${cnt.index}].eqCd" value="${examQueSubmit.eqCd}"/>
+		<c:choose>
+			<c:when test="${examQueSubmit.eqType eq '객관식'}">
+				<div class="border m-3" id="${cnt.index+1}">
+					<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+			        	<h5>문제 ${cnt.index+1}번</h5>
+			        	<div>${examQueSubmit.eqScore}점</div>
+			        </div>
+			        <div class="p-3">
+				        <p>${examQueSubmit.eqQt}</p>
+				        <div class="d-flex flex-column">
+				        	<div class="m-2 p-2">
+				        		<i class="mdi mdi-checkbox-blank-circle"></i>
+				        		<span class="p-2">${examQueSubmit.eqView1}</span>
+				        	</div>
+				        	<div class="m-2 p-2">
+					        	<i class="mdi mdi-checkbox-blank-circle"></i>
+					        	<span class="p-2">${examQueSubmit.eqView2}</span>
+				        	</div>
+				        	<div class="m-2 p-2">
+					        	<i class="mdi mdi-checkbox-blank-circle"></i>
+					        	<span class="p-2">${examQueSubmit.eqView3}</span>
+				        	</div>
+				        	<div class="m-2 p-2">
+					        	<i class="mdi mdi-checkbox-blank-circle"></i>
+					        	<span class="p-2">${examQueSubmit.eqView4}</span>
+				        	</div>
+				        </div>
+			        </div>
+			        <div class="table-responsive pt-3">
+			        <table class="table table-bordered">
+			        	<tbody>
+				        	<tr>
+				        		<td style="background:aliceblue; font-weight: bolder;">정답</td>
+				        		<td>${examQueSubmit.eqAnsw}번</td>
+				        	</tr>
+				        	<tr>
+				        		<td style="background:aliceblue; font-weight: bolder;">제출된 답안</td>
+				        		<td>${examQueSubmit.eqsAnswer}번</td>
+				        	</tr>
+				        	<tr>
+				        		<td style="background:aliceblue; font-weight: bolder;">점수부여</td>
+				        		<td><input type="number" class="form-control-sm score" name="examQueSubmitList[${cnt.index}].eqsScore" value="${examQueSubmit.eqsScore}"></input>점</td>
+				        	</tr>
+			        	</tbody>
+			        </table>
+			        </div>
+			    </div>
+			</c:when>
+			<c:otherwise>
+			<div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 ${cnt.index+1}번</h5>
+		        	<div>${examQueSubmit.eqScore}점</div>
+		        </div>
+		        <div class="p-3">
+		       	<p>${examQueSubmit.eqQt}</p>
+		        </div>
+		         <div class="table-responsive pt-3">
+		        <table class="table table-bordered">
+		        	<tbody>
+			        	<tr>
+			        		<td style="background:aliceblue; font-weight: bolder;">정답</td>
+			        		<td>${examQueSubmit.eqAnsw}</td>
+			        	</tr>
+			        	<tr>
+			        		<td style="background:aliceblue; font-weight: bolder;">제출된 답안</td>
+			        		<td>${examQueSubmit.eqsAnswer}</td>
+			        	</tr>
+			        	<tr>
+			        		<td style="background:aliceblue; font-weight: bolder;">점수부여</td>
+			        		<td><input type="number" class="form-control-sm score" name="examQueSubmitList[${cnt.index}].eqsScore" value="${examQueSubmit.eqsScore}"></input>점</td>
+			        	</tr>
+		        	</tbody>
+		        </table>
+		        </div>
+		    </div>
+			</c:otherwise>				
+		</c:choose>
+	</c:forEach>
+	</form>
+  	</div>
+  	<div class="col-md-3">
+  		<div class="position-fixed border submitSide" style="margin-top: 15px;">
+  			<div class="border-bottom">
+  				<div class="p-2 d-flex align-items-center justify-content-center queSide">
+	  				제출자 정보
+  				</div>
+  				<p class="p-1" id="stName">학생명: </p>
+  				<p class="p-1" id="stCd">학번: </p>
+  				<p class="p-1" id="dtNm">학과: </p>
+  				<p class="p-1" id="stScore">점수: </p>
+  			</div>
+  			<div>
+  				<div class="p-2 queSide">
+					<div class="d-flex justify-content-center align-items-center queSide">
+	  					문제
+	  				</div>
+  				</div>
+  				<c:forEach items="${examQueSubmitList}" var="examQueSubmit" varStatus="cnt">
+				<p class="p-1">
+					<a href="#${cnt.index+1}">
+						<i class="mdi mdi-checkbox-blank-circle"></i>
+						<c:choose>
+							<c:when test="${examQueSubmit.eqType eq '객관식'}">
+				    			<span>문제 ${cnt.index+1}번 (객관식)</span>
+				    		</c:when>
+				    		<c:otherwise>
+				    			<span>문제 ${cnt.index+1}번 (주관식)</span>
+				    		</c:otherwise>
+				    	</c:choose>	
+					</a>
+				</p>
+				</c:forEach>
+  			</div>
+ 		</div>
+  	</div>

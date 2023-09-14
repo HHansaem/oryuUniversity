@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.researchJournal.dao.ResearchJournalDAO">
+
+	<sql id="searchFrag">
+		<trim prefix=" WHERE ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(RJ_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'department'">
+        				INSTR(RJ_AUT_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(RJ_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(RJ_AUT_NM, #{simpleCondition.searchWord}) > 0 
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+	<select id="selectTotalRecord" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM RESEARCHJOURNAL	
+		<include refid="searchFrag" />
+	</select>
+
+	<select id="selectResearchJournalList" resultType="kr.or.ddit.researchJournal.vo.ResearchJournalVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM AS RNUM, A.*
+		    FROM (
+		        SELECT
+		            RJ_SN,
+		            RESE_CD,
+		            ATCH_FILE_ID,
+		            RJ_NM,
+		            RJ_AUT_NM,
+		            RJ_CONTENT,
+		            RJ_FILE,
+		            RJ_DATE
+		        FROM RESEARCHJOURNAL
+		        <include refid="searchFrag" />
+		        ORDER BY ROWID DESC
+		    ) A
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+
+	</select>
+
+	<select id="selectResearchJournal" parameterType="int" resultType="kr.or.ddit.researchJournal.vo.ResearchJournalVO">
+		SELECT 				
+				RJ_SN
+				, RESE_CD
+				, ATCH_FILE_ID
+				, RJ_NM
+				, RJ_AUT_NM
+				, RJ_CONTENT
+				, RJ_FILE
+				, RJ_DATE 
+				FROM RESEARCHJOURNAL
+		FROM RESEARCHJOURNAL WHERE RJ_SN = #{rjSn}
+	</select>
+
+	<insert id="insertResearchJournal" parameterType="kr.or.ddit.researchJournal.vo.ResearchJournalVO">
+		INSERT INTO RESEARCHJOURNAL(
+				RJ_SN
+				, RESE_CD
+				, ATCH_FILE_ID
+				, RJ_NM
+				, RJ_AUT_NM
+				, RJ_CONTENT
+				, RJ_FILE
+				, RJ_DATE )
+			VALUES(
+				#{rjSn,jdbcType=VARCHAR}
+				, #{reseCd,jdbcType=VARCHAR}
+				, #{atchFileId,jdbcType=NUMERIC}
+				, #{rjNm,jdbcType=VARCHAR}
+				, #{rjAutNm,jdbcType=VARCHAR}
+				, #{rjContent,jdbcType=CLOB}
+				, #{rjFile,jdbcType=VARCHAR}
+				, #{rjDate,jdbcType=DATE}
+	</insert>
+
+<update id="updateResearchJournal" parameterType="kr.or.ddit.researchJournal.vo.ResearchJournalVO">
+		UPDATE RESEARCHJOURNAL SET 
+			RJ_SN = #{rjSn,jdbcType=VARCHAR}
+			, RESE_CD = #{reseCd,jdbcType=VARCHAR}
+			, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+			, RJ_NM = #{rjNm,jdbcType=VARCHAR}
+			, RJ_AUT_NM = #{rjAutNm,jdbcType=VARCHAR}
+			, RJ_CONTENT = #{rjContent,jdbcType=CLOB}
+			, RJ_FILE = #{rjFile,jdbcType=VARCHAR}
+			, RJ_DATE = #{rjDate,jdbcType=DATE}
+		WHERE RJ_SN = #{rjSn,jdbcType=VARCHAR}
+	</update>
+
+
+</mapper>

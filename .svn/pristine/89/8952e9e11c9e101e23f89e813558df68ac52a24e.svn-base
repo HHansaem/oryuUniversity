@@ -1,0 +1,48 @@
+package kr.or.ddit.graduation.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.graduation.service.GraduationService;
+import kr.or.ddit.graduation.vo.GraduationVO;
+
+@Controller
+public class GraduationStudentRetrieveController {
+
+	@Inject
+	private GraduationService service;
+	
+	@RequestMapping("/graduation/graduationStudentList.do")
+	public String graduationlist(
+		Authentication authentication
+		, Model model
+	){
+		String stCd = authentication.getName();
+		List<GraduationVO> graduationList = service.retrieveGraduationStudentList(stCd);
+		GraduationVO graduation = service.retrieveGraduationStudentBelong(stCd);
+		model.addAttribute("graduationList", graduationList);
+		model.addAttribute("graduation", graduation);
+		
+		return "graduation/graduationStudentList";
+	}
+	
+	@RequestMapping("/graduation/studentView.do")
+	public String getHandler(
+		@RequestParam("who") String stCd
+		, Model model
+	){
+		List<GraduationVO> graduationList = service.retrieveGraduationStudentList(stCd);
+		GraduationVO graduation = service.retrieveGraduationStudentBelong(stCd);
+		model.addAttribute("graduationList", graduationList);
+		model.addAttribute("graduation", graduation);
+		return "graduation/graduationStudentList";
+	}
+	
+}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.examSubmission.dao.ExamSubmitDAO">
+	<!-- 학생 시험제출 목록조회 -->
+	<select id="selectExamSubmitList" resultType="kr.or.ddit.lectureContents.vo.ExamSubmitVO" parameterType="string">
+		WITH STUDENTVIEW AS (
+		SELECT
+		dt_nm,st_nm,st_cd 
+		from student s inner join department d on (s.dt_cd = d.dt_cd)
+		)
+		SELECT
+		    st_nm
+		  , dt_nm
+		  , es_cd
+		  , es.exam_cd
+		  , es.lec_cd
+		  , es.st_cd
+		  , es_date
+		  , es_score
+		  , exam_score
+		FROM
+    	exam_submit es inner join STUDENTVIEW s on s.st_cd = es.st_cd
+    			      inner join exam e on e.exam_cd = es.exam_cd 
+    	WHERE es.exam_cd = #{examCd}
+	</select>
+	
+	<!-- 학생 시험제출 상세조회 -->
+	<select id="selectExamSubmit" resultType="kr.or.ddit.lectureContents.vo.ExamSubmitVO" parameterType="string">
+		WITH STUDENTVIEW AS (
+		SELECT
+		dt_nm,st_nm,st_cd 
+		from student s inner join department d on (s.dt_cd = d.dt_cd)
+		)
+		SELECT
+		    st_nm
+		  , dt_nm
+		  , es_cd
+		  , exam_cd
+		  , lec_cd
+		  , e.st_cd
+		  , es_date
+		  , es_score
+		FROM
+    	exam_submit e inner join STUDENTVIEW s on s.st_cd = e.st_cd
+    	WHERE es_cd = #{esCd}
+	</select>
+	
+	<!-- 학생 시험제출 등록 -->
+	<insert id="insertExamSubmit" parameterType="kr.or.ddit.lectureContents.vo.ExamSubmitVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="esCd">
+			SELECT EXAMSUBMIT_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO exam_submit (
+	      es_cd
+	    , exam_cd
+	    , lec_cd
+	    , st_cd
+	    , es_date
+	    , es_score
+		) VALUES (
+		 #{esCd,jdbcType=VARCHAR}
+		,#{examCd,jdbcType=VARCHAR}
+		,#{lecCd,jdbcType=VARCHAR}
+		,#{stCd,jdbcType=VARCHAR}
+		,sysdate
+		,0
+		)
+	</insert>
+	<!-- 학생 시험제출 점수업데이트 -->
+	<update id="updateExamSubmitScore" parameterType="kr.or.ddit.lectureContents.vo.ExamSubmitVO">
+	UPDATE exam_submit
+	SET
+	, ES_SCORE =  #{esScore,jdbcType=NUMERIC}
+	WHERE es_cd = #{esCd}
+	</update>
+	<!-- 학생 시험제출 답안등록 -->
+	<insert id="insertExamQueSubmit" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestSubmitVO">
+	INSERT INTO exam_quest_submit (
+      es_cd
+    , eq_cd
+    , es_answer
+    , es_score
+	) VALUES ( 
+	 #{esCd,jdbcType=VARCHAR}
+	,#{eqCd,jdbcType=VARCHAR}
+	,#{esAnswer,jdbcType=VARCHAR}
+	,#{esScore,jdbcType=NUMERIC}
+	)
+	</insert>
+	
+	<!-- 학생 시험제출답안 전체조회 -->
+	<select id="selectExamQueSubmitList" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.ExamQuestSubmitVO">
+		SELECT
+		    es_cd
+		  , eq_cd
+		  , es_answer
+		  , es_score
+		FROM
+    	exam_quest_submit
+    	where es_cd = #{esCd}
+	</select>
+	
+	<!-- 학생 시험제출답안 점수업데이트 -->
+	
+	<update id="updateExamQueSubmit" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestSubmitVO">
+		UPDATE exam_quest_submit
+		SET
+		ES_SCORE =  #{esScore,jdbcType=NUMERIC}
+		WHERE
+	        es_cd = #{esCd}
+	    AND eq_cd = #{eqCd}
+	</update>
+	
+</mapper>

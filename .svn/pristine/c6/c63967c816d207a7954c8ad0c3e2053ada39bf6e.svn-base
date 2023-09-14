@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.club.dao.ClubDAO">
+
+<sql id="closedSearchFrag">
+<trim prefix=" AND ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'clubNm'">
+        				INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+
+</sql>
+
+
+<sql id="searchFrag">
+		<trim prefix=" AND ">
+        	<if test="paging.simpleCondition neq null and paging.simpleCondition.searchWord neq null and not paging.simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="paging.simpleCondition.searchType eq 'clubNm'">
+        				INSTR(CLUB_NM, #{paging.simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(CLUB_NM, #{paging.simpleCondition.searchWord}) > 0
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+
+<sql id="searchFragClubStu">
+<trim prefix=" WHERE ">
+        	<if test="paging.simpleCondition neq null and paging.simpleCondition.searchWord neq null and not paging.simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="paging.simpleCondition.searchType eq 'stNm'">
+        				INSTR(ST_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="paging.simpleCondition.searchType eq 'stCd'">
+        				INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="paging.simpleCondition.searchType eq 'dtNm'">
+        				INSTR(DT_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+        			
+	        		INSTR(ST_NM, #{paging.simpleCondition.searchWord}) > 0 
+	        		OR 
+	        		INSTR(ST_CD, #{paging.simpleCondition.searchWord}) > 0 
+	        		OR
+	        		INSTR(DT_NM, #{paging.simpleCondition.searchWord}) > 0 
+        			
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+</sql>
+
+<sql id="searchFrag2">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'prNm'">
+        				INSTR(PR_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'prCd'">
+        				INSTR(PR_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'dtNm'">
+        				INSTR(DT_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+        			
+	        		INSTR(PR_NM, #{simpleCondition.searchWord}) > 0 
+	        		OR 
+	        		INSTR(PR_CD, #{simpleCondition.searchWord}) > 0 
+	        		OR
+	        		INSTR(DT_NM, #{simpleCondition.searchWord}) > 0 
+        			
+        			</otherwise>
+        		</choose>
+        	</if>
+	</sql>
+	
+
+	
+	
+	
+ <!-- 교수 인적 사항 -->
+ <sql id="pro_info">
+ WITH PRO_INFO AS( SELECT PR_CD, P.DT_CD, PR_NM, PR_PH, PR_EMAIL, PR_PASS, PR_PIC, PR_ROLE, 
+PR_STATUS, PR_ADDR1, PR_ADDR2, PR_REG1, PR_REG2 , COLGE_CD , ATCH_FILE_ID , DT_NM  , DT_ONNER_NM 
+, DT_ADDR , DT_PH , DT_EST , DT_STAT , DT_URL FROM PROFESSOR P INNER JOIN DEPARTMENT D ON P.DT_CD 
+= D.DT_CD )
+ </sql>
+ 
+ <!-- 동아리 개설 신청 -->
+<insert id="insertClub" parameterType="kr.or.ddit.club.vo.ClubVO">
+  INSERT INTO CLUB(CLUB_CD, ST_CD, PR_CD, CLUB_NM, CLUB_PLAN,CLUB_DETAIL, CLUB_STATUS, CLUB_APP_DATE)
+  VALUES(CLUB_SEQ.NEXTVAL, #{stCd}, (SELECT PR_CD FROM PROFESSOR WHERE PR_NM=#{professorVO.prNm}),
+         #{clubNm}, #{clubPlan}, #{clubDetail},#{clubStatus}, SYSDATE)
+</insert>
+
+<!-- 동아리 개설 신청서 상세보기 -->
+<select id="insertViewClub" parameterType="kr.or.ddit.club.vo.ClubVO" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM, CLUB_DETAIL
+, C.CLUB_PLAN, C.CLUB_APP_DATE, C.CLUB_STATUS, C.CLUB_REFUSE 
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE C.CLUB_CD = #{clubCd}
+</select>
+
+<!-- 학생 본인이 신청한 동아리 개설 신청 목록 보기 -->
+<select id="insertSListClub" parameterType="kr.or.ddit.club.vo.ClubVO" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM, CLUB_DETAIL, C.CLUB_STATUS 
+FROM CLUB C 
+INNER JOIN STUDENT S ON C.ST_CD = S.ST_CD 
+INNER JOIN PROFESSOR P ON C.PR_CD = P.PR_CD 
+WHERE C.ST_CD = #{Cd}
+</select>
+
+<!-- 교수가 보는 개설 신청 목록 -->
+<select id="insertPListClub" parameterType="kr.or.ddit.club.vo.ClubVO" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM, CLUB_DETAIL, C.CLUB_STATUS 
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE C.PR_CD=#{Cd} AND C.CLUB_STATUS = '신청'
+</select>
+
+<!-- 교직원이 보는 동아리 신청 목록 -->
+<select id="RequestListClub" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM, CLUB_DETAIL, C.CLUB_STATUS 
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE CLUB_STATUS = '확인'
+</select>
+
+<!-- 개설신청 중복 막기 위한 쿼리 -->
+<select id="checkClub" resultType="kr.or.ddit.club.vo.ClubVO">
+ SELECT * FROM CLUB C 
+WHERE 
+CASE
+  WHEN ST_CD = #{Cd} AND (CLUB_STATUS = '승인' OR CLUB_STATUS= '신청' OR CLUB_STATUS = '확인')  THEN 1
+  WHEN PR_CD = #{Cd} AND (CLUB_STATUS = '승인' OR CLUB_STATUS= '확인') THEN 1
+  ELSE 0
+ END > 0
+</select>
+
+<!-- 학생이 속한 동아리 목록 -->
+<select id="myClubList" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+            SELECT C.CLUB_CD, CLUB_NM, CLUB_DETAIL, CLUB_FIC_FILE 
+FROM CLUB C
+INNER JOIN CLUB_MEMBER CM ON C.CLUB_CD = CM.CLUB_CD WHERE CLUB_STATUS = '승인' AND CM.ST_CD = #{stCd} AND CM.CLUB_ENT_STA = '승인'
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]>
+
+</select>
+
+<select id="myClubListTotalRecord" resultType="long" parameterType="String">
+SELECT
+      COUNT(*)
+    FROM CLUB C
+			INNER JOIN CLUB_MEMBER CM ON C.CLUB_CD = CM.CLUB_CD
+				WHERE CLUB_STATUS = '승인' AND CM.ST_CD =#{stCd} AND CM.CLUB_ENT_STA = '승인'
+</select>
+
+
+<!-- 속한 동아리 상세보기(교수) -->
+<select id ="myClub" parameterType="Integer" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD, C.PR_CD, C.ST_CD, C.CLUB_STAT, C.CLUB_CLOSED, C.CLUB_DETAIL, C.CLUB_FIC_FILE 
+, C.CLUB_NM, C.CLUB_PLAN, C.CLUB_APP_DATE, C.CLUB_STATUS, C.CLUB_REFUSE, S.ST_NM AS "STUDENTVO.STNM" 
+, P.PR_NM AS "PROFESSORVO.PRNM" FROM CLUB C 
+INNER JOIN 
+(SELECT DISTINCT S.ST_CD, S.ST_NM, CLM.CLUB_MEM_CLASS FROM STUDENT S INNER JOIN CLUB_MEMBER CLM ON S.ST_CD=CLM.ST_CD WHERE CLUB_MEM_CLASS='부장') S ON C.ST_CD = S.ST_CD 
+INNER JOIN 
+PROFESSOR P ON C.PR_CD = P.PR_CD 
+WHERE C.CLUB_STATUS = '승인' AND P.PR_CD=#{Cd}
+</select>
+<!-- 속한 동아리 상세 보기(학생) -->
+<select id="stuMyClub" parameterType="String" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD, C.PR_CD, C.ST_CD, C.CLUB_STAT, C.CLUB_CLOSED, C.CLUB_DETAIL, C.CLUB_FIC_FILE 
+, C.CLUB_NM, C.CLUB_PLAN, C.CLUB_APP_DATE, C.CLUB_STATUS, C.CLUB_REFUSE, S.ST_NM AS "STUDENTVO.STNM" 
+, P.PR_NM AS "PROFESSORVO.PRNM" FROM CLUB C 
+INNER JOIN 
+(SELECT DISTINCT S.ST_CD, S.ST_NM, CLM.CLUB_MEM_CLASS FROM STUDENT S INNER JOIN CLUB_MEMBER CLM ON S.ST_CD=CLM.ST_CD WHERE CLUB_MEM_CLASS='부장') S ON C.ST_CD = S.ST_CD 
+INNER JOIN 
+PROFESSOR P ON C.PR_CD = P.PR_CD 
+WHERE C.CLUB_STATUS = '승인' AND C.CLUB_CD=#{Cd}
+
+</select>
+
+<!-- 개설 완료된 동아리 목록 -->
+<select id="clubListView" resultType="kr.or.ddit.club.vo.ClubVO"> 
+WITH INCLUB AS ( SELECT DISTINCT C.CLUB_CD, CLUB_NM, CLUB_DETAIL FROM CLUB C LEFT 
+JOIN CLUB_MEMBER CM ON C.CLUB_CD = CM.CLUB_CD WHERE CLUB_STATUS = '승인' AND CM.ST_CD = #{stCd} AND CM.CLUB_ENT_STA NOT IN ('거절', '탈퇴')) 
+SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+            SELECT DISTINCT CLUB.CLUB_CD, CLUB_NM, CLUB_DETAIL, CLUB_FIC_FILE FROM CLUB WHERE CLUB_STATUS 
+			= '승인' AND CLUB.CLUB_CD NOT IN (SELECT CLUB_CD FROM INCLUB) 
+          ) A
+      ) B 
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]>
+<include refid="searchFrag"></include>
+</select>
+<!-- 개설 완료된 동아리 수 -->
+<select id="clubListViewCount" resultType="long">
+WITH INCLUB AS ( SELECT DISTINCT C.CLUB_CD, CLUB_NM, CLUB_PLAN, CLUB_FIC_FILE FROM CLUB C LEFT 
+JOIN CLUB_MEMBER CM ON C.CLUB_CD = CM.CLUB_CD WHERE CLUB_STATUS = '승인' AND CM.ST_CD = #{stCd} AND CM.CLUB_ENT_STA NOT IN ('거절', '탈퇴')) 
+SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+            SELECT COUNT(*) FROM CLUB WHERE CLUB_STATUS 
+			= '승인' AND CLUB.CLUB_CD NOT IN (SELECT CLUB_CD FROM INCLUB) 
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]>
+</select>
+
+<!-- 개설 된 동아리 상세 정보 -->
+<select id="clubDetail" parameterType="String" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD, C.PR_CD, C.ST_CD, C.CLUB_STAT, C.CLUB_CLOSED, C.CLUB_DETAIL, C.CLUB_FIC_FILE
+, C.CLUB_NM, C.CLUB_PLAN, C.CLUB_APP_DATE, C.CLUB_STATUS, C.CLUB_REFUSE, S.ST_NM AS "STUDENTVO.stNm"
+, P.PR_NM AS "PROFESSORVO.prNm"
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE (C.Club_Cd=#{clubCd})
+</select>
+
+<!-- 동아리 개설한 동아리 수 -->
+<select id="clubTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM CLUB
+      WHERE CLUB_STATUS = '승인'
+      <include refid="searchFrag"></include>
+   </select>
+
+
+<!-- 담당 교수가 될수 있는 교수 목록 -->
+<select id="proChoice"  parameterType="kr.or.ddit.common.vo.PaginationInfo" resultType="kr.or.ddit.professor.vo.ProfessorVO">
+    
+    <include refid="pro_info"></include>
+    
+   SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.* FROM(
+       SELECT  DISTINCT  
+           P.PR_CD,
+            DT_CD,
+            PR_NM,
+            PR_PH,
+            PR_EMAIL,
+            PR_PASS,
+            PR_PIC,
+            PR_ROLE,
+            PR_STATUS,
+            PR_ADDR1,
+            PR_ADDR2,
+            PR_REG1,
+            PR_REG2
+            , COLGE_CD
+            , P.ATCH_FILE_ID
+            , DT_NM 
+            , DT_ONNER_NM
+            , DT_ADDR
+            , DT_PH
+            , DT_EST
+            , DT_STAT
+            , DT_URL
+        FROM
+            PRO_INFO P
+        LEFT JOIN
+            CLUB C ON P.PR_CD = C.PR_CD
+        WHERE
+            C.CLUB_STATUS IS NULL OR C.CLUB_STATUS NOT IN ('확인', '승인')
+           
+        ORDER BY P.PR_CD ASC
+          ) A <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            WHERE <include refid="searchFrag2"></include>
+        	</if>
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+]]> 
+</select>
+<!-- 담당 교수가 될수 있는 교수의 수 -->
+<select id="profTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+     <include refid="pro_info"></include>
+      SELECT COUNT(*)
+      FROM 
+      (
+   SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.* FROM(
+       SELECT    
+           P.PR_CD,
+            DT_CD,
+            PR_NM,
+            PR_PH,
+            PR_EMAIL,
+            PR_PASS,
+            PR_PIC,
+            PR_ROLE,
+            PR_STATUS,
+            PR_ADDR1,
+            PR_ADDR2,
+            PR_REG1,
+            PR_REG2
+            , COLGE_CD
+            , P.ATCH_FILE_ID
+            , DT_NM 
+            , DT_ONNER_NM
+            , DT_ADDR
+            , DT_PH
+            , DT_EST
+            , DT_STAT
+            , DT_URL
+        FROM
+            PRO_INFO P
+        LEFT JOIN
+            CLUB C ON P.PR_CD = C.PR_CD
+        WHERE
+            C.CLUB_STATUS IS NULL OR C.CLUB_STATUS NOT IN ('확인', '승인')
+           
+        ORDER BY P.PR_CD ASC
+          ) A 
+      ) B
+<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            WHERE <include refid="searchFrag2"></include>
+        	</if>
+        	)
+</select>
+
+<!-- 동아리 수정 -->
+<update id="clubUpdate" parameterType="kr.or.ddit.club.vo.ClubVO">
+    UPDATE CLUB
+    SET CLUB_NM=#{clubNm}, 
+        ST_CD=(SELECT DISTINCT S.ST_CD FROM STUDENT S INNER JOIN CLUB_MEMBER CM ON S.ST_CD = CM.ST_CD 
+         WHERE ST_NM=#{studentVO.stNm} AND CM.CLUB_CD = #{clubCd}),
+        CLUB_PLAN=#{clubPlan},
+        CLUB_DETAIL=#{clubDetail}
+    WHERE CLUB_CD=#{clubCd}
+</update>
+
+<!-- 부장이 될 수 있는 학생 -->
+<select id="stuChoice"   resultType="kr.or.ddit.clubMember.vo.ClubMemberVO">
+   SELECT B.*
+      FROM(SELECT ROWNUM RNUM, A.* FROM(
+       SELECT 
+        S.ST_CD
+        ,S.ST_NM
+        ,D.DT_NM
+        ,S.ST_PH
+        ,CM.CLUB_MEM_CLASS
+        FROM CLUB_MEMBER CM
+    	INNER JOIN 
+   		STUDENT S  ON CM.ST_CD = S.ST_CD
+    	INNER JOIN
+    	DEPARTMENT D ON S.DT_CD = D.DT_CD
+    	WHERE 
+    	CM.CLUB_CD = #{clubCd} AND CLUB_MEM_CLASS = '부원' AND CLUB_ENT_STA = '승인' 
+        ORDER BY  S.ST_CD ASC
+          ) A 
+          <include refid="searchFragClubStu"></include>
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]> 
+</select>
+
+<select id="stuClubMemberTotalRecord" resultType="long" >
+SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.* FROM(
+       SELECT 
+       COUNT(*)
+        FROM STUDENT S 
+    	INNER JOIN 
+   		CLUB_MEMBER CM ON S.ST_CD = CM.ST_CD
+    	INNER JOIN
+    	DEPARTMENT D ON S.DT_CD = D.DT_CD
+    	WHERE 
+    	CM.CLUB_CD = #{clubCd} AND CLUB_MEM_CLASS = '부원' AND CLUB_ENT_STA = '승인' 
+        ORDER BY  S.ST_CD ASC
+          ) A 
+          <include refid="searchFragClubStu"></include>
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]> 
+
+</select>
+
+
+<!-- 개설 승인,확인 -->
+<update id="insertApproval" parameterType="String">
+UPDATE CLUB SET CLUB_STATUS=#{param2}
+WHERE CLUB_CD=#{param1}
+</update>
+
+<!-- 동아리 개설 승인 될 시 신청한 학생 부장으로 등록 -->
+<insert id="insertApprovalInsertMember" parameterType="String">
+INSERT INTO  CLUB_MEMBER (CLUB_MEM_CD, ST_CD, CLUB_CD, CLUB_ENT_DATE
+, CLUB_MEM_CLASS
+,CLUB_ENT_STA) 
+SELECT
+   CLUB_MEM_SEQ.NEXTVAL
+   , STUDENT.ST_CD
+  , CLUB.CLUB_CD
+  , SYSDATE
+  , '부장'
+  , '승인'
+FROM
+    STUDENT 
+    LEFT JOIN DEPARTMENT ON STUDENT.DT_CD = DEPARTMENT.DT_CD
+    INNER JOIN CLUB ON STUDENT.ST_CD = CLUB.ST_CD
+WHERE CLUB.CLUB_CD = #{clubCd}
+</insert>
+
+<!-- 동아리 개설 거절 -->
+<update id="insertRefuse" parameterType="kr.or.ddit.club.vo.ClubVO">
+UPDATE CLUB SET CLUB_STATUS = #{clubStatus}, CLUB_REFUSE = #{clubRefuse}
+WHERE CLUB_CD=#{clubCd}
+</update>
+
+<!-- 동아리 폐부 신청 -->
+<update id="clubClosed" parameterType="String">
+UPDATE CLUB SET CLUB_STATUS = '폐부'
+WHERE CLUB_CD=#{clubCd}
+</update>
+<!-- 동아리 폐부 목록 -->
+<select id="clubClosedList" parameterType="kr.or.ddit.common.vo.PaginationInfo" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+            SELECT DISTINCT CLUB.CLUB_CD, CLUB_NM, CLUB_DETAIL, CLUB_FIC_FILE FROM CLUB WHERE CLUB_STATUS 
+			= '폐부'
+          ) A
+      ) B 
+<![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+]]>
+<include refid="closedSearchFrag"></include>
+</select>
+
+<select id="clubClosedListCount" parameterType="kr.or.ddit.common.vo.PaginationInfo" resultType="long">
+SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+            SELECT COUNT(*) FROM CLUB WHERE CLUB_STATUS 
+			= '폐부'
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+]]>
+</select>
+</mapper>

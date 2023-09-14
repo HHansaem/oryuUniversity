@@ -1,0 +1,22 @@
+package kr.or.ddit.lectureContents.exam.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureContents.vo.ExamVO;
+
+@Mapper
+public interface ExamDAO {
+	//시험 상세조회
+	public ExamVO selectExamDetail(String examCd);
+	//시험 목록조회
+	public List<ExamVO> selectExamList(String lecCd);
+	//시험 등록
+	public int insertExam(ExamVO exam);
+	//시험 수정
+	public int updateExam(ExamVO exam);
+	//시험 상태 변경
+	public int updateExamState(ExamVO exam);
+	
+}

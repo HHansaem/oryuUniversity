@@ -1,0 +1,77 @@
+package kr.or.ddit.staff.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.staff.service.StaffService;
+import kr.or.ddit.staff.vo.StaffVO;
+import kr.or.ddit.validate.groups.UpdateGroup;
+
+@Controller
+public class StaffMypageUpdateController {
+
+	@Inject
+	private StaffService service;
+	@Inject
+	private PasswordEncoder encoder;
+	
+	@PostMapping("/mypage/staffUpdateCheck.do")
+	public String updateCheck(
+		@RequestParam("who") String tsCd
+		, @RequestParam("password") String password
+		, HttpSession session
+		, Model model
+	){
+		String logicalViewName = null;
+		StaffVO staff = service.retrieveStaff(tsCd);
+		String originPass = staff.getTsPass();
+		model.addAttribute("staff", staff);
+		
+		if(encoder.matches(password, originPass)) {
+			session.setAttribute("message", "확인되었습니다.");
+			logicalViewName = "staff/staffMypageEdit";
+		}else {
+			session.setAttribute("message", "비밀번호가 일치하지 않습니다.");
+			logicalViewName = "redirect:/mypage/staffView.do?who="+tsCd;
+		}
+		return logicalViewName;
+	}
+	
+	@PostMapping("/mypage/staffUpdate.do")
+	public String updateProcess(
+		@Validated(UpdateGroup.class) @ModelAttribute("staff") StaffVO staff
+		, BindingResult errors
+		, HttpSession session
+	) {
+		String logicalViewName = null;
+		String plain = staff.getTsPass();
+		String encoded = encoder.encode(plain);
+		staff.setTsPass(encoded);
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifyStaff(staff);
+			if(ServiceResult.OK == result) {
+				session.setAttribute("message", "수정 성공!");
+				logicalViewName = "redirect:/mypage/staffView.do?who="+staff.getTsCd();
+			}else {
+				session.setAttribute("message", "오류, 수정 실패");
+				logicalViewName = "staff/staffMypageEdit";
+			}
+		}else {
+			session.setAttribute("message", "오류, 수정 실패");
+			logicalViewName = "staff/staffMypageEdit";
+		}
+		return logicalViewName;
+	}
+	
+}

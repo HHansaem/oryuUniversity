@@ -1,0 +1,125 @@
+package kr.or.ddit.tuition.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.tuition.service.TuitionService;
+import kr.or.ddit.tuition.vo.TuitionVO;
+
+@Controller
+public class ScholarshipApplyRetrieveController {
+
+	@Inject
+	private TuitionService service;
+	@Inject
+	private DepartmentDAO departmentDAO;
+	
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		List<DepartmentVO> dList = departmentDAO.selectDepartmentList();
+		return dList;
+	}
+	
+	// 학생들에게 받은 장학신청 껍데기 페이지 로딩
+	@RequestMapping("/scholarship/scholarshipApplyFrameRetrieve.do")
+	public String enrollmentList(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+		, @RequestParam Map<String,Object> detailCondition
+		, Model model
+	) {
+		return "tuition/scholarshipStaffList";
+	}
+	
+	@RequestMapping("/scholarship/scholarshipApplyRetrieve.do")
+	public String getHandler(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, @RequestParam Map<String,Object> detailCondition
+		, SimpleCondition simpleCondition
+		, Model model
+	){
+		PaginationInfo<TuitionVO> paging = new PaginationInfo<>(9, 5);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		paging.setDetailCondition(detailCondition);
+		
+		List<TuitionVO> tuitionList = service.retrieveStaffApplyScholarship(paging);
+		paging.setDataList(tuitionList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "tuition/ajax/scholarshipStaffList2";
+	}
+	
+	@RequestMapping("/scholarship/scholarshipApplyView.do")
+	public String getHandler2(
+		@RequestParam(name="when") String semesterCd
+		, @RequestParam(name="who") String stCd
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		TuitionVO seletedTuition = service.retrieveScholarship(tuition);
+		model.addAttribute("tuition", seletedTuition);
+		return "jsonView";
+	}
+	
+	@PostMapping("/scholarship/scholarshipAccept.do")
+	public String postHandler(
+		@RequestParam(name="semesterCd") String semesterCd
+		, @RequestParam(name="stCd") String stCd
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		
+		String tuSchSta = service.retrieveScholarship(tuition).getTuSchSta();
+		if(tuSchSta.equals("승인")) {
+			model.addAttribute("result", "이미승인");
+		}else {
+			model.addAttribute("result", "승인완료");
+			service.acceptScholarship(tuition);
+		}
+		
+		return "jsonView";
+	}
+	
+	@PostMapping("/scholarship/scholarshipReject.do")
+	public String postHandler2(
+		@RequestParam(name="semesterCd") String semesterCd
+		, @RequestParam(name="stCd") String stCd
+		, @RequestParam(name="tuRea") String tuRea
+		, Model model
+	){
+		TuitionVO tuition = new TuitionVO();
+		tuition.setSemesterCd(semesterCd);
+		tuition.setStCd(stCd);
+		tuition.setTuRea(tuRea);
+		
+		String tuSchSta = service.retrieveScholarship(tuition).getTuSchSta();
+		if(tuSchSta.equals("반려")) {
+			model.addAttribute("result", "이미반려");
+		}else {
+			model.addAttribute("result", "반려완료");
+			service.refuseScholarship(tuition);
+		}
+		
+		return "jsonView";
+	}
+	
+}

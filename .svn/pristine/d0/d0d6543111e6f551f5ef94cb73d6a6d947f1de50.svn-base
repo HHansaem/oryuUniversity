@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	<aop:config proxy-target-class="true">
+<!-- 		<aop:pointcut id="serviceMethod" expression="execution(* kr.or.ddit.springmvc..service.*Service.*(..))" /> -->
+		<aop:pointcut id="serviceMethod" expression="execution(* kr.or.ddit..dao.*DAO.*(..))" />
+		<aop:pointcut id="targetMethod" 
+		     expression="execution(* kr.or.ddit..*Service.*(..))" />
+		     
+<!-- 		<aop:aspect ref="exceptionTransfer"> -->
+<!-- 			<aop:after-throwing throwing="exception" pointcut-ref="serviceMethod" method="transfer" /> -->
+<!-- 		</aop:aspect> -->
+		
+		<aop:aspect ref="advice4XML">
+<!-- 			<aop:after-returning pointcut-ref="targetMethod" method="afterReturningMethod" -->
+<!-- 			 								returning="retVal"/> -->
+<!-- 			<aop:around pointcut-ref="targetMethod" method="aroundMethod"/> -->
+			<aop:around pointcut-ref="serviceMethod" method="aroundMethod"/>
+		</aop:aspect>
+	</aop:config>
+	
+	<bean id="advice4XML" class="kr.or.ddit.advice.Advice4XML"/>
+	
+</beans>

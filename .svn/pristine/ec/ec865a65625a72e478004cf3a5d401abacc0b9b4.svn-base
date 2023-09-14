@@ -1,0 +1,24 @@
+package kr.or.ddit.lecture.vo;
+
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "lnNum")
+public class NoticeVO {
+	
+	private long rnum;
+	
+	@NotBlank
+	private String lnNum;
+	@NotBlank
+	private String lecCd;
+	private Integer atchFileId;
+	private String lnTitle;
+	private String lnCont;
+	private LocalDate lnPostDate;
+}

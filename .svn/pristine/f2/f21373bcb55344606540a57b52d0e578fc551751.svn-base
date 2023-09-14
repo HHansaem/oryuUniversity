@@ -1,0 +1,29 @@
+package kr.or.ddit.tuition.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.tuition.vo.TuitionVO;
+
+public interface TuitionService {
+
+	/**
+	 * 전체학생의 장학금정보 조회
+	 * @param paging
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStaffTuitionList(PaginationInfo<TuitionVO> paging);
+	/**
+	 * 학생이 신청한 장학금정보 조회
+	 * @param tuition
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStudentApplyScholarship(String stCd);
+	/**
+	 * 장학금 신청(등록금 테이블 업데이트)
+	 * @param tuition
+	 * @return
+	 */
+	public boolean applyScholarship(TuitionVO tuition);
+	
+}

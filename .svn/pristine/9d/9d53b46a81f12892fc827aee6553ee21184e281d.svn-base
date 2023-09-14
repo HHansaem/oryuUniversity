@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.schedule.dao.AcademicScheduleDAO">
+	
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM ACA_SCHEDULE
+<!--       <include refid="searchFrag"></include> -->
+   </select>
+	
+	<select id="selectAcademicScheduleLsit" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+                  AS_CD
+			    , AS_NM
+			    , AS_DISTINCTION
+			    , AS_START
+			    , AS_END
+			    , AS_CONT
+			    , AS_ACCE_PERM
+              FROM ACA_SCHEDULE
+<!--               <include refid="searchFrag"/> -->
+              ORDER BY AS_CD DESC
+          ) A
+      ) B
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+   <insert id="insertAcademicSchedule" parameterType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   	<selectKey order="BEFORE" resultType="int" keyProperty="asCd">
+         SELECT ACA_SCHEDULE_SEQ.NEXTVAL FROM DUAL
+      </selectKey>
+      INSERT INTO ACA_SCHEDULE (
+            AS_CD
+		    , AS_NM
+		    , AS_DISTINCTION
+		    , AS_START
+		    , AS_END
+		    , AS_CONT
+		    , AS_ACCE_PERM
+      ) VALUES (
+         #{asCd,jdbcType=VARCHAR}
+		, #{asNm,jdbcType=VARCHAR}
+		, #{asDistinction,jdbcType=VARCHAR}
+		, #{asStart,jdbcType=DATE}
+		, #{asEnd,jdbcType=DATE}
+		, #{asCont,jdbcType=CLOB}
+		, #{asAccePerm,jdbcType=VARCHAR}
+      )
+   </insert>
+   
+   <select id="getCalendar" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   		SELECT 
+			AS_CD
+	    , AS_NM
+	    , AS_START
+	    , AS_END
+	     FROM ACA_SCHEDULE
+   </select>
+
+</mapper>

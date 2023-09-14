@@ -1,0 +1,76 @@
+package kr.or.ddit.lecture.vo;
+
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.validate.UpdateGroup;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import kr.or.ddit.professor.vo.ProfessorVO;
+import kr.or.ddit.subject.vo.SubjectVO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * 강의 VO
+ * 
+ * @author rottw
+ *
+ */
+@Data
+@EqualsAndHashCode(of = "lecCd")
+public class LectureVO {
+
+	private long rnum;
+	@NotBlank(groups = UpdateGroup.class)
+	private String lecCd;
+	@NotBlank
+	private String subjCd;
+	@NotBlank
+	private String prCd;
+	@NotBlank
+	private String lecLectTitle;
+	private String lecGraCd;
+	private String lecSemeCd;
+	private String lecLectCred;
+	private String lecEnroLimit;
+	private String lecLectDivision;
+	private String lecStat;
+	private Integer grMid;
+	private Integer grFinal;
+	private Integer grAttend;
+	private Integer grAssi;
+
+	private MultipartFile[] lectureFiles;
+
+	private Integer atchFileId;
+	
+	private AtchFileVO fileGroup;
+
+	private DepartmentVO department;
+	
+	private SubjectVO subject;
+	
+	private ProfessorVO professor;
+	
+	private List<LectureScheduleVO> lectureScheduleList;
+	
+	private List<LectureVO> lectureSchedule;
+	
+	private String colgeCd;
+	private String dtNm;
+	
+	private String scheCd;
+	private String scheCds;
+	private String clasCd;
+	private String clasNm;
+	private String subjComType;
+	
+	private String enroll;
+	private int enrollmentCount;
+	
+}

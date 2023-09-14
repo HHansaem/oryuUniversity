@@ -1,0 +1,215 @@
+package kr.or.ddit.club.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.club.dao.ClubDAO;
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.clubMember.dao.ClubMemberDAO;
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.professor.vo.ProfessorVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class ClubServiceImpl implements ClubService {
+	
+	@Inject
+	private ClubDAO clubDao; 
+	
+	@Inject
+	private ClubMemberDAO memClubDao;
+	
+	/**
+	 * 동아리 개설 신청
+	 * @param Club 개설 요청
+	 * @return 1
+	 */
+	@Override
+	public boolean createInsertRequest(ClubVO club) {
+		return clubDao.insertClub(club);
+	}
+	
+	@Override
+	public ClubVO InsertViewClub(String clubCd) {
+		return clubDao.insertViewClub(clubCd);
+	}
+
+	@Override
+	public int insertApproval(String clubCd,String clubStatus) {
+		
+		int	success = clubDao.insertApproval(clubCd,clubStatus);
+		if(success>0) { // 동아리 상태 변화 에러 없이 잘 돌아감
+			if(clubStatus.equals("승인"))
+			{ // 동아리 상태 변화가 승인일 경우
+				return clubDao.insertApprovalInsertMember(clubCd);
+			}else {// 동아리 상태 변화가 승인이 아닌 확인 경우
+				return success;
+			}
+		}else{ // 동아리 상태 변화 에러 생김
+			return success;
+		}
+	}
+
+	@Override
+	public int insertRefuse(ClubVO club) {
+		return clubDao.insertRefuse(club);
+	}
+
+	@Override
+	public List<ClubVO> RequestListClub() {
+		return clubDao.RequestListClub();
+	}
+
+	@Override
+	public List<ClubVO> insertSListClub(int Cd) {
+		return clubDao.insertSListClub(Cd);
+	}
+
+	@Override
+	public List<ClubVO> insertPListClub(int Cd) {
+		return clubDao.insertPListClub(Cd);
+	}
+
+	@Override
+	public ClubVO checkClub(int Cd) {
+		return clubDao.checkClub(Cd);
+	}
+
+	@Override
+	public ClubVO myClub(int Cd,String clubCd) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if(authentication.getAuthorities().stream().anyMatch(auth -> "ROLE_PR".equals(auth.getAuthority())))
+		{
+		return clubDao.myClub(Cd);
+		}else {
+			return clubDao.stuMyClub(clubCd);
+		}
+	}
+
+	@Override
+	public List<ClubVO> ClubListView(PaginationInfo paging,String stCd) {
+		long totalRecord =clubDao.clubListViewCount(paging,stCd);
+		
+		paging.setTotalRecord(totalRecord);
+		log.info("확인 : "+ paging.getTotalPage());
+		
+		return clubDao.clubListView(paging,stCd);
+	}
+
+	@Override
+	public ClubVO clubDetail(String clubCd) {
+		return clubDao.clubDetail(clubCd);
+	}
+
+	@Override
+	public int clubUpdate(ClubVO club) {
+		return clubDao.clubUpdate(club);
+	}
+
+	@Override
+	public List<ProfessorVO> proChoice(PaginationInfo paging) {
+		long totalRecord = clubDao.profTotalRecord(paging);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubDao.proChoice(paging);
+	}
+
+	/**
+	 * 총 동아리 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long clubTotalRecord(PaginationInfo paging) {
+		return clubDao.clubTotalRecord(paging);
+	}
+	
+	
+	/**
+	 * 총 교수 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long profTotalRecord(PaginationInfo paging) {
+		return clubDao.profTotalRecord(paging);
+	}
+
+	@Override
+	public int clubNoUpdate(ClubVO club) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	/**
+	 * 수정 처리
+	 */
+	@Override
+	@Transactional
+	public int clubUpdateRequest(ClubVO club) {
+		
+		int success= clubDao.clubUpdate(club);
+		if(success>0)
+		{
+			memClubDao.clubHeadDownUpdate(club.getClubCd());
+			memClubDao.clubHeadUpUpdate(club);
+			return 1;
+		}else {
+			return 0;
+		}
+	}
+
+	@Override
+	public List<ClubVO> myClubList(PaginationInfo paging, String stCd) {
+		long totalRecord = clubDao.myClubListTotalRecord(stCd);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubDao.myClubList(paging, stCd);
+	}
+	
+	
+	/**
+	 * 학생이 속한 동아리 수
+	 */
+	public long myClubListTotalRecord(String stCd) {
+		return clubDao.myClubListTotalRecord(stCd);
+	}
+
+	@Override
+	public List<ClubMemberVO> stuChoice(PaginationInfo paging, String clubCd) {
+		long totalRecord = clubDao.stuClubMemberTotalRecord(paging,clubCd);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubDao.stuChoice(paging,clubCd);
+	}
+
+	@Override
+	public long stuClubMemberTotalRecord(PaginationInfo paging, String clubCd) {
+		return clubDao.stuClubMemberTotalRecord(paging,clubCd);
+	}
+	
+	/**
+	 * 폐부 처리
+	 */
+	@Override
+	public int clubClosed(String clubCd) {
+		return clubDao.clubClosed(clubCd);
+	}
+
+	@Override
+	public List<ClubVO> clubClosedList(PaginationInfo paging) {
+		long totalRecord =clubDao.clubClosedListCount(paging);
+		paging.setTotalRecord(totalRecord);
+		return clubDao.clubClosedList(paging);
+	}
+	
+}

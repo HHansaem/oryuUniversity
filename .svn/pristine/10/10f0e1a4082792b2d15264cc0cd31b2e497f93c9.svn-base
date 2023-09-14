@@ -1,0 +1,33 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<table class="table table-hover">
+	<tbody>
+		<thead>
+			<tr>
+			<th colspan="2">
+			졸업 이수 조건
+			</th>
+			</tr>
+		</thead>
+		<c:set var="graduation" value="${graduation }" />
+		<c:set var="graduationList" value="${graduationList }" />
+		<tr>
+		<th>소속단과</th>
+		<th>소속학과</th>
+			<c:forEach items="${graduationList }" var="graduationList">
+					<th>${graduationList.geGradCondType }</th>
+			</c:forEach>
+			</tr>
+			<tr>
+				<td>${graduation.colgeNm }</td>
+				<td>${graduation.dtNm }</td>
+				<c:forEach items="${graduationList }" var="graduationList">
+				<td>
+					${graduationList.gradCond }
+				</td>
+				</c:forEach>
+			</tr>
+	</tbody>
+</table>

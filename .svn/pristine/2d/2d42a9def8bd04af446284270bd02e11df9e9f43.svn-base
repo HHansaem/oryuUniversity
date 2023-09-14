@@ -1,0 +1,53 @@
+package kr.or.ddit.lectureContents.exam.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.lectureContents.exam.service.ExamService;
+import kr.or.ddit.lectureContents.vo.ExamVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+@RequestMapping("/lecture/examInsert.do")
+public class ExamInsertController {
+	
+	@Inject
+	ExamService service;
+	
+	@GetMapping
+	public String examForm(String lecture, Model model) {
+		model.addAttribute("lecCd",lecture);
+		return "lecture/exam/examForm";
+	}
+	@PostMapping(produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8")
+	@ResponseBody
+	public String examRegist(@Validated(InsertGroup.class) ExamVO exam, Errors errors) {
+		String flag = "";
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.registerExam(exam);
+			switch(result) {
+			case OK:
+				flag = "성공";
+				break;
+			case FAIL:
+				flag = "실패";
+				
+			}
+		}else {
+			flag = "실패";
+		}
+		
+		return flag;
+	}
+}

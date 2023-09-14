@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.tuition.dao.TuitionDAO">
+
+	<sql id="searchFrag">
+		<where>
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'stnum'">
+        				INSTR(S.ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(S.ST_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        		</choose>
+        	</if>
+        	<if test="detailCondition neq null">
+        		<choose>
+        			<when test="detailCondition.semesterCd neq null and not detailCondition.semesterCd.isEmpty">
+        				AND A.SEMESTER_CD = #{detailCondition.semesterCd}
+        			</when>
+        		</choose>
+        		<choose>
+        			<when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+        				AND A.DT_CD = #{detailCondition.dtCd}
+        			</when>
+        		</choose>
+        		<choose>
+        			<when test="detailCondition.tuWhether neq null and not detailCondition.tuWhether.isEmpty">
+        				AND A.TU_WHETHER = #{detailCondition.tuWhether}
+        			</when>
+        		</choose>
+        		<choose>
+        			<when test="detailCondition.tuSchSta neq null and not detailCondition.tuSchSta.isEmpty">
+        				AND A.TU_SCH_STA = #{detailCondition.tuSchSta}
+        			</when>
+        		</choose>
+        		</if>
+        </where>
+	</sql>
+	
+	<select id="selectTotalRecord">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, S.ST_NM, D.DT_NM
+		    FROM (
+				SELECT 
+					T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START
+					,T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO
+					,T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER
+				FROM TUITION T 
+		       	ORDER BY ROWID DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD
+			<include refid="searchFrag" />
+		)
+		SELECT COUNT(*) 
+		FROM ORDEREDMEMBER
+	</select>
+	
+	<select id="selectScholarshipTotalRecord">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, S.ST_NM, D.DT_NM
+		    FROM (
+				SELECT 
+					T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START
+					,T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO
+					,T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER
+				FROM TUITION T WHERE T.TU_SCH_STA IS NOT NULL
+		       	ORDER BY ROWID DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD 
+			<include refid="searchFrag" />
+		)
+		SELECT COUNT(*) 
+		FROM ORDEREDMEMBER
+	</select>
+	
+	<select id="selectStaffTuitionList" resultType="kr.or.ddit.tuition.vo.TuitionVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, S.ST_NM, D.DT_NM
+		    FROM (
+				SELECT 
+					T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START
+					,T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO
+					,T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER
+				FROM TUITION T 
+		       	ORDER BY TO_NUMBER(T.SEMESTER_CD) DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD
+			<include refid="searchFrag" />
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="selectStudentApplyScholarship" resultType="kr.or.ddit.tuition.vo.TuitionVO">
+		SELECT 
+			T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START,
+       		T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO,
+       		T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER, T.ATCH_FILE_ID,
+       		T.TU_SCH_DATE, T.TU_REA, S.ST_NM, D.DT_NM
+		FROM 
+			TUITION T
+		JOIN 
+			STUDENT S ON T.ST_CD = S.ST_CD
+		JOIN 
+			DEPARTMENT D ON T.DT_CD = D.DT_CD
+		WHERE 
+			T.ST_CD = #{stCd} ORDER BY TO_NUMBER(T.SEMESTER_CD) DESC
+	</select>
+	
+	<update id="submitScholarship" parameterType="kr.or.ddit.tuition.vo.TuitionVO">
+		UPDATE 
+			TUITION 
+		SET 
+			TU_SCH_TYPE = #{tuSchType,jdbcType=VARCHAR}
+			,TU_SCH_CON = #{tuSchCon,jdbcType=CLOB}
+			,ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+			,TU_SCH_DATE = SYSDATE
+			,TU_SCH_STA  = '대기'
+			,TU_SCH_AMO = CASE
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '성적우수' THEN '3,000,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '대외활동' THEN '1,500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '생활보조' THEN '2,500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '평생학습' THEN '1,000,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '근로' THEN '500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '봉사' THEN '800,000'
+						END
+		WHERE 
+			SEMESTER_CD = ${semesterCd} AND ST_CD = ${stCd}
+	</update>
+	
+	<select id="selectStaffApplyScholarship" resultType="kr.or.ddit.tuition.vo.TuitionVO">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, S.ST_NM, D.DT_NM
+		    FROM (
+				SELECT 
+					T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START
+					,T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO
+					,T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER, T.TU_SCH_DATE
+				FROM TUITION T WHERE T.TU_SCH_STA IS NOT NULL
+		       	ORDER BY TO_NUMBER(T.SEMESTER_CD) DESC, TO_NUMBER(T.ST_CD) DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD
+			<include refid="searchFrag" />
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<resultMap type="kr.or.ddit.tuition.vo.TuitionVO" id="tuitionMap" autoMapping="true">
+		<id property="semesterCd" column="SEMESTER_CD"/>
+		<id property="stCd" column="ST_CD"/>
+		<association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID"/>
+			<result property="creatDt" column="CREAT_DT"/>
+			<result property="useAt" column="USE_AT"/>
+			<collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+				<id property="atchFileId" column="ATCH_FILE_ID"/>
+				<id property="fileSn" column="FILE_SN"/>
+			</collection>
+		</association>
+	</resultMap>
+	
+	<select id="selectScholarship" resultMap="tuitionMap" parameterType="kr.or.ddit.tuition.vo.TuitionVO">
+		WITH ATCH_FILE_VIEW AS(
+		    SELECT *
+		    FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+		            USING(ATCH_FILE_ID)
+		)
+		SELECT 
+			SEMESTER_CD, ST_CD, TU_SCH_TYPE, TU_SCH_CON, TU_SCH_STA
+			
+			, ATCH_FILE_ID, FILE_SN, FILE_STRE_COURS
+			, STRE_FILE_NM, ORIGNL_FILE_NM
+			, FILE_EXTSN, FILE_SIZE
+			, FILE_MIME
+			
+			, CREAT_DT
+			, USE_AT
+		FROM TUITION LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+		WHERE SEMESTER_CD = #{semesterCd} AND ST_CD = #{stCd}
+	</select>
+	
+	<update id="approveScholarship">
+		UPDATE 
+			TUITION 
+		SET 
+			TU_SCH_STA = '승인' 
+		WHERE 
+			SEMESTER_CD = ${semesterCd} AND ST_CD = ${stCd}
+	</update>
+	
+	<update id="rejectScholarship">
+		UPDATE 
+			TUITION 
+		SET 
+			TU_SCH_STA = '반려', 
+			TU_REA = '${tuRea}'
+		WHERE 
+			SEMESTER_CD = ${semesterCd} AND ST_CD = ${stCd}
+	</update>
+	
+	<update id="approveTuition">
+		UPDATE
+			TUITION
+		SET
+			TU_WHETHER = '완료'
+		WHERE
+			SEMESTER_CD = ${semesterCd} AND ST_CD = ${stCd}
+	</update>
+
+	<select id="selectTuition" parameterType="kr.or.ddit.tuition.vo.TuitionVO" resultType="kr.or.ddit.tuition.vo.TuitionVO">
+		SELECT
+		    T.SEMESTER_CD, T.ST_CD, S.ST_NM, T.DT_CD, T.TU_AMOUNT,
+		    T.TU_START, T.TU_END, T.TU_PAY, T.TU_DATE,
+		    T.TU_SCH_TYPE, T.TU_SCH_AMO, T.TU_SCH_STA,
+		    T.TU_SCH_CON, T.TU_WHETHER, T.ATCH_FILE_ID,
+		    T.TU_SCH_DATE, T.TU_REA, T.TU_APP_DATE, T.TU_ACC_NUM, S.ST_PH
+		FROM
+		    TUITION T
+		JOIN
+		    STUDENT S ON T.ST_CD = S.ST_CD
+		WHERE
+		    T.SEMESTER_CD = ${semesterCd} AND T.ST_CD = ${stCd}
+
+	</select>
+
+</mapper>

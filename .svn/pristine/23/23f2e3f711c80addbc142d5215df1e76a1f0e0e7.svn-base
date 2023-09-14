@@ -1,0 +1,139 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<style>
+	.card-body{
+		box-shadow: 0 0 6px #4872f4 inset;
+    	border-radius: 10px;
+	}
+	.form-check-input{
+		width: 20px;
+    	height: 20px;
+    }
+    .custom-Font{
+    	font-size: 17px;
+    }
+	.form-select{
+		margin-right: 10px;
+	}
+	.custom-ml{
+		margin-right: 170px;
+	}
+	.custom-btnml{
+		margin-left: 10px;
+	}
+	.custom-div{
+		background:white;
+		border: 1px solid #e1e3e6;
+	}
+}
+
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div class="col-md-12 p-2" style="height:50%;">
+			<div>
+				<input type="hidden" id="lecCd" value="${lecCd}"/>
+			</div>
+			<div>
+				<ul class="nav nav-tabs" id="myTab" role="tablist">
+					<li class="nav-item"><a class="nav-link active"
+						id="home-tab" data-toggle="tab" href="#home" role="tab"
+						aria-controls="home" aria-selected="true">출석등록</a></li>
+					<li class="nav-item"><a class="nav-link" id="profile-tab"
+						data-toggle="tab" href="#profile" role="tab"
+						aria-controls="profile" aria-selected="false">출석점수</a></li>
+				</ul>
+			
+				<div class="tab-content custom-div" id="myTabContent">
+					<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+						<!-- 탭의 내용 -->
+						<div class="d-flex">
+							<div class="col-md-12">
+								<div class="card">
+									<div class="card-body" id="body">
+										
+										
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+						<!-- 탭의 내용 -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	
+	$(document).ready(function() {
+		var lecCd = $("#lecCd").val();
+		var data =
+			{
+				lecCd : lecCd
+			}
+		$.ajax({
+		      url: '${pageContext.request.contextPath}/lecture/AttendanceList.do',
+		      method: 'GET', 
+		      data: data,
+		      success: function(data) {
+		    	  $("#body").html(data);
+		      },
+		      error: function(xhr, status, error) {
+		        console.error('Ajax 요청 실패', error);
+		      }
+		});
+	  });
+	
+	function getAttendanceList(){
+		var lecCd = $("input[name='lecCd']").val();
+		var attsSche = $("select[name='attsSche']").val();
+		var attsWeek = $("select[name='attsWeek']").val();
+		
+		var data = 
+			{
+				lecCd : lecCd,
+				attsSche : attsSche,
+				attsWeek : attsWeek
+			}
+		
+		 $.ajax({
+		      url: '${pageContext.request.contextPath}/lecture/AttendanceList.do',
+		      method: 'GET',
+		      data: data,
+		      success: function(data) {
+		        $("#body").html(data);
+		      },
+		      error: function(xhr, status, error) {
+		        console.error('Ajax 요청 실패', error);
+		      }
+		    });
+	}
+	
+	function saveAttendance(){
+		var data = $("#attForm").serializeArray();
+		
+		 $.ajax({
+		      url: '${pageContext.request.contextPath}/lecture/AttendanceInsert.do',
+		      method: 'POST',
+		      data: data,
+// 		      contentType : "application/json; charset=utf-8",
+		      success: function(response) {
+		        
+		      },
+		      error: function(xhr, status, error) {
+		        console.error('Ajax 요청 실패', error);
+		      }
+		    });
+	}
+	
+	function totalChecked(){
+		var presentRadios = $("input[value='present']"); 
+		$(presentRadios).each(function(){
+			$(this).prop("checked", true);
+		});
+	}
+</script>

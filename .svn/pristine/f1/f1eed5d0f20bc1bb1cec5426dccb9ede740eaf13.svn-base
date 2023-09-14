@@ -1,0 +1,49 @@
+package kr.or.ddit.lectureContents.attendance.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.lectureContents.attendance.dao.AttendanceDAO;
+import kr.or.ddit.lectureContents.vo.AttendanceStateVO;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+import kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO;
+
+@Service
+public class AttendanceServiceImpl implements AttendanceService {
+	
+	@Inject
+	AttendanceDAO attDAO;
+	
+	@Override
+	public List<AttendanceVO> retrieveAttendanceList(AttendanceVO attendance) {
+		return attDAO.selectAttendanceList(attendance);
+	}
+
+	@Override
+	public int registerAttendance(AttendanceVO attendance) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int registerAttendanceState(AttendanceStateVO attendanceState) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int modifyAttendance(AttendanceVO attendance) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int modifyAttendanceState(AttendanceStateVO attendanceState) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

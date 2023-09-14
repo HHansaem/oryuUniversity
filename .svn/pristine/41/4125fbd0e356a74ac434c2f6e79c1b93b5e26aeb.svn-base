@@ -1,0 +1,46 @@
+package kr.or.ddit.lecture.vo;
+
+import java.io.Serializable;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.common.validate.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * 강의 VO
+ * 
+ * @author rottw
+ *
+ */
+@Data
+@EqualsAndHashCode(of = "lecCd")
+public class LectureVO implements Serializable {
+
+	private long rnum;
+	@NotBlank(groups = UpdateGroup.class)
+	private String lecCd;
+	@NotBlank
+	private String subjCd;
+	private String lecClassCd;
+	@NotBlank
+	private String prCd;
+	@NotBlank
+	private String lecLectTitle;
+	private String lecGraCd;
+	private String lecSemeCd;
+	private String lecLectCred;
+	private String lecLectDesc;
+	private String lecClassTime;
+	private String lecEnroLimit;
+	private String lecLectDivision;
+	@NotBlank
+	private String lecStat;
+	private Integer atchFileId;
+	private Integer grMid;
+	private Integer grFinal;
+	private Integer grAttend;
+	private Integer grAssi;
+
+}

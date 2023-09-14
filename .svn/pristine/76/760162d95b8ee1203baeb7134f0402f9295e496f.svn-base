@@ -1,0 +1,14 @@
+package kr.or.ddit.lectureContents.examSubmission.service;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.ExamSubmitVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface ExamSubmitService {
+	//학생 시험제출,답안 등록
+	public ServiceResult registerExamSubmit(ExamSubmitVO examSubmit);
+	//학생 시험제출 목록 조회
+	public List<ExamSubmitVO> retrieveExamSubmitList(String examCd); 
+
+}

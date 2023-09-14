@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.notice.dao.NotificationDAO">
+
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'title'">
+						INSTR(N.NOTI_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sender'">
+						INSTR(S.NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(N.NOTI_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(S.NAME, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+				<choose>
+					<when test="detailCondition.who neq null and not detailCondition.who.isEmpty">
+						AND  D.NOTI_RECEIVER = #{detailCondition.who}
+					</when>
+				</choose>
+			</if>		
+		</where>
+	</sql>
+	<select id="selectTotalNotification" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME AS SENDER,
+		            N.NOTI_TITLE,
+		            N.NOTI_DATE,
+		            COUNT(R.NAME) AS RECEIVER,
+		            COUNT(CASE WHEN D.NOTI_STAT = '2' THEN 1 ELSE NULL END) AS COUNT 
+		        FROM
+		            NOTIFICATION N
+		        JOIN
+		            NOTICEDETAIL D ON N.NOTI_CD = D.NOTI_CD
+		        LEFT JOIN
+		            all_people S ON N.NOTI_SENDER = S.ID
+		        LEFT JOIN
+		            all_people R ON D.NOTI_RECEIVER = R.ID
+		        <include refid="searchFrag"/>
+		        GROUP BY
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME,
+		            N.NOTI_TITLE,
+		            N.NOTI_DATE
+		        ORDER BY N.NOTI_CD DESC
+		    ) A
+		) B
+	</select>
+	
+	<select id="selectNotificationList" resultType="kr.or.ddit.notice.vo.NotificationVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME AS SENDER,
+		            N.NOTI_TITLE,
+		            N.NOTI_DATE,
+		            COUNT(R.NAME) AS RECEIVER,
+		            COUNT(CASE WHEN D.NOTI_STAT = '2' THEN 1 ELSE NULL END) AS COUNT
+		        FROM
+		            NOTIFICATION N
+		        JOIN
+		            NOTICEDETAIL D ON N.NOTI_CD = D.NOTI_CD
+		        LEFT JOIN
+		            all_people S ON N.NOTI_SENDER = S.ID
+		        LEFT JOIN
+		            all_people R ON D.NOTI_RECEIVER = R.ID
+		        <include refid="searchFrag"/>
+		        GROUP BY
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME,
+		            N.NOTI_TITLE,
+		            N.NOTI_DATE
+		        ORDER BY N.NOTI_CD DESC
+		    ) A
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<insert id="insertNotification" parameterType="kr.or.ddit.notice.vo.NotificationVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="notiCd">
+			SELECT NOTI_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO NOTIFICATION (
+			    NOTI_CD
+			    , NOTI_TYPE
+			    , NOTI_SENDER
+			    , NOTI_TITLE
+			    , NOTI_CONT
+			    , NOTI_DATE
+			) VALUES (
+				#{notiCd,jdbcType=VARCHAR}
+				, #{notiType,jdbcType=VARCHAR}
+				, #{notiSender,jdbcType=VARCHAR}
+				, #{notiTitle,jdbcType=VARCHAR}
+				, #{notiCont,jdbcType=CLOB}
+				, SYSDATE
+			)
+	</insert>
+	
+	<insert id="sendNotification" parameterType="kr.or.ddit.notice.vo.NoticeDetailVO">
+		INSERT INTO NOTICEDETAIL (
+		    NOTI_RECEIVER
+		    , NOTI_CD
+		    , NOTI_STAT
+		) VALUES (
+		    #{notiReceiver,jdbcType=VARCHAR}
+			, #{notiCd,jdbcType=VARCHAR}
+			, '2'
+		)
+	</insert>
+	
+	<select id="checkNotice" resultType="int" parameterType="String">
+		SELECT
+		COUNT(*)
+		FROM
+		    NOTICEDETAIL
+		WHERE NOTI_RECEIVER = #{String} AND NOTI_STAT = '2'
+	</select>
+	
+	<select id="notificationDetail" resultType="kr.or.ddit.notice.vo.NotificationVO" parameterType="String">
+		SELECT
+		    NOTI_CD
+		  , NOTI_TYPE
+		  , NOTI_SENDER
+		  , NOTI_TITLE
+		  , NOTI_CONT
+		  , NOTI_DATE
+		  , A.NAME AS SENDER
+		FROM
+		    NOTIFICATION N
+		LEFT JOIN ALL_PEOPLE A ON N.NOTI_SENDER = A.ID		
+		WHERE NOTI_CD = #{String}  
+	</select>
+	
+	<update id="checkNotification" parameterType="kr.or.ddit.notice.vo.NotificationVO">
+		UPDATE NOTICEDETAIL
+		SET
+		    NOTI_STAT = '1'
+		WHERE
+	        NOTI_RECEIVER = #{notiReceiver,jdbcType=VARCHAR}
+		    AND NOTI_CD = #{notiCd,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="checkReader" parameterType="kr.or.ddit.notice.vo.NoticeDetailVO">
+		SELECT COUNT(*)
+		FROM
+		    NOTICEDETAIL
+		    WHERE NOTI_CD = #{notiCd,jdbcType=VARCHAR} AND NOTI_RECEIVER = #{notiReceiver,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectMyNoticeList" resultType="kr.or.ddit.notice.vo.NotificationVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME AS SENDER,
+		            N.NOTI_TITLE,
+		            N.NOTI_CONT,
+		            N.NOTI_DATE,
+		            D.NOTI_STAT,
+		            D.NOTI_RECEIVER,
+		            R.NAME AS RECEIVER
+		        FROM
+		            NOTIFICATION N
+		        JOIN
+		            NOTICEDETAIL D ON N.NOTI_CD = D.NOTI_CD
+		        LEFT JOIN
+		            all_people S ON N.NOTI_SENDER = S.ID
+		        LEFT JOIN
+		            all_people R ON D.NOTI_RECEIVER = R.ID
+		        <include refid="searchFrag"/>
+		        ORDER BY N.NOTI_CD DESC
+		    ) A
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<select id="selectMyNotice"  resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            N.NOTI_CD,
+		            N.NOTI_TYPE,
+		            N.NOTI_SENDER,
+		            S.NAME AS SENDER,
+		            N.NOTI_TITLE,
+		            N.NOTI_CONT,
+		            N.NOTI_DATE,
+		            D.NOTI_STAT,
+		            D.NOTI_RECEIVER,
+		            R.NAME AS RECEIVER
+		        FROM
+		            NOTIFICATION N
+		        JOIN
+		            NOTICEDETAIL D ON N.NOTI_CD = D.NOTI_CD
+		        LEFT JOIN
+		            all_people S ON N.NOTI_SENDER = S.ID
+		        LEFT JOIN
+		            all_people R ON D.NOTI_RECEIVER = R.ID
+		        <include refid="searchFrag"/>
+		        ORDER BY N.NOTI_CD DESC
+		    ) A
+		) B
+	</select>
+	
+</mapper>

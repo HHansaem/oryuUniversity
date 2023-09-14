@@ -1,0 +1,39 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<p>세션에 저장된 userId: ${sessionScope.userId}</p>
+<p>확인 :${fn:substring(sessionScope.userId, 0, 1) eq 1}</p>
+<table class="table table-border">
+	<thead>
+		<tr>
+			<th>학생이름</th>
+			<th>학번</th>
+			<th>당당교수</th>
+			<th>동아리이름</th>
+			<th>동아리상태</th>
+		</tr>
+	</thead>
+	<c:if test="${empty club and fn:substring(sessionScope.userId, 0, 1) eq '1'}">
+    <tr>
+        <td colspan="5">신청한 동아리 없음</td>
+    </tr>
+</c:if>
+<c:if test="${sessionScope.userId.length() == 7}}">
+    <tr>
+        <td colspan="5">신청 받은 동아리 없음</td>
+    </tr>
+</c:if>
+	<c:if test="${not empty club }">
+		<c:forEach items="${club }" var="club">
+			<tr>
+				<td>${club.studentVO.stNm }</td>
+				<td><a href="${pageContext.request.contextPath}/club/clubInsertRequestView.do?who=${club.clubCd}" data-who="${club.clubCd}">${club.stCd}</a></td>
+				<td>${club.professorVO.prNm }</td>
+				<td>${club.clubNm }</td>
+				<td>${club.clubStatus }</td>
+			</tr>
+		</c:forEach>
+	</c:if>
+</table>
+

@@ -1,0 +1,29 @@
+package kr.or.ddit.club.vo;
+
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.professor.vo.ProfessorVO;
+import kr.or.ddit.student.vo.StudentVO;
+import lombok.Data;
+
+@Data
+public class ClubVO {
+	@NotBlank private String clubCd;
+     private Integer prCd;
+	 private Integer stCd;
+	 private String clubStat;
+	 private String clubColsApplForm;
+	 private String clubDetail;
+	 private String clubFicFile;
+	 private String clubNm;
+	 private String clubPlan;
+	 private LocalDate clubAppDate;
+	 private String clubStatus;
+	 private String clubRefuse;
+	 
+	 
+	 private ProfessorVO professorVO;
+	 private StudentVO studentVO;
+}

@@ -1,0 +1,113 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<form:form method="post" modelAttribute="internAPC" enctype="multipart/form-data">
+	<table class="table table-border">	
+			<c:if test="${not empty internAPC.inteCd }">
+				<tr hidden="true">
+					<th>신청한 인턴십 코드</th>
+				<td><input type="hidden" name="inteCd" value="${internAPC.inteCd}" readonly>${intern.inteCd}</td>
+			</tr>
+			</c:if>
+			
+			<c:if test="${not empty internAPC.iaCd }">
+			<tr hidden="true">
+				<th>신청코드</th>
+			<td><input type="text" name="iaCd" value="${internAPC.iaCd}" readonly></td>
+			</tr>
+			</c:if>
+			<tr>
+				<th>프로필사진</th>
+				<td><img src="<c:url value='/resources/profileImages/${internAPC.studentVO.stFic }'/>" /></td>
+			</tr>
+			<tr>
+				<th>학번</th>
+				<td><input type="hidden" name="internAPC.stCd" value="${internAPC.stCd }" readonly>${internAPC.stCd }</td>
+			</tr>
+			<tr>
+				<th>학과</th>
+				<td>${internAPC.departmentVO.dtNm }</td>
+			</tr>
+			<tr>
+				<th>이름</th>
+				<td>${internAPC.studentVO.stNm }</td>
+			</tr>
+			<tr>
+				<th>주민등록번호</th>
+				<td>${internAPC.studentVO.stReg1 } - ${internAPC.studentVO.stReg2 }</td>
+			</tr>
+			<tr>
+				<th>주소</th>
+				<td>${internAPC.studentVO.stAddr1 } ${internAPC.studentVO.stAddr2 }</td>
+			</tr>
+			<tr>
+				<th>전화번호</th>
+				<td>${internAPC.studentVO.stPh }</td>
+			</tr>
+			<tr>
+				<th>이메일</th>
+				<td>${internAPC.studentVO.stEmail }</td>
+			</tr>
+			
+			
+			<tr>
+				<th>지원 목적 및 동기</th>
+			<td>${internAPC.iaPur }</td>
+			</tr>
+			
+			<tr>
+				<th>졸업 후 계획</th>
+			<td>${internAPC.iaCou }</td>
+			</tr>
+			<tr>
+			<td colspan="3">
+				<sec:authorize access="hasRole('ROLE_ST')"><!-- 학생 -->
+					<input class="btn btn-secondary" type="reset"value="뒤로가기" onclick="history.back();">				
+					<c:if test="${internAPC.iaStat eq '신청'}">
+					<input class="btn btn-primary" type="button" value="수정하기" onclick="internshipAPCUpdate()">
+					</c:if>
+				</sec:authorize>
+				<sec:authorize access="hasRole('ROLE_TS')"><!-- 교직원 -->
+			    	<c:if test="${internAPC.iaStat eq '신청'}">
+			    	<input class="btn btn-success" type="button" value="합격" onclick="internshipAPCPass()">
+			    	<input class="btn btn-danger" type="button" value="불합격" onclick="internshipAPCNopass()">
+			    	</c:if>
+			    	<input class="btn btn-secondary" type="button" value="뒤로가기" onclick="history.back();">
+    			</sec:authorize>
+			</td>
+		</tr>
+		</table>
+</form:form>
+
+<script>
+var internAPCInteDelete = "${internAPC.inteDelete}";
+console.log("확인" + internAPCInteDelete);
+
+function internshipAPCUpdate() {
+    if (internAPCInteDelete.trim() === '삭제') {
+        alert("삭제 된 게시물입니다.");
+    } else {
+        window.location.href = "${pageContext.request.contextPath}/internshipAPC/internshipAPCUpdate.do?what=${internAPC.iaCd}";
+    }
+}
+
+function internshipAPCPass() {
+    if (internAPCInteDelete.trim() === '삭제') {
+        alert("삭제 된 게시물입니다.");
+    } else {
+        window.location.href = "${pageContext.request.contextPath}/internshipAPC/internshipAPCPass.do?what=${internAPC.iaCd}&stat=${internAPC.iaStat}";
+    }
+}
+
+function internshipAPCNopass() {
+    if (internAPCInteDelete.trim() === '삭제') {
+        alert("삭제 된 게시물입니다.");
+    } else {
+        window.location.href = "${pageContext.request.contextPath}/internshipAPC/internshipAPCNopass.do?what=${internAPC.iaCd}&stat=${internAPC.iaStat}";
+    } 
+}
+	</script>

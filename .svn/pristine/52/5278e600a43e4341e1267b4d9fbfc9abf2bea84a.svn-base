@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.attendance.dao.AttendanceDAO">
+	
+	<resultMap type="kr.or.ddit.lectureContents.vo.AttendanceVO" id="attendanceMap" autoMapping="true">
+		<id property="attCd" column="ATT_CD"/>
+		<collection property="attendanceStateList" ofType="kr.or.ddit.lectureContents.vo.AttendanceStateVO" autoMapping="true">
+			<id property="attsCd" column="ATTS_CD"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectAttendanceList" parameterType="kr.or.ddit.lectureContents.vo.AttendanceVO" resultMap="attendanceMap">
+	WITH STUDENTVIEW AS (
+	    SELECT
+	    dt_nm,st_nm,st_cd 
+	    from student s inner join department d on (s.dt_cd = d.dt_cd)
+	)
+	SELECT
+	    at.att_cd
+	  , at.lec_cd
+	  , at.st_cd
+	  , atte_lec_days
+	  , atte_days
+	  , atte_abse_days
+	  , atte_tard_days
+	  , atte_score
+	  , dt_nm
+	  , st_nm
+	  , ATTS_SCHE
+	  , ATTS_STATE
+	  , ATTS_CD
+	  , ATTS_WEEK
+	FROM
+	attendance at left outer JOIN (
+    SELECT * 
+    FROM attendancestate  
+    WHERE ATTS_SCHE = #{attsSche} AND atts_week = #{attsWeek}
+    ) ats ON at.att_cd = ats.att_cd 
+    INNER JOIN STUDENTVIEW sv ON at.st_cd = sv.st_cd
+    where at.lec_cd = #{lecCd}
+    order by TO_NUMBER(at.st_cd)
+	</select>
+	
+	<insert id="insertAttendance" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		INSERT INTO attendance (
+	    att_cd,
+	    lec_cd,
+	    st_cd,
+	    atte_lec_days,
+	    atte_days,
+	    atte_abse_days,
+	    atte_tard_days,
+	    atte_score
+		) VALUES (
+	      ATTENDANCE_SEQ.NEXTVAL 
+	    , #{lecCd,jdbcType=VARCHAR}
+	    , #{stCd,jdbcType=VARCHAR}
+	    , 0
+	    , 0
+	    , 0
+	    , 0
+	    , 0
+		)
+	</insert>
+	
+	<insert id="insertAttendanceState" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="attsCd">
+		SELECT ATTSTATE_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+		INSERT INTO attendancestate (
+		    atts_cd,
+		    atts_sche,
+		    atts_state,
+		    att_cd,
+		    atts_week
+		) VALUES (
+		    #{attsCd,jdbcType=VARCHAR}
+		    , #{attsSche,jdbcType=VARCHAR}
+		    , #{attsState,jdbcType=VARCHAR}
+		    , #{attCd,jdbcType=VARCHAR}
+		    , #{attsWeek,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="upAttendanceDay" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+		UPDATE attendance
+		SET
+		ATTE_LEC_DAYS = ATTE_LEC_DAYS + 1
+		<choose>
+			<when test="attsState == 'present'">
+				, ATTE_DAYS = ATTE_DAYS + 1
+			</when>
+			<when test="attsState == 'late'">
+				, ATTE_TARD_DAYS = ATTE_TARD_DAYS + 1 
+			</when>
+			<otherwise>
+				, ATTE_ABSE_DAYS = ATTE_ABSE_DAYS + 1
+			</otherwise>
+		</choose>
+		WHERE
+   		att_cd = #{attCd}
+	</update>
+	
+	<update id="updateAttendanceDay" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+		UPDATE attendance
+		SET
+		<choose>
+			<when test="attsState == 'present' and prevAttsState == 'late'">
+				ATTE_TARD_DAYS = ATTE_TARD_DAYS - 1 
+				, ATTE_DAYS = ATTE_DAYS + 1
+			</when>
+			<when test="attsState == 'present' and prevAttsState == 'absent'">
+				ATTE_ABSE_DAYS = ATTE_ABSE_DAYS - 1
+				, ATTE_DAYS = ATTE_DAYS + 1
+			</when>
+			<when test="attsState == 'late' and prevAttsState == 'present'">
+				ATTE_DAYS = ATTE_DAYS - 1
+				, ATTE_TARD_DAYS = ATTE_TARD_DAYS + 1
+			</when>
+			<when test="attsState == 'late' and prevAttsState == 'absent'">
+				ATTE_ABSE_DAYS = ATTE_ABSE_DAYS - 1
+				, ATTE_TARD_DAYS = ATTE_TARD_DAYS + 1
+			</when>
+			<when test="attsState == 'absent' and prevAttsState == 'present'">
+				ATTE_DAYS = ATTE_DAYS - 1
+				, ATTE_ABSE_DAYS = ATTE_ABSE_DAYS + 1
+			</when>
+			<when test="attsState == 'absent' and prevAttsState == 'late'">
+				ATTE_TARD_DAYS = ATTE_TARD_DAYS - 1
+				, ATTE_ABSE_DAYS = ATTE_ABSE_DAYS + 1
+			</when>
+		</choose>
+		WHERE att_cd = #{attCd}
+	</update>
+	
+	
+	<update id="updateAttendanceState" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+		UPDATE attendancestate
+		SET
+    	ATTS_STATE = #{attsState,jdbcType=VARCHAR}
+		WHERE
+    	atts_cd = #{attsCd}
+	</update>
+	
+	<select id="selectAttendanceState" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+		SELECT
+	    atts_cd
+	  	, atts_sche
+	  	, atts_state
+	  	, att_cd
+	  	, atts_week
+		FROM
+	    attendancestate
+	    WHERE atts_cd = #{attsCd}
+	</select>
+	
+	<resultMap type="kr.or.ddit.lectureContents.vo.AttendanceVO" id="attendView" autoMapping="true">
+		<id property="attCd" column="ATT_CD"/>
+		<collection property="attendanceStateList" ofType="kr.or.ddit.lectureContents.vo.AttendanceStateVO" autoMapping="true">
+			<id property="attsCd" column="ATTS_CD"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectStAttendanceList" parameterType="kr.or.ddit.lectureContents.vo.AttendanceVO" resultMap="attendView">
+		SELECT
+		    at.att_cd
+		  , at.lec_cd
+		  , at.st_cd
+		  , atte_lec_days
+		  , atte_days
+		  , atte_abse_days
+		  , atte_tard_days
+		  , atte_score
+		  , atts_sche
+		  , atts_state
+		  , atts_week
+		  , lec_lect_title
+		  , atts_cd
+		  , CASE SUBSTR(atts_sche,1,1)
+	           WHEN '월' THEN TO_NUMBER(1 || SUBSTR(atts_sche,2,1))
+	           WHEN '화' THEN TO_NUMBER(2 || SUBSTR(atts_sche,2,1))
+	           WHEN '수' THEN TO_NUMBER(3 || SUBSTR(atts_sche,2,1))
+	           WHEN '목' THEN TO_NUMBER(4 || SUBSTR(atts_sche,2,1))
+	           WHEN '금' THEN TO_NUMBER(5 || SUBSTR(atts_sche,2,1))
+	        END AS week
+		FROM
+	    attendance at inner join attendancestate ats on at.att_cd = ats.att_cd
+	                  inner join lecture lec on at.lec_cd = lec.lec_cd
+	                  where at.lec_cd = #{lecCd} and at.st_cd = #{stCd}
+	                  order by week , atts_week
+	</select>
+	
+	<delete id="deleteAttendance" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		DELETE FROM ATTENDANCE WHERE lec_cd = #{lecCd} and st_cd = #{stCd}
+	</delete>
+	
+	<update id="updateAttendScore">
+		UPDATE attendance
+		SET ATTE_SCORE = CASE 
+		    WHEN ATTE_ABSE_DAYS + TRUNC(ATTE_TARD_DAYS / 3) >= #{absenceInput} THEN #{scoreInput} 
+		ELSE ATTE_SCORE
+		END
+		WHERE lec_Cd = #{lecCd}
+	</update>
+	
+</mapper>

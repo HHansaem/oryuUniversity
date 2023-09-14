@@ -1,0 +1,28 @@
+package kr.or.ddit.lectureSchedule.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+
+/**
+ * 강의스케쥴 DAO
+ * @author rottw
+ *
+ */
+@Mapper
+public interface LectureScheduleDAO {
+	// 강의 스케쥴 등록
+	public int insertLectureSchedule(LectureScheduleVO lectureSchedule);
+	// 강의 스케쥴 삭제
+	public int deleteLectureShcedule(LectureScheduleVO lectureSchedule);
+	// 강의 스케쥴 검색 (강의실별)
+	public List<LectureScheduleVO> selectedLectureSchedule(String clasCd);
+	// 강의 스케쥴 검색 (학생별)
+	
+	// 강의 스케줄 교시조회
+	public List<LectureScheduleVO> selectLectureScheduleDetail(String lecCd);
+	
+
+}

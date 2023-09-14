@@ -1,0 +1,36 @@
+package kr.or.ddit.enrollment.service;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.vo.LectureVO;
+
+public interface EnrollmentService {
+	
+	// 수강신청목록 조회(교직원)
+	public List<EnrollmentVO> retrieveEnrollmentList(PaginationInfo paging);
+
+	// 수강요청확정 (교직원)
+	public int acceptEnrollment(List<EnrollmentVO> reqList);
+	
+	// 수강요청거절 (교직원)
+	public int rejectEnrollment(List<EnrollmentVO> reqList);
+	
+	// 수강신청목록 조회 (학생)
+	public List<EnrollmentVO> retrieveMyEnrollmentList(String stCd);
+	
+	// 수강 신청
+	public int sendEnrollement(EnrollmentVO enrollment);
+	
+	// 수강신청 취소(학생)
+	public int deleteEnrollment(EnrollmentVO enrollment);
+
+	// 학생 현재 학기 수강목록 조회
+	public List<EnrollmentVO> retrieveSTEnrollmentList(String stCd);
+	
+	public LectureVO retrieveGradeRate(String lecCd);
+	
+}
+

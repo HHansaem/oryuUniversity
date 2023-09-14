@@ -1,0 +1,101 @@
+package kr.or.ddit.lectureContents.assignmentSub.service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.service.AtchFileService;
+import kr.or.ddit.atch.vo.AtchFileDetailVO;
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lectureContents.assignmentSub.dao.AssignmentSubDAO;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class AssignmentSubServiceImpl implements AssignmentSubService {
+
+	@Inject
+	private AssignmentSubDAO assignSubDAO;
+	
+	@Inject 
+	private AtchFileService atchService;
+	@Value("#{appInfo.CommonAtchPath}")
+	private Resource atchPath;
+	
+	private void processAtchFileGroup(AssignmentSubVO assignSubmission) {
+		MultipartFile[] auFiles = assignSubmission.getAuFiles();
+		if(auFiles==null) return;
+		List<AtchFileDetailVO> detailList = new ArrayList<>();
+		for(MultipartFile asFile : auFiles) {
+			if(asFile.isEmpty()) continue;
+			detailList.add(new AtchFileDetailVO(asFile));
+		}
+		if(detailList.size()>0) {
+			AtchFileVO fileGroup = new AtchFileVO();
+			fileGroup.setDetailList(detailList);
+			try {
+				//	1. 첨부파일의 메타 데이터 저장
+				//	2. 첨부파일의 2진 데이터 저장
+				int atchFileId = atchService.createAtchFileGroup(fileGroup, atchPath);
+				assignSubmission.setAtchFileId(atchFileId);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	@Override
+	public List<AssignmentSubVO> retrieveAssignmentSubList(PaginationInfo paging) {
+		return assignSubDAO.selectAssignmentSubList(paging);
+	}
+
+	@Override
+	public AssignmentSubVO retrieveAssignmentSub(String assiCd, String stCd) {
+		return assignSubDAO.selectAssignmentSub(assiCd, stCd);
+	}
+
+	@Override
+	public boolean modifyAssignmentScore(AssignmentSubVO assignSub) {
+		boolean result;
+		int cnt = assignSubDAO.updateAssignmentScore(assignSub);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+	
+	
+	@Override
+	public ServiceResult registerAssignSubmission(AssignmentSubVO assignSubmission) {
+		processAtchFileGroup(assignSubmission);
+		return assignSubDAO.insertAssignSubmission(assignSubmission) > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+	@Override
+	public AssignmentSubVO retrieveAssignSubmissionDetail(AssignmentSubVO assignSubmission) {
+		return assignSubDAO.selectAssignSubmissionDetail(assignSubmission);
+	}
+
+	@Override
+	public ServiceResult modifyAssignSubmission(AssignmentSubVO assignSubmission) {
+		processAtchFileGroup(assignSubmission);
+		return assignSubDAO.updateAssignSubmission(assignSubmission) > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+
+}
+
+
+
+
+

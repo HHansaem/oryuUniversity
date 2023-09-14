@@ -1,0 +1,33 @@
+package kr.or.ddit.email.service;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.email.dao.MailDAO;
+import kr.or.ddit.email.vo.MailVO;
+
+@Service
+public class MailServiceImpl implements MailService {
+	
+	@Inject
+	private MailDAO service;
+	
+	@Override
+	public MailVO mailAutoLogin(String id) {
+			return service.mailAutoLogin(id);
+	}
+
+	@Override
+	public int mailIDInsert(MailVO mail) {
+		return service.mailIDInsert(mail);
+	}
+
+	@Override
+	public int mailCheck(String id) {
+		return service.mailCheck(id);
+	}
+
+	
+	
+}

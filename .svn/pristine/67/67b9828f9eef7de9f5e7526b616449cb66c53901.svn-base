@@ -1,0 +1,29 @@
+package kr.or.ddit.lectureContents.attendance.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureContents.vo.AttendanceStateVO;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+
+@Mapper
+public interface AttendanceDAO {
+	
+	//출석 목록조회
+	public List<AttendanceVO> selectAttendanceList(AttendanceVO attendance);
+	
+	// 강의 출석 등록
+	public int insertAttendance(AttendanceVO attendance);
+	
+	// 강의 출석상태 등록
+	public int insertAttendanceState(AttendanceStateVO attendanceState);
+	
+	// 강의 출석 변경
+	public int updateAttendance(AttendanceVO attendance);
+	
+	// 강의 출석상태 변경
+	public int updateAttendanceState(AttendanceStateVO attendanceState);
+	
+	
+}

@@ -1,0 +1,50 @@
+package kr.or.ddit.research.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.research.dao.ResearchDAO;
+import kr.or.ddit.research.vo.ResearchVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class ResearchServiceImpl implements ResearchService {
+
+	@Inject
+	private ResearchDAO researchDAO;
+	
+	private Resource researchSaveRes;
+	
+	@Override
+	public ServiceResult createResearch(ResearchVO research) {
+		ServiceResult result = null;
+		return result;
+	}
+	
+
+	@Override
+	public ResearchVO retrieveResearch(String reseCd) {
+		return null;
+	}
+
+	@Override
+	public List<ResearchVO> retrieveResearchList(PaginationInfo<ResearchVO> paging) {
+		return null;
+	}
+
+	@Override
+	public ServiceResult modifyResearch(ResearchVO research) {
+		return null;
+	}
+
+	@Override
+	public ServiceResult removeResearch(ResearchVO research) {
+		return null;
+	}
+
+}

@@ -1,0 +1,76 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<table class="table">
+<tr><td><h4><br>학사 공지사항</h4></td></tr>
+</table>
+<table class="table">
+	<tr>
+		<td><h3>${acaNotice.anTitle }</h3></td>
+	</tr>
+	<tr>
+		<th>게시일</th>
+		<td>${acaNotice.anPostDate }</td>
+		<th>작성자</th>
+		<td>${acaNotice.anWriter }</td>
+		<th>조회수</th>
+		<td>${acaNotice.anViews }</td>
+	</tr>
+	<tr>
+		<th>내용</th>
+		<td>${acaNotice.anCont }</td>
+	</tr>
+	<tr>
+		<th>첨부파일</th>
+		<td>
+			<c:if test="${not empty acaNotice.fileGroup and not empty acaNotice.fileGroup.detailList }">
+				<c:forEach items="${acaNotice.fileGroup.detailList }" var="fileDetail">
+					<c:url value="/academic/download.do" var="downloadURL">
+						<c:param name="atchFileId" value="${fileDetail.atchFileId }" />
+						<c:param name="fileSn" value="${fileDetail.fileSn }" />
+					</c:url>
+					<a href="${downloadURL }">${fileDetail.orignlFileNm }</a>
+				</c:forEach>
+			</c:if>
+		</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	
+	<tr>
+		<c:url value='/academic/acaNoticeUpdate.do' var="updateURL">
+			<c:param name="what" value="${acaNotice.anNum }" />
+		</c:url>
+		<c:url value='/academic/acaNoticeDelete.do' var="deleteURL">
+			<c:param name="what" value="${acaNotice.anNum }" />
+		</c:url>
+		<c:url value='/academic/acaNoticeList.do' var="listURL" />
+         <td colspan="2">
+         	<c:if test="${role == 'ROLE_TS'}">
+               <a class="btn btn-primary" href="${updateURL }">수정</a>
+               <a class="btn btn-danger" href="${deleteURL }" onclick="return confirmDelete(event)">삭제</a>
+            </c:if>
+               <a class="btn btn-success" href="${listURL }">목록</a>
+         </td>
+   </tr>
+</table>
+
+<script>
+    function confirmDelete(event) {
+        var result = confirm("공지사항을 삭제하시겠습니까?");
+        if (!result) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
+</script>
+
+
+
+
+

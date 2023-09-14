@@ -1,0 +1,42 @@
+package kr.or.ddit.professor.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.professor.service.ProfessorService;
+import kr.or.ddit.professor.vo.ProfessorVO;
+
+@Controller
+public class ProfessorMypageDeleteController {
+	
+	@Inject
+	private ProfessorService service;
+	@Inject
+	private PasswordEncoder encoder;
+	
+	@PostMapping("/mypage/professorDelete.do")
+	public String postHandler(
+		@RequestParam("who") String prCd
+		, @RequestParam("password") String password
+		, HttpSession session
+	){
+		String logicalViewName = null;
+		ProfessorVO professor = service.retrieveProfessor(prCd);
+		String originPass = professor.getPrPass();
+		
+		if(encoder.matches(password, originPass)) {
+			service.removeProfessor(prCd);
+			session.setAttribute("message", "삭제가 완료되었습니다.");
+			logicalViewName = "redirect:/";
+		}else {
+			session.setAttribute("message", "비밀번호가 일치하지 않습니다.");
+			logicalViewName = "redirect:/mypage/professorView.do?who="+prCd;
+		}
+		return logicalViewName;
+	}
+}

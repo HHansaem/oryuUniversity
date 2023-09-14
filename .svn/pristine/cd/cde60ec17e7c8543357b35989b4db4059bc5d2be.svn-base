@@ -1,0 +1,33 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<c:url value="/research/researchUpdate.do" var="updateURL">
+	<c:param name="who" value="${research.reseCd }" />
+</c:url>
+<a href="${updateURL }">수정</a>
+
+<table>
+	<tr>
+		<th>연구번호</th>
+		<td>${research.reseCd }</td>
+	</tr>
+	<tr>
+		<th>연구명</th>
+		<td>${research.reseNm }</td>
+	</tr>
+	<tr>
+		<th>연구내용</th>
+		<td>${research.reseCont }</td>
+	</tr>
+	<tr>
+		<th>첨부파일</th>
+		<td>${research.attCd }</td>
+	</tr>
+
+	<tr>
+		<th>연구상태</th>
+		<td>${research.reseStat }</td>
+	</tr>
+</table>

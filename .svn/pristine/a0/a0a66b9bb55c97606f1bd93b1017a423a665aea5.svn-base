@@ -1,0 +1,47 @@
+package kr.or.ddit.lectureContents.attendance.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lectureContents.vo.AttendanceStateVO;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+
+@Mapper
+public interface AttendanceDAO {
+	
+	//출석 목록조회
+	public List<AttendanceVO> selectAttendanceList(AttendanceVO attendance);
+	
+	// 강의 출석 등록(수강신청완료시 처리중)
+	public int insertAttendance(EnrollmentVO enrollment);
+	
+	// 강의 출석상태 등록
+	public int insertAttendanceState(AttendanceStateVO attendanceState);
+	
+	// 강의 출석일 증가
+	public int upAttendanceDay(AttendanceStateVO attendanceState);
+	
+	// 강의 출석일 수정
+	public int updateAttendanceDay(AttendanceStateVO attendanceState);
+	
+	// 강의 출석상태 변경
+	public int updateAttendanceState(AttendanceStateVO attendanceState);
+	
+	// 강의 출석상태 조회
+	public AttendanceStateVO selectAttendanceState(String attsCd);
+	
+	// 학생 출석 조회
+	public AttendanceVO selectStAttendanceList(AttendanceVO attendance);
+	
+	// 학생 출석 삭제
+	public int deleteAttendance(EnrollmentVO enrollment);
+	
+	// 출석 점수 부여(업데이트)
+	public int updateAttendScore(@Param("lecCd")String lecCd, @Param("absenceInput")int absenceInput, @Param("scoreInput")int scoreInput);
+	
+	// 출석 점수 조회
+	public List<Integer> selectAttendScore(@Param("lecCd")String lecCd);
+}

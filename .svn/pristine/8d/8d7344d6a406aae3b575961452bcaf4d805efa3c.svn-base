@@ -1,0 +1,87 @@
+package kr.or.ddit.student.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.student.dao.OthersDAO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.validate.groups.UpdateGroup;
+
+@Controller
+public class StudentMypageUpdateController {
+	
+	@Inject
+	private StudentService service;
+	@Inject
+	private OthersDAO othersDAO;
+	@Inject
+	private PasswordEncoder encoder;
+	
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList() {
+		return othersDAO.selectDepartmentList();
+	}
+	
+	@PostMapping("/mypage/studentUpdateCheck.do")
+	public String updateCheck(
+		@RequestParam("who") String stCd
+		, @RequestParam("password") String password
+		, HttpSession session
+		, Model model
+	){
+		String logicalViewName = null;
+		StudentVO student = service.retrieveStudent(stCd);
+		String originPass = student.getStPass();
+		model.addAttribute("student", student);
+		
+		if(encoder.matches(password, originPass)) {
+			session.setAttribute("message", "확인되었습니다.");
+			logicalViewName = "student/studentMypageEdit";
+		}else {
+			session.setAttribute("message", "비밀번호가 일치하지 않습니다.");
+			logicalViewName = "redirect:/mypage/studentView.do?who="+stCd;
+		}
+		return logicalViewName;
+	}
+
+	@PostMapping("/mypage/studentUpdate.do")
+	public String updateProcess(
+		@Validated(UpdateGroup.class) @ModelAttribute("student") StudentVO student
+		, BindingResult errors
+		, HttpSession session
+	) {
+		String logicalViewName = null;
+		String plain = student.getStPass();
+		String encoded = encoder.encode(plain);
+		student.setStPass(encoded);
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifyStudent(student);
+			if(ServiceResult.OK == result) {
+				session.setAttribute("message", "수정 성공!");
+				logicalViewName = "redirect:/mypage/studentView.do?who="+student.getStCd();
+			}else {
+				session.setAttribute("message", "오류, 수정 실패");
+				logicalViewName = "student/studentMypageEdit";
+			}
+		}else {
+			session.setAttribute("message", "오류, 수정 실패");
+			logicalViewName = "student/studentMypageEdit";
+		}
+		return logicalViewName;
+	}
+	
+}

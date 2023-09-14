@@ -1,0 +1,15 @@
+package kr.or.ddit.professor.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.professor.vo.ProfessorVO;
+
+@Mapper
+public interface ProfessorDAO {
+	public int insertProfessor(ProfessorVO student);
+	public ProfessorVO selectProfessor(int prCd);
+	public List<ProfessorVO> selectProfessorList();
+	public int updateProfessor(ProfessorVO Professor);
+}

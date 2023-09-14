@@ -1,0 +1,56 @@
+package kr.or.ddit.research.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.research.service.ResearchService;
+import kr.or.ddit.research.vo.ResearchVO;
+
+@Controller
+public class ResearchRetrieveController {
+
+	@Inject
+	private ResearchService service;
+	
+	public String list(
+			@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+			, SimpleCondition simpleCondition
+			, Model model
+			){
+		PaginationInfo<ResearchVO> paging = new PaginationInfo<>(5, 3);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		
+		List<ResearchVO> researchList = service.retrieveResearchList(paging);
+		paging.setDataList(researchList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "student/studentList";
+		
+	}
+	@RequestMapping("/research/researchView.do")
+	public ModelAndView view(
+			@RequestParam(name="who") String reseCd
+	) {
+		
+			ResearchVO research = service.retrieveResearch(reseCd);
+			
+			ModelAndView mav = new ModelAndView();
+			mav.addObject("research", research);
+			mav.setViewName("research/researchView");
+			return mav;
+	}
+	
+	
+	
+}

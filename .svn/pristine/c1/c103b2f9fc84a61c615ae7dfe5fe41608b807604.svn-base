@@ -1,0 +1,21 @@
+package kr.or.ddit.lecture.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lecture.vo.AssignmentVO;
+
+@Mapper
+public interface AssignmentDAO {
+	//과제 등록
+	public int insertAssignment(AssignmentVO assign);
+	// 과제 상세조회
+	public AssignmentVO selectAssignmentDetail(String assiCd);
+	// 과제 목록조회
+	public List<AssignmentVO> selectAssignmentList(String lecCd);
+	// 과제 업데이트
+	public int updateAssignment(AssignmentVO assign); 
+	// 과제 상태 삭제
+	public int deleteAssignment(String assiCd);
+}

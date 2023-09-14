@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.enrollment.dao.EnrollmentDAO">
+	
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'lCode'">
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'lName'">
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'pName'">
+						INSTR(P.PR_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sName'">
+						INSTR(S.ST_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(P.PR_NM, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(S.ST_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND P.DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.classfication neq null and not detailCondition.classfication.isEmpty">
+			            AND SB.SUBJ_COM_TYPE = #{detailCondition.classfication}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.grade neq null and not detailCondition.grade.isEmpty">
+			            AND L.LEC_GRA_CD = #{detailCondition.grade}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.semester neq null and not detailCondition.semester.isEmpty">
+			            AND L.LEC_SEME_CD = #{detailCondition.semester}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	
+	<resultMap type="kr.or.ddit.enrollment.vo.EnrollmentVO" id="enrollmentMap" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		<id property="stCd" column="ST_CD"/>
+		
+		<association property="lecture" javaType="kr.or.ddit.lecture.vo.LectureVO" autoMapping="true">
+			<id property="lecCd" column="LEC_CD"/>
+			<result property="lecLectTitle" column="LEC_LECT_TITLE"/>
+			<result property="lecGraCd" column="LEC_GRA_CD"/>
+			<result property="lecSemeCd" column="LEC_SEME_CD"/>
+			<result property="lecLectCred" column="LEC_LECT_CRED"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectEnrollmentList" resultMap="enrollmentMap" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT
+		    E.LEC_CD,
+		    E.ST_CD,
+            S.ST_NM,
+		    E.ENRO_APPL_STAT,
+		    E.ENRO_APPL_DATE,
+		    E.GRA_ASSI_SCORE,
+		    E.GRA_ATTEND_SCORE,
+		    E.GRA_MID_SCORE,
+		    E.GRA_FINAL_SCORE,
+		    E.GRA_FINAL_TOTAL,
+		    L.SUBJ_CD,
+		    L.PR_CD,
+            P.PR_NM,
+            P.DT_CD,
+            SB.SUBJ_COM_TYPE,
+		    L.LEC_LECT_TITLE,
+		    L.LEC_GRA_CD,
+		    L.LEC_SEME_CD,
+		    L.LEC_LECT_CRED,
+		    L.LEC_ENRO_LIMIT,
+		    L.LEC_LECT_DIVISION,
+		    L.LEC_STAT,
+		    L.GR_MID,
+		    L.GR_FINAL,
+		    L.GR_ATTEND,
+		    L.GR_ASSI,
+		    L.ATCH_FILE_ID,
+		    LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS COMBINED_SCHE_CD
+            
+		FROM
+		    ENROLLMENT E
+		INNER JOIN
+		    LECTURE L ON E.LEC_CD = L.LEC_CD
+		INNER JOIN
+		    LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+        INNER JOIN
+		    STUDENT S ON S.ST_CD = E.ST_CD
+		INNER JOIN
+            PROFESSOR P ON P.PR_CD = L.PR_CD
+        LEFT OUTER JOIN  
+            SUBJECT SB ON SB.SUBJ_CD = L.SUBJ_CD
+		<include refid="searchFrag"/>
+		GROUP BY
+		    E.LEC_CD, E.ST_CD, E.ENRO_APPL_STAT, E.ENRO_APPL_DATE,
+		    E.GRA_ASSI_SCORE, E.GRA_ATTEND_SCORE, E.GRA_MID_SCORE, E.GRA_FINAL_SCORE, E.GRA_FINAL_TOTAL,
+		    L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD, L.LEC_LECT_CRED,
+		    L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT, L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI,
+		    L.ATCH_FILE_ID,P.PR_NM,S.ST_NM, P.DT_CD, SB.SUBJ_COM_TYPE
+	</select>
+	
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*) AS TOTAL_COUNT
+		FROM (
+		    SELECT
+		        E.LEC_CD,
+		        E.ST_CD,
+		        S.ST_NM,
+		        E.ENRO_APPL_STAT,
+		        E.ENRO_APPL_DATE,
+		        E.GRA_ASSI_SCORE,
+		        E.GRA_ATTEND_SCORE,
+		        E.GRA_MID_SCORE,
+		        E.GRA_FINAL_SCORE,
+		        E.GRA_FINAL_TOTAL,
+		        L.SUBJ_CD,
+		        L.PR_CD,
+		        P.PR_NM,
+		        P.DT_CD,
+		        SB.SUBJ_COM_TYPE,
+		        L.LEC_LECT_TITLE,
+		        L.LEC_GRA_CD,
+		        L.LEC_SEME_CD,
+		        L.LEC_LECT_CRED,
+		        L.LEC_ENRO_LIMIT,
+		        L.LEC_LECT_DIVISION,
+		        L.LEC_STAT,
+		        L.GR_MID,
+		        L.GR_FINAL,
+		        L.GR_ATTEND,
+		        L.GR_ASSI,
+		        L.ATCH_FILE_ID,
+		        LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS COMBINED_SCHE_CD
+		    FROM
+		        ENROLLMENT E
+		    INNER JOIN
+		        LECTURE L ON E.LEC_CD = L.LEC_CD
+		    INNER JOIN
+		        LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+		    INNER JOIN
+		        STUDENT S ON S.ST_CD = E.ST_CD
+		    INNER JOIN
+		        PROFESSOR P ON P.PR_CD = L.PR_CD
+		    LEFT OUTER JOIN  
+		        SUBJECT SB ON SB.SUBJ_CD = L.SUBJ_CD
+			<include refid="searchFrag"/>
+		    GROUP BY
+		        E.LEC_CD, E.ST_CD, E.ENRO_APPL_STAT, E.ENRO_APPL_DATE,
+		        E.GRA_ASSI_SCORE, E.GRA_ATTEND_SCORE, E.GRA_MID_SCORE, E.GRA_FINAL_SCORE, E.GRA_FINAL_TOTAL,
+		        L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD, L.LEC_LECT_CRED,
+		        L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT, L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI,
+		        L.ATCH_FILE_ID, P.PR_NM, S.ST_NM, P.DT_CD, SB.SUBJ_COM_TYPE
+		) A
+	</select>
+	
+	<update id="commitEnrollment">
+		UPDATE ENROLLMENT
+		SET
+		    ENRO_APPL_STAT = 'FIN'
+		WHERE
+		    LEC_CD = #{lecCd, jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd, jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="refuseEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		DELETE FROM ENROLLMENT
+		WHERE
+			LEC_CD = #{lecCd,jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="selectMyEnrollmentList" resultMap="enrollmentMap" parameterType="String">
+		SELECT
+		    LEC_CD
+		  , LEC_LECT_TITLE
+		  , LEC_GRA_CD
+		  , LEC_SEME_CD
+		  , LEC_LECT_CRED
+		  , ENRO_APPL_DATE
+		  , ENRO_APPL_STAT
+		FROM ENROLLMENT
+		    LEFT OUTER JOIN LECTURE USING(LEC_CD)
+		WHERE ST_CD = #{stCd,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="submitEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		INSERT INTO enrollment (
+		    LEC_CD
+		    , ST_CD
+		    , ENRO_APPL_STAT
+		    , ENRO_APPL_DATE
+		) VALUES (
+			  #{lecCd,jdbcType=VARCHAR}
+			, #{stCd,jdbcType=VARCHAR}
+			, 'REQ'
+			, SYSDATE
+		)
+	</insert>
+	
+	<delete id="cancelEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		DELETE FROM ENROLLMENT
+		WHERE
+			LEC_CD = #{lecCd,jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="checkCred" resultType="int" parameterType="String">
+		
+		SELECT COALESCE(SUM(L.LEC_LECT_CRED), 0) AS TOTAL_LECT_CRED
+		FROM ENROLLMENT E
+		LEFT JOIN LECTURE L ON E.LEC_CD = L.LEC_CD
+		WHERE E.ST_CD = #{stCd}
+		
+	</select>
+	
+	<select id="countStudent" resultType="int" parameterType="String">
+		SELECT COUNT(*) AS row_count
+		FROM ENROLLMENT
+		WHERE LEC_CD = #{lecCd}
+	</select>
+	
+	<select id="duplicateCheck" resultType="int" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    COUNT(*) AS SAME_SCHE_COUNT
+		FROM
+		    LECTURESCHEDULE PST
+		INNER JOIN
+		    LECTURESCHEDULE PRE ON PST.SCHE_CD = PRE.SCHE_CD
+		WHERE
+		    PST.LEC_CD IN (SELECT LEC_CD FROM ENROLLMENT WHERE ST_CD = #{stCd,jdbcType=VARCHAR})
+		    AND PRE.LEC_CD = #{lecCd,jdbcType=VARCHAR}
+	</select>
+
+	
+
+</mapper>

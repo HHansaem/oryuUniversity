@@ -1,0 +1,31 @@
+package kr.or.ddit.lecture.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+/**
+ * 강의 service
+ * @author rottw
+ *
+ */
+public interface LectureService {
+	// 전체 과목 조회
+	public List<LectureVO> retrieveLectureList(PaginationInfo paging);
+	// 강의 등록(교직원)
+	public ServiceResult createLecture(LectureVO lecture);
+	
+	// 강의 조회
+	public LectureVO retrieveLecture(String lecCd);
+	
+	// 현재 학기 강의 조회(교수)
+	public List<LectureVO> retrieveCurrentLectureList(String professorId);
+	// 현재 학기 강의 조회(학생)
+	public List<LectureVO> retrieveCurrentClassList(String studentId);
+	
+	
+}

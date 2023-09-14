@@ -1,0 +1,23 @@
+package kr.or.ddit.lectureContents.examSubmission.service;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.lectureContents.examSubmission.dao.ExamSubmitDAO;
+import kr.or.ddit.lectureContents.vo.ExamSubmitVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class ExamSubmitServiceImpl implements ExamSubmitService {
+	
+	@Inject
+	ExamSubmitDAO dao;
+	
+	@Override
+	public ServiceResult insertExamSubmit(ExamSubmitVO examSubmit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

@@ -1,0 +1,20 @@
+package kr.or.ddit.lectureContents.assignmentSub.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface AssignmentSubService {
+	public List<AssignmentSubVO> retrieveAssignmentSubList(PaginationInfo paging);
+	public AssignmentSubVO retrieveAssignmentSub(String assiCd, String stCd);
+	public boolean modifyAssignmentScore(AssignmentSubVO assignSub);
+	
+	// 학생 과제 제출
+	public ServiceResult registerAssignSubmission(AssignmentSubVO assignSubmission);
+	//학생 제출과제 상세조회
+	public AssignmentSubVO retrieveAssignSubmissionDetail(AssignmentSubVO assignSubmission);
+	//학생 과제 재제출(업데이트)
+	public ServiceResult modifyAssignSubmission(AssignmentSubVO assignSubmission);
+}

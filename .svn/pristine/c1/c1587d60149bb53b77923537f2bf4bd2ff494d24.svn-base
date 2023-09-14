@@ -1,0 +1,71 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<p>${acaChange }</p>
+<table class="table">
+<tr><td><h4><br>학적 변동 신청서 세부내용</h4></td></tr>
+</table>
+<table class="table">
+	<tr>
+		<td><h3>${acaChange.studentVO.stNm }</h3></td>
+	</tr>
+	<tr>
+		<th>신청일</th>
+		<td>${acaChange.acChAppDate }</td>
+		<th>답변일</th>
+		<td>${acaChange.acChCerDate }</td>
+		<th>현재 학적 상태</th>
+		<td>${acaChange.studentVO.stStatus }</td>
+		<th>신청항목</th>
+		<td>${acaChange.acChDiv }</td>
+		<th>신청상태</th>
+		<td>${acaChange.acChSta } </td>
+	</tr>
+	<tr>
+		<th>내용</th>
+		<td>${acaChange.acChRe }</td>
+	</tr>
+	<tr>
+		<th>첨부파일</th>
+		<td>
+			<c:if test="${not empty acaChange.fileGroup and not empty acaChange.fileGroup.detailList }">
+				<c:forEach items="${acaChange.fileGroup.detailList }" var="fileDetail">
+					<c:url value="/academicChange/download.do" var="downloadURL">
+						<c:param name="atchFileId" value="${fileDetail.atchFileId }" />
+						<c:param name="fileSn" value="${fileDetail.fileSn }" />
+					</c:url>
+					
+					<a href="${downloadURL }">${fileDetail.orignlFileNm }</a>
+				</c:forEach>
+			</c:if>
+		</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+    <sec:authorize access="hasRole('ROLE_ST')"><!-- 학생 -->
+        <input class="btn btn-success" type="button" value="확인" onclick="history.back();">
+    </sec:authorize>
+    <sec:authorize access="hasRole('ROLE_TS')"><!-- 교직원 -->
+    	<input class="btn btn-success" type="button" value="승인" onclick="approvalRequest()">
+    	<input class="btn btn-danger" type="button" value="거절" onclick="refuseRequest()">
+    	<input class="btn btn-secondary" type="button" value="뒤로가기" onclick="history.back();">
+    </sec:authorize>
+</td>
+	</tr>
+</table>
+
+<script>
+	function approvalRequest() {
+		window.location.href = "${pageContext.request.contextPath}/academicChange/requestProcess.do?what=${acaChange.acChCd}&process=승인&who=${acaChange.stCd }&div=${acaChange.acChDiv }";
+	}
+	function refuseRequest() {
+		window.location.href = "${pageContext.request.contextPath}/academicChange/requestProcess.do?what=${acaChange.acChCd}&process=거절";
+	} 
+	
+</script>

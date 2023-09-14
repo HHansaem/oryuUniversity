@@ -1,0 +1,100 @@
+package kr.or.ddit.academicChange.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import kr.or.ddit.academicChange.service.AcademicChangeService;
+import kr.or.ddit.academicChange.vo.AcademicChangeVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@Slf4j
+public class AcademicChangeRetrieve {
+
+	@Inject
+	private AcademicChangeService service;
+	
+	
+	@RequestMapping("/academicChange/acaChangeList.do")
+	public String acaChangeReqList(
+			 @RequestParam(name = "who") String stCd
+			, @RequestParam(name = "acChSta", required = false) String acChSta
+			, Model model
+			,RedirectAttributes redirectAttributes
+			) {
+			String message = (String) redirectAttributes.getFlashAttributes().get("message");
+	        
+	        if (acChSta != null && !acChSta.isEmpty()) {
+	        	List<AcademicChangeVO> acaChangeReqList = service.acaChangeRequestListSearch(acChSta, stCd);
+	        	model.addAttribute("acaChange", acaChangeReqList);
+	        }else {
+	        List<AcademicChangeVO> acaChangeReqList = service.acaChangeRequestList(stCd);
+	        model.addAttribute("acaChange", acaChangeReqList);
+	        }
+	        model.addAttribute("message", message);
+			
+	        
+	        return "academicChange/acaChangeReqList";
+	}	
+	
+	
+	@RequestMapping("/academicChange/acaChangeStaffList.do")
+	public String acaChageStaffReqList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			, @RequestParam Map<String,Object> detailCondition
+			, Model model
+			,RedirectAttributes redirectAttributes
+			){
+		PaginationInfo<AcademicChangeVO> paging = new PaginationInfo<>();
+		
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setDetailCondition(detailCondition);
+		redirectAttributes.getFlashAttributes().get("message");
+		log.info("dsadsa"+detailCondition);
+		
+		List<AcademicChangeVO> acaChangeList = service.stffacaChangeRequestList(paging);
+		paging.setDataList(acaChangeList);
+		
+		model.addAttribute("paging", paging);
+		model.addAttribute("detail", detailCondition);
+		// 총 레코드 수 조회
+        long totalRecord = service.getTotalRecordCount(paging);
+        model.addAttribute("totalRecord", totalRecord);
+		
+		return "academicChange/StaffacaChangeList";
+	}
+	
+	
+	
+	
+	
+	@RequestMapping("/academicChange/acaChangeView.do")
+	public String acaNoticeView(
+			@RequestParam("what") String acChCd
+			, Model model
+	) {
+		AcademicChangeVO acaChange = service.acaChangeView(acChCd);
+		model.addAttribute("acaChange", acaChange);
+		return "academicChange/acaChangeView";
+	}
+}
+
+
+
+
+
+
+

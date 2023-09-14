@@ -1,0 +1,24 @@
+package kr.or.ddit.lecture.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.lecture.dao.ExamDAO;
+import kr.or.ddit.lecture.vo.ExamVO;
+
+@Service
+public class ExamServiceImpl implements ExamService {
+
+	@Inject
+	ExamDAO examDAO;
+	
+	@Override
+	public List<ExamVO> retrieveExamList(String lecCd) {
+		
+		return examDAO.selectExamList(lecCd);
+	}
+
+}

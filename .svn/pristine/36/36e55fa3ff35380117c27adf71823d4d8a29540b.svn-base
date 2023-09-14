@@ -1,0 +1,67 @@
+package kr.or.ddit.lecture.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.dao.NoticeDAO;
+import kr.or.ddit.lecture.vo.NoticeVO;
+
+@Service
+public class NoticeServiceImpl implements NoticeService {
+
+	@Inject
+	private NoticeDAO noticeDAO;
+	
+	@Override
+	public List<NoticeVO> retrieveNoticeList(PaginationInfo paging) {
+		long totalRecord = noticeDAO.selectTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		return noticeDAO.selectNoticeList(paging);
+	}
+
+	@Override
+	public NoticeVO retrieveNotice(String lnNum) {
+		return noticeDAO.selectNotice(lnNum);
+	}
+
+	@Override
+	public boolean createNotice(NoticeVO lecNotice) {
+		boolean result;
+		int cnt = noticeDAO.insertNotice(lecNotice);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+	@Override
+	public boolean modifyNotice(NoticeVO lecNotice) {
+		boolean result;
+		int cnt = noticeDAO.updateNotice(lecNotice);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+	@Override
+	public boolean removeNotice(NoticeVO lecNotice) {
+		boolean result;
+		int cnt = noticeDAO.deleteNotice(lecNotice);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+}

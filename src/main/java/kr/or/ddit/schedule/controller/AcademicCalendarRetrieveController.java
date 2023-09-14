@@ -1,0 +1,139 @@
+package kr.or.ddit.schedule.controller;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.schedule.service.AcademicScheduleService;
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+import kr.or.ddit.schedule.vo.adapter.AcaSchedultWrapper;
+import kr.or.ddit.schedule.vo.adapter.FullCalendarEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Controller
+public class AcademicCalendarRetrieveController {
+	private final AcademicScheduleService service;
+
+	@RequestMapping("/schedule/acaCalendar.do")
+	public String list(
+//    		@RequestParam(name = "type", required = flase)
+			Optional<String> type) {
+		if (type.isPresent()) {
+			return "schedule/ajax/acaCalendar";
+		} else {
+			return "schedule/acaCalendar";
+		}
+
+	}
+
+	@RequestMapping(value = "/schedule/acaCalendarDS.do", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<FullCalendarEvent<AcademicScheduleVO>> listDS(Authentication authentication, Model model) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+		boolean showInsertButton = false;
+		String role = "";
+		for (GrantedAuthority authority : authorities) {
+			role = authority.getAuthority();
+			if ("ROLE_TS".equals(role)) {
+				showInsertButton = true;
+				break;
+			}
+		}
+		List<AcademicScheduleVO> acaCalendar = service.getCalendar(role);
+		model.addAttribute("showInsertButton", showInsertButton);
+		return acaCalendar.stream().map(AcaSchedultWrapper::new).collect(Collectors.toList());
+	}
+
+	@PostMapping("/schedule/calendarEvent.do")
+	@ResponseBody
+	public FullCalendarEvent<AcademicScheduleVO> calendarEvent(
+			@RequestParam(value = "asCd", required = false) String asCd, @RequestParam("asNm") String asNm,
+			@RequestParam("asDistinction") String asDistinction, @RequestParam("asStart") String asStart,
+			@RequestParam("asEnd") String asEnd, @RequestParam("asCont") String asCont,
+			@RequestParam(value = "asAccePerm", required = false) String[] asAccePerm, Authentication authentication,
+			Model model, AcademicScheduleVO acaScheduleVO) {
+		acaScheduleVO.setAsStart(LocalDate.parse(asStart, DateTimeFormatter.ISO_DATE));
+		acaScheduleVO.setAsEnd(LocalDate.parse(asEnd, DateTimeFormatter.ISO_DATE));
+		acaScheduleVO.setAsNm(asNm);
+		acaScheduleVO.setAsDistinction(asDistinction);
+		acaScheduleVO.setAsCont(asCont);
+
+		// 체크 여부에 따라 열람 권한 설정
+		if (asAccePerm != null && asAccePerm.length > 0) {
+			boolean isProfessorSelected = false;
+			boolean isStudentSelected = false;
+
+			for (String permission : asAccePerm) {
+				if ("professor".equals(permission)) {
+					isProfessorSelected = true;
+				} else if ("student".equals(permission)) {
+					isStudentSelected = true;
+				}
+			}
+
+			if (isProfessorSelected && isStudentSelected) {
+				acaScheduleVO.setAsAccePerm("BOTH");
+			} else if (isProfessorSelected) {
+				acaScheduleVO.setAsAccePerm("PROFESSOR");
+			} else if (isStudentSelected) {
+				acaScheduleVO.setAsAccePerm("STUDENT");
+			} else {
+				acaScheduleVO.setAsAccePerm("NONE");
+			}
+		} else {
+			acaScheduleVO.setAsAccePerm("NONE");
+		}
+		
+		// 일정 코드 존재 확인 후 등록 및 수정
+		if (StringUtils.isBlank(asCd)) {
+			service.createAcademicSchedule(acaScheduleVO);
+		} else {
+			service.modifyAcademicSchedule(acaScheduleVO);
+		}
+
+		if (!StringUtils.isBlank(asCd)) {
+			AcademicScheduleVO updatedSchedule = service.retrieveAcademicSchedule(asCd);
+			FullCalendarEvent<AcademicScheduleVO> updatedEvent = new AcaSchedultWrapper(updatedSchedule);
+			return updatedEvent;
+		}
+
+		return null;
+	}
+	
+	@PostMapping("/schedule/deleteEvent.do")
+	@ResponseBody
+	public ResponseEntity<String> deleteEvent(
+			@RequestParam("asCd") String asCd
+	){
+		AcademicScheduleVO acaSchedule = service.retrieveAcademicSchedule(asCd);
+		boolean result = service.removeAcademicSchedule(acaSchedule);
+		if(result) {
+			return new ResponseEntity<>("일정 삭제 성공", HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>("일정 삭제 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+}

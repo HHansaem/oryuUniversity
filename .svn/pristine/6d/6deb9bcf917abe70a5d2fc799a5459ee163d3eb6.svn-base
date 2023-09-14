@@ -1,0 +1,34 @@
+package kr.or.ddit.lectureContents.vo;
+
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@Data
+@EqualsAndHashCode(of = "assuCd")
+public class AssignmentSubVO {
+	@NotBlank
+	private String assuCd;
+	@NotBlank
+	private String lecCd;
+	@NotBlank
+	private String assiCd;
+	@NotBlank
+	private String stCd;
+	private Integer atchFileId;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	private LocalDateTime submDate;
+	private String submStat;
+	private Integer assuScore;
+	private String assuText;
+	
+	private String stNm;
+}

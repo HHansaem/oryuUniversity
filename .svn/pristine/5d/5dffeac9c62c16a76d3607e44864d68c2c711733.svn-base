@@ -1,0 +1,11 @@
+package kr.or.ddit.graduation.service;
+
+import java.util.List;
+
+import kr.or.ddit.graduation.vo.GraduationVO;
+
+public interface GraduationService {
+
+	public List<GraduationVO> retrieveGraduationList(GraduationVO graduation);
+	
+}

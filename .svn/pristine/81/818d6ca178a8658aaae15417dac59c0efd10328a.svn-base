@@ -1,0 +1,97 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<table class="table">
+	<tr>
+		<th>프로필사진</th>
+		<td><img src="<c:url value='/resources/profileImages/${staff.tsFic }'/>" /></td>
+	</tr>
+	<tr>
+		<th>직번</th>
+		<td>${staff.tsCd }</td>
+	</tr>
+	<tr>
+		<th>부서</th>
+		<td>${staff.tsDep }</td>
+	</tr>
+	<tr>
+		<th>이름</th>
+		<td>${staff.tsNm }</td>
+	</tr>
+	<tr>
+		<th>주민등록번호</th>
+		<td>${staff.tsReg1 } - ${staff.tsReg2 }</td>
+	</tr>
+	<tr>
+		<th>주소</th>
+		<td>${staff.tsAddr1 } ${staff.tsAddr2 }</td>
+	</tr>
+	<tr>
+		<th>전화번호</th>
+		<td>${staff.tsPh }</td>
+	</tr>
+	<tr>
+		<th>이메일</th>
+		<td>${staff.tsEmail }</td>
+	</tr>
+	<tr>
+		<th>근적상태</th>
+		<td>${staff.tsStatus }</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<form id="updateForm" method="post" action="<c:url value='/mypage/staffUpdateCheck.do'>
+					<c:param name="who" value="${staff.tsCd }" />
+				</c:url>">
+				<input type="submit" value="수정" onclick="return confirmUpdate(event)" />
+			</form>
+			<form id="deleteForm" method="post" action="<c:url value='/mypage/staffDelete.do'>
+					<c:param name="who" value="${staff.tsCd }" />
+				</c:url>">
+				<input type="submit" value="탈퇴" onclick="return confirmDelete(event)">
+			</form>
+		</td>
+	</tr>
+</table>
+<script>
+    function confirmDelete(event) {
+        var result = confirm("탈퇴하시겠습니까?");
+        if (!result) {
+            event.preventDefault();
+            return false;
+        }
+
+        var password = prompt("비밀번호를 입력하세요:");
+        if (password === null) {
+            event.preventDefault();
+            return false;
+        }
+
+        var deleteForm = document.getElementById("deleteForm");
+        var passwordField = document.createElement("input");
+        passwordField.setAttribute("type", "hidden");
+        passwordField.setAttribute("name", "password");
+        passwordField.setAttribute("value", password);
+        deleteForm.appendChild(passwordField);
+
+        return true;
+    }
+</script>
+<script>
+    function confirmUpdate(event) {
+        var password = prompt("비밀번호를 입력하세요:");
+        if (password === null) {
+            event.preventDefault();
+            return false;
+        }
+
+        var deleteForm = document.getElementById("updateForm");
+        var passwordField = document.createElement("input");
+        passwordField.setAttribute("type", "hidden");
+        passwordField.setAttribute("name", "password");
+        passwordField.setAttribute("value", password);
+        deleteForm.appendChild(passwordField);
+
+        return true;
+    }
+</script>

@@ -1,0 +1,127 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<div id="studentListWrapper">
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th><input type="checkbox" id="selectAllCheckbox" /></th>
+			<th>년도</th>
+			<th>학기</th>
+			<th>학번</th>
+			<th>학과</th>
+			<th>이름</th>
+			<th>등록금액</th>
+			<th>장학금액</th>
+			<th>납부금액</th>
+			<th>납부여부</th>
+			<th>명세서</th>
+		</tr>
+	</thead>
+	<form>
+	<tbody>
+		<c:set var="tuitionList" value="${paging.dataList }" />
+		<c:if test="${empty tuitionList }">
+			<tr>
+				<td colspan="11">검색결과 없음.</td>
+			</tr>
+		</c:if>
+		<c:if test="${not empty tuitionList }">
+			<c:forEach items="${tuitionList }" var="tuition">
+				<tr>
+					<td><input type="checkbox" name="chkParam" value=${tuition.stCd }></td>
+					<td>${tuition.semesterCd.substring(0, 4) }</td>
+					<td>${tuition.semesterCd.substring(4, 5) }</td>
+					<td>${tuition.stCd }</td>
+					<td>${tuition.dtNm }</td>
+					<td>${tuition.stNm }</td>
+					<td>${tuition.tuAmount }</td>
+					
+					<c:choose>
+			            <c:when test="${tuition.tuSchSta != '승인'}">
+			                <td>0</td>
+			            </c:when>
+			            <c:otherwise>
+			                <td>${tuition.tuSchAmo}</td>
+			            </c:otherwise>
+			        </c:choose>
+					
+					<td>${tuition.tuPay }</td>
+					<td>${tuition.tuWhether }</td>
+					<td>
+						<input type="button" value="명세서">
+					</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+	</tbody>
+	</form>
+	<tfoot>
+		<tr>
+			<td colspan="11">
+				<div id="regBtnWrapper" style="text-align: right;">
+                	<input type="button" value="납부완료" id="regBtn"/>
+           		</div>
+				${paging.pagingHTML }
+				<div id="searchUI">
+					<form:select path="simpleCondition.searchType">
+						<form:option value="stnum" label="학번" />
+						<form:option value="semester" label="년도/학기" />
+						<form:option value="whether" label="납부여부" />
+					</form:select>
+					<form:input path="simpleCondition.searchWord" />
+					<input type="button" value="검색" id="searchBtn"/>
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>
+</div>
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+
+<script src="<c:url value='/resources/js/app/member/memberList.js' />"></script>
+<script>
+    window.onload = function() {
+        var selectAllCheckbox = document.getElementById("selectAllCheckbox");
+        var checkboxes = document.querySelectorAll("input[type='checkbox'][name='chkParam']");
+        
+        selectAllCheckbox.addEventListener("click", function() {
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+        
+        var detailButtons = document.querySelectorAll("input[type='button'][value='명세서']");
+        detailButtons.forEach(function(button) {
+            button.addEventListener("click", function() {
+                var row = button.closest("tr");
+                var stCd = row.querySelector("td:nth-child(4)").textContent;
+                var semesterCd = row.querySelector("td:nth-child(2)").textContent + row.querySelector("td:nth-child(3)").textContent;
+                sendToServer(stCd, semesterCd);
+            });
+        });
+    };
+
+    // 서버로 데이터 전송하는 함수
+    function sendToServer(stCd, semesterCd) {
+        var xhr = new XMLHttpRequest();
+        var url = "${pageContext.request.contextPath}/tuition/tuitionPrint/do"; // 컨트롤러 URL
+        var params = "stCd=" + stCd + "&semesterCd=" + semesterCd;
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                // 서버로부터 응답을 받았을 때의 처리 (예: 알림 메시지 출력 등)
+            }
+        };
+
+        xhr.send(params);
+    }
+</script>

@@ -1,0 +1,95 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<c:forEach items="${myQueSubmitList}" var="myQueSubmit" varStatus="cnt">
+<div class="border m-3" id="${cnt.index+1}">
+	<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+      	<h5>문제 ${cnt.index+1}번</h5>
+      	<div>${myQueSubmit.eqScore}점</div>
+      </div>
+      <div class="pt-3">
+       <p class="p-2">${myQueSubmit.eqQt}</p>
+       <div class="d-flex flex-column">
+       <c:choose>
+       		<c:when test="${myQueSubmit.eqType eq '객관식'}">
+       			<c:forEach var = "item" items= "${myQueSubmit.eqView1}, ${myQueSubmit.eqView2}, ${myQueSubmit.eqView3}, ${myQueSubmit.eqView4}" varStatus="cnt">
+       				<c:choose>
+       					<c:when test="${myQueSubmit.eqAnsw == myQueSubmit.eqsAnswer}">
+       						<c:choose>
+								<c:when test="${myQueSubmit.eqAnsw == cnt.index+1}">
+										<div class="m-2 examView p-2">
+								       		<i class="mdi mdi-checkbox-blank-circle"></i>
+								       		<span class="p-2">${item}</span>
+								       		<div class="pencil-icon">정답입니다!</div>
+								       	</div>
+								</c:when>
+								<c:otherwise>
+										<div class="m-2 p-2">
+								        	<i class="mdi mdi-checkbox-blank-circle"></i>
+								        	<span class="p-2">${item}</span>
+								       	</div>
+								</c:otherwise>       						
+       						</c:choose>
+       					</c:when>
+       					<c:otherwise>
+							<c:choose>
+								<c:when test="${myQueSubmit.eqAnsw == cnt.index+1}">
+									<div class="m-2 examView p-2">
+							        	<i class="mdi mdi-checkbox-blank-circle"></i>
+							        	<span class="p-2">${item}</span>
+								    </div>
+								</c:when>
+								<c:when test="${myQueSubmit.eqsAnswer == cnt.index+1 }">
+									<div class="m-2 p-2 wrong">
+							        	<i class="mdi mdi-checkbox-blank-circle"></i>
+							        	<span class="p-2">${item}</span>
+							        	<div class="pencil-icon2">오답입니다.</div>
+								    </div>
+								</c:when>
+								<c:otherwise>
+									<div class="m-2 p-2">
+							        	<i class="mdi mdi-checkbox-blank-circle"></i>
+							        	<span class="p-2">${item}</span>
+							       	</div>
+								</c:otherwise>
+							</c:choose>       					
+       					</c:otherwise>
+       				</c:choose>
+       			</c:forEach>
+       		</c:when>
+       		<c:when test="${myQueSubmit.eqType eq '주관식' }">
+       			<div class="m-2 p-2">
+       				<div>
+	       				<p>
+						<i class="mdi mdi-checkbox-blank-circle"></i>
+						정답: ${myQueSubmit.eqAnsw}
+						</p>
+					</div>
+					<div class="d-flex align-items-center">
+						<p class="pt-2">
+						<i class="mdi mdi-checkbox-blank-circle"></i>
+							제출한 답: ${myQueSubmit.eqsAnswer}
+						</p>
+						<c:choose>
+						<c:when test="${myQueSubmit.eqsScore == myQueSubmit.eqScore}">
+							<div class="pencil-icon m-2">정답입니다.</div>
+						</c:when>
+						<c:when test="${myQueSubmit.eqsScore == 0}">
+							<div class="pencil-icon2 m-2">오답입니다.</div>
+						</c:when>
+						<c:otherwise>
+							<div class="pencil-icon3 m-2">부분정답입니다.</div>
+						</c:otherwise>
+						</c:choose>
+					</div>
+				</div>
+       		</c:when>
+       </c:choose>
+       </div>
+      </div>
+      <div class="col-md-10 d-flex justify-content-end align-items-center" style="font-weight:bold;">
+       	<span class="m-2">받은 점수: ${myQueSubmit.eqsScore}점</span>
+      </div>
+</div>
+</c:forEach>

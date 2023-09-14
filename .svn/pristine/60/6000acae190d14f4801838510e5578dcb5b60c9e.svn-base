@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.assignment.dao.AssignmentDAO">
+	
+	<!-- 과제 목록 조회 -->
+	<select id="selectAssignmentList" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.AssignmentVO">
+	SELECT
+    	assi_cd, lec_cd, atch_file_id,
+    	assi_nm, assi_cont, assi_period,
+    	assi_score, assi_state
+	FROM
+    assignment
+    where lec_cd= #{lecCd} and assi_state != '삭제'
+	</select>
+	
+	<resultMap type="kr.or.ddit.lectureContents.vo.AssignmentVO"
+		id="assignMap" autoMapping="true">
+		<id property="assiCd" column="assi_Cd" />
+		<association property="fileGroup"
+			javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID" />
+			<result property="creatDt" column="CREAT_DT" />
+			<result property="useAt" column="USE_AT" />
+			<collection property="detailList"
+				ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+				<id property="atchFileId" column="ATCH_FILE_ID" />
+				<id property="fileSn" column="FILE_SN" />
+			</collection>
+		</association>
+	</resultMap>
+	
+	<!-- 과제 상세조회 -->
+	<select id="selectAssignmentDetail" parameterType="string" resultMap="assignMap">
+    
+    WITH ATCH_FILE_VIEW AS(
+		SELECT *
+		FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL USING (atch_file_id)
+		)
+		SELECT
+		assi_cd, lec_cd, atch_file_id,
+    	assi_nm, assi_cont, assi_period,
+    	assi_score, assi_state, ATCH_FILE_ID, 
+    	FILE_SN, STRE_FILE_NM, FILE_STRE_COURS,
+    	FILE_MIME, FILE_EXTSN, FILE_SIZE, 
+    	ORIGNL_FILE_NM, CREAT_DT , USE_AT
+		FROM
+		assignment left outer join ATCH_FILE_VIEW using (atch_file_id)
+		WHERE assi_cd = ${assiCd} and assi_state != '삭제' 
+	</select>
+	
+	<!-- 교수 과제 등록 -->
+	<insert id="insertAssignment" parameterType="kr.or.ddit.lectureContents.vo.AssignmentVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="assiCd">
+		SELECT ASSIGNMENT_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+	INSERT INTO assignment (
+    	assi_cd, lec_cd, atch_file_id,
+   		assi_nm, assi_cont, assi_period,
+   		assi_score, assi_state
+	) VALUES (
+	 #{assiCd,jdbcType=VARCHAR}
+	,#{lecCd,jdbcType=VARCHAR}
+	,#{atchFileId,jdbcType=NUMERIC}
+	,#{assiNm,jdbcType=VARCHAR}
+	,#{assiCont,jdbcType=VARCHAR}
+	,#{assiPeriod,jdbcType=DATE}
+	,#{assiScore,jdbcType=NUMERIC}
+ 	,'정상'
+	)
+	</insert>
+	
+	<!-- 교수 과제 업데이트 -->
+	<update id="updateAssignment" parameterType="kr.or.ddit.lectureContents.vo.AssignmentVO">
+		UPDATE assignment
+		SET
+		  ATCH_FILE_ID =  #{atchFileId,jdbcType=NUMERIC}
+		, ASSI_NM =  #{assiNm,jdbcType=VARCHAR}
+		, ASSI_CONT =  #{assiCont,jdbcType=VARCHAR}
+		, ASSI_PERIOD =  #{assiPeriod,jdbcType=DATE}
+		, ASSI_SCORE =  #{assiScore,jdbcType=NUMERIC}
+		WHERE
+        assi_cd = #{assiCd} 	
+	</update>
+	<!-- 교수 과제 삭제 -->
+	<update id="deleteAssignment" parameterType="string">
+		UPDATE assignment
+		SET
+		ASSI_STATE = '삭제' 
+		where
+		assi_cd = #{assiCd} 	
+	</update>
+	
+	<resultMap type="kr.or.ddit.lectureContents.vo.AssignSubmissionVO"
+		id="assignSubmissionMap" autoMapping="true">
+		<id property="assuCd" column="assu_Cd" />
+		<association property="fileGroup"
+			javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID" />
+			<result property="creatDt" column="CREAT_DT" />
+			<result property="useAt" column="USE_AT" />
+			<collection property="detailList"
+				ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+				<id property="atchFileId" column="ATCH_FILE_ID" />
+				<id property="fileSn" column="FILE_SN" />
+			</collection>
+		</association>
+	</resultMap>
+	
+	<!-- 학생 과제제출 상세조회 -->
+	<select id="selectAssignSubmissionDetail" parameterType="kr.or.ddit.lectureContents.vo.AssignSubmissionVO" resultMap="assignSubmissionMap">
+		WITH ATCH_FILE_VIEW AS(
+		SELECT *
+		FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL USING (atch_file_id)
+		)
+		SELECT
+        assu_cd, lec_cd, assi_cd
+        , st_cd, atch_file_id, subm_date
+        , subm_stat, assu_score, assu_text
+    	, FILE_SN, STRE_FILE_NM, FILE_STRE_COURS,
+    	FILE_MIME, FILE_EXTSN, FILE_SIZE, 
+    	ORIGNL_FILE_NM, CREAT_DT , USE_AT
+		FROM
+		ASSIGN_SUBMISSION left outer join ATCH_FILE_VIEW using (atch_file_id)
+		WHERE assi_cd = #{assiCd} and st_cd = #{stCd} 
+	</select>
+	<!-- 학생 과제제출 등록-->
+	<insert id="insertAssignSubmission" parameterType="kr.or.ddit.lectureContents.vo.AssignSubmissionVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="assuCd">
+		SELECT ASSIGN_SUBMISSION_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+	INSERT INTO assign_submission (
+    assu_cd
+    , lec_cd
+    , assi_cd
+    , st_cd
+    , atch_file_id
+    , subm_date
+    , subm_stat
+    , assu_score
+    , assu_text
+	) VALUES (
+	 #{assuCd,jdbcType=VARCHAR}
+	,#{lecCd,jdbcType=VARCHAR}
+	,#{assiCd,jdbcType=VARCHAR}
+	,#{stCd,jdbcType=VARCHAR}
+	,#{atchFileId,jdbcType=NUMERIC}
+	,#{submDate,jdbcType=DATE}
+	,#{submStat,jdbcType=VARCHAR}
+	,#{assuScore,jdbcType=NUMERIC}
+	,#{assuText,jdbcType=VARCHAR}
+	)
+	</insert>
+	<!-- 학생 과제제출 수정-->
+	<update id="updateAssignSubmission" parameterType="kr.or.ddit.lectureContents.vo.AssignSubmissionVO">
+	UPDATE assign_submission
+	SET
+      ASSU_CD =  #{assuCd,jdbcType=VARCHAR}
+    , LEC_CD =  #{lecCd,jdbcType=VARCHAR}
+    , ASSI_CD =  #{assiCd,jdbcType=VARCHAR}
+	, ST_CD =  #{stCd,jdbcType=VARCHAR}
+	, ATCH_FILE_ID =  #{atchFileId,jdbcType=NUMERIC}
+	, SUBM_DATE =  #{submDate,jdbcType=DATE}
+	, SUBM_STAT =  #{submStat,jdbcType=VARCHAR}
+	, ASSU_SCORE =  #{assuScore,jdbcType=NUMERIC}
+	, ASSU_TEXT =  #{assuText,jdbcType=VARCHAR}
+	WHERE
+    assu_cd = #{assuCd}
+	</update>
+	
+
+</mapper>

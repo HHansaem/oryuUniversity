@@ -1,0 +1,453 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+
+<style>
+	.test{
+		width: 80%;
+		
+	}
+	.text-center{
+		background-color: white;
+	}
+	
+	.modal-content {
+	    background-color: white;
+	    margin: 15% auto;
+	    padding: 20px;
+	    width: 70%; /* 모달의 가로 크기를 조절할 수 있습니다. */
+	}
+	.larger-list {
+    	font-size: 18px; /* 원하는 크기로 변경 */
+    	margin-left: 25px; /* 원하는 여백을 지정 */
+	}
+	.pencil-icon {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    background: #36ed2f;
+    border: 2px solid #13d80c;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
+  	}
+
+  .pencil-icon::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #13d80c;
+  }
+  
+  .pencil-icon2 {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    background: #ff828e;
+    border: 2px solid #dc3545;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
+  	}
+
+  .pencil-icon2::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #dc3545;
+  }
+  .pencil-icon3 {
+    position: relative;
+    display: inline-block;
+    width: 130px;
+    height: 30px;
+    background: #f7db82;
+    border: 2px solid #f6ba00;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
+  	}
+
+  .pencil-icon3::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #f6ba00;
+  }
+  .mdi-checkbox-blank-circle{
+  	font-size: 0.8em;
+  }
+  .examView{
+      border-radius: 15px;
+      background: #7fe2ff7d;
+      font-weight: bolder;
+  }
+  .wrong{
+  	font-weight: bolder;
+    color: red;
+  }
+  a{
+	color: inherit;
+    text-decoration: none; 
+  }
+  .submitSide{
+  	width: 260px; 
+  	font-weight: bold;
+  	border-radius: 15px;
+  }
+  .queSide{
+  	border-radius: 15px;
+  	font-weight: bold;
+  	background: aliceblue;
+  }
+/*   .modal{ */
+/* 	  top: 30%; */
+/* 	  left: 50%; */
+/* 	  transform: translate(-50%, -50%); */
+/*   } */
+	
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="card-header" style="border-radius: 20px 20px 0 0; background-color:#154FA9; font-weight:bold; color:white; margin-bottom: 20px;">시험</div>
+	<div class="h-100 row">
+<div id="container">
+	<div class="row row-cols-1 row-cols-md-2 mb-3 text-center p-4 m-4">
+	      <div class="col d-flex justify-content-end">
+	        <div class="card mb-3 rounded-3 shadow-sm test">
+	          <div class="card-header py-3">
+	            <h4 class="my-0 fw-normal">중간고사</h4>
+	          </div>
+	          <div class="card-body">
+	            <h1 class="card-title pricing-card-title">23학년도 1학기 중간고사</h1>
+	            <sec:authorize access="hasRole('ROLE_ST')">
+	            <c:choose>
+		            <c:when test="${not empty midterm and midterm.testAvailable}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: ${midterm.examTakeTime}분</li>
+			              <li>총점: ${midterm.examScore}점</li>
+			              <li>시작일시: ${midterm.startTime}</li>
+			              <li>마감일시: ${midterm.endTime}</li>
+			              <c:if test="${not empty midScore}">
+			              <li>최종점수: ${midScore}점</li>
+			              </c:if>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" onclick = "checkAvailable(${midterm.testAvailable},${midFlag})" href="<%=request.getContextPath()%>/lecture/examQueView.do?examCd=${midterm.examCd}&lecCd=${lecCd}">시험풀기</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험결과" onclick="mySubmitView(${midterm.examCd},${pageContext.request.userPrincipal.name},${midFlag})"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>중간고사 기간이 아닙니다.</h3>
+			            	</ul>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	            <sec:authorize access="hasRole('ROLE_PR')">
+	            <c:choose>
+		            <c:when test="${not empty midterm}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: ${midterm.examTakeTime}분</li>
+			              <li>총점: ${midterm.examScore}점</li>
+			              <li>시작일시: ${midterm.startTime}</li>
+			              <li>마감일시: ${midterm.endTime}</li>
+			              <li>활성화 여부: ${midterm.examState}</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${midterm.examCd}&lecture=${lecCd}&type=중간고사">시험출제</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험채점" onclick="examSubmitResult(${midterm.examCd},'mid')"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5" style="height:70%;">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>출제된 시험이 존재하지 않습니다.</h3>
+			            	</ul>
+			            </div>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${midterm.examCd}&lecture=${lecCd}&type=중간고사">시험출제</a>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	          </div>
+	        </div>
+	      </div>
+	      <div class="col d-flex">
+	        <div class="card mb-3 rounded-3 shadow-sm test">
+	          <div class="card-header py-3">
+	            <h4 class="my-0 fw-normal">기말고사</h4>
+	          </div>
+	          <div class="card-body">
+	            <h1 class="card-title pricing-card-title">23학년도 1학기 기말고사</h1>
+	            <sec:authorize access="hasRole('ROLE_ST')">
+	            <c:choose>
+		            <c:when test="${not empty finals and finals.testAvailable}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: ${finals.examTakeTime}분</li>
+			              <li>총점: ${finals.examScore}점</li>
+			              <li>시작일시: ${finals.startTime}</li>
+			              <li>마감일시: ${finals.endTime}</li>
+			               <c:if test="${not empty finalScore}">
+			              <li>임시점수: ${finalScore}점</li>
+			              </c:if>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" onclick = "checkAvailable(${finals.testAvailable},${finalFlag})" href="<%=request.getContextPath()%>/lecture/examQueView.do?examCd=${finals.examCd}&lecCd=${lecCd}">시험풀기</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험결과" onclick="mySubmitView(${finals.examCd},${pageContext.request.userPrincipal.name},${finalFlag})"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>기말고사 기간이 아닙니다.</h3>
+			            	</ul>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	            <sec:authorize access="hasRole('ROLE_PR')">
+	            <c:choose>
+		            <c:when test="${not empty finals}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: ${finals.examTakeTime}분</li>
+			              <li>총점: ${finals.examScore}점</li>
+			              <li>시작일시: ${finals.startTime}</li>
+			              <li>마감일시: ${finals.endTime}</li>
+			              <li>활성화 여부: ${midterm.examState}</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${finals.examCd}&lecture=${lecCd}&type=기말고사">시험출제</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험채점" onclick="examSubmitResult(${finals.examCd},'final')"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5" style="height:70%;">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>출제된 시험이 존재하지 않습니다.</h3>
+			            	</ul>
+			            </div>
+			             <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${finals.examCd}&lecture=${lecCd}&type=기말고사">시험출제</a>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	          </div>
+	        </div>
+	      </div>
+	</div>
+	<div id="ajax" class="p-2 m-3">
+	
+	</div>
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content" style="width: 70%; margin: 0 auto;">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel"></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick=closeModal()>
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div id="modalBody" class="modal-body d-flex">
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" onclick=closeModal() class="btn btn-secondary" data-dismiss="modal">닫기</button>
+	        <button type="button" class="btn btn-primary" id="scoreUpdate">점수등록</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</div>
+</div>
+</div>
+
+<script>
+
+	//모달 닫기
+	function closeModal(){
+		$("#exampleModal").modal('hide');
+	}
+
+	function checkAvailable(checkFlag,flag){
+		if(checkFlag=="false"){
+			 event.preventDefault(); 
+			 Swal.fire({
+     	 		icon: 'info',
+     		    text: '시험기간이 아닙니다.',  
+   			});
+			 
+		}
+		if(flag){
+			event.preventDefault();
+			 Swal.fire({
+	     	 		icon: 'info',
+	     		    text: '이미 시험을 치뤘습니다.',  
+	   		 });
+		}
+		
+	}
+	function examSubmitResult(examCd,type){
+		
+		var data = 
+		{
+			examCd : examCd	
+		}
+		$.ajax({
+	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	        data: data,
+	        url: "${pageContext.request.contextPath}/lecture/examSubmitList.do",
+	        success: function(response) {
+	    	   	$("#ajax").html(response);
+	    	   	$("#type").val(type);
+	        },
+	        error: function(xhr, status, error) {
+	            console.error(error);
+	        }
+	    });
+	}
+	
+	function mySubmitView(examCd,stCd,flag){
+		if(!flag){
+			Swal.fire({
+     	 		icon: 'info',
+     	 		title: '시험미응시',
+     		    text: '시험내역이 존재하지 않습니다.',  
+   		 	});
+			return;
+		}
+		
+		var data = 
+		{
+			examCd : examCd,
+			stCd : stCd
+		}
+		$.ajax({
+	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	        data: data,
+	        url: "${pageContext.request.contextPath}/lecture/examStSubmitView.do",
+	        success: function(response) {
+	        	if(response=='noResult'){
+	        		Swal.fire({
+	         	 		icon: 'info',
+	         		    text: '시험내역이 존재하지 않습니다.',  
+	       		 	});
+	        	}else{
+	    	   		$("#ajax").html(response);
+	        	}
+	        },
+	        error: function(xhr, status, error) {
+	            console.error(error);
+	        }
+	    });
+	}
+
+    $(document).ready(function() {
+    	
+        $(".clickable-row").click(function() {
+	        var lec = $(this).data("lec");
+	        var exam = $(this).data("exam");
+	        window.location.href = "<%=request.getContextPath()%>/lecture/examQueView.do?examCd=" + exam + "&lecCd="+lec;
+        });
+        
+        $(".clickable-progress").click(function() {
+	        var id = this.getAttribute("data-id");
+	        window.location.href = "<%=request.getContextPath()%>/lecture/examInsert.do?examCd=" + id;
+        });
+        
+        $("#scoreUpdate").click(function(){
+        	var totalScore = 0;
+        	$("input[class='form-control-sm score']").each(function(idx,element){
+        		totalScore += parseInt($(element).val());
+        	});
+        	$("#totalScore").val(totalScore);
+        	var stCd = $("#stuId").val();
+        	
+        	$.ajax({
+    	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+    	        data: $(examScoreForm).serializeArray(),
+    	        url: "${pageContext.request.contextPath}/lecture/examScoreUpdate.do",
+    	        success: function(response) {
+    	        	if(response.result=="성공"){
+    	        		Swal.fire({
+    	         	 		icon: 'success',
+    	         		    text: '시험점수가 등록되었습니다.',  
+    	       		 	});
+    	        		var stScore = $("#stScore").text();
+    	        		const spScore = stScore.split("/");
+    	        		$("#stScore").text(totalScore+"/"+spScore[1]);
+    	        		$("#"+stCd+"Score").text(totalScore+"/"+spScore[1]);
+    	        		$("#exampleModal").modal('hide');
+    	        	}else{
+    	        		Swal.fire({
+    	         	 		icon: 'warning',
+    	         		    text: '시험점수가 등록이 실패하였습니다.',  
+    	       		 	});
+    	        	}
+    	        },
+    	        error: function(xhr, status, error) {
+    	            console.error(error);
+    	        }
+    	    });
+        });
+        
+        $("#ajax").on("click",".stSubmitView", function() {
+        	var stName = $(this).closest("tr").find(".stName").text();
+        	var stCd = $(this).closest("tr").find(".stCd").text();
+        	var dtNm = $(this).closest("tr").find(".dtNm").text();
+        	var stScore = $(this).closest("tr").find(".stScore").text();
+        	
+        	var examCd = $(this).data("exam");
+        	
+        	var data = 
+    		{
+    			examCd : examCd,
+    			stCd : stCd
+    		}
+        	
+        	$.ajax({
+    	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+    	        data: data,
+    	        url: "${pageContext.request.contextPath}/lecture/examSubmitView.do",
+    	        success: function(response) {
+    	        	$("#modalBody").html(response);
+    	        	$("#stName").text("학생명: "+stName);
+    	        	$("#stCd").text("학번: "+stCd);
+    	        	$("#dtNm").text("학과: "+dtNm);
+    	        	$("#stScore").text("점수: "+stScore);
+    	        	$("#stuId").val(stCd);
+    	        	$("#examCode").val(examCd);
+    	        	$("#exampleModal").modal('show');
+    	        },
+    	        error: function(xhr, status, error) {
+    	            console.error(error);
+    	        }
+    	    });
+        });
+        
+    });
+   
+</script>

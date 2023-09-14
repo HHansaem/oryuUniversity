@@ -1,0 +1,102 @@
+package kr.or.ddit.lectureSchedule.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.vo.ClassRoomVO;
+import kr.or.ddit.common.vo.DaytimeScheduleVO;
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lectureSchedule.service.LectureScheduleService;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+@RequestMapping("/lecture/lectureScheduleInsert.do")
+public class LectureScheduleInsertController {
+	
+	@Inject
+	private LectureScheduleService service;
+	@Inject
+	private LectureService lService;
+	
+	@Inject
+	private CommonDAO commonDAO;
+	
+	@ModelAttribute("classRoomList")
+	public List<ClassRoomVO> classRoomList(){
+		return commonDAO.selectClassRoomList();
+	}
+	
+	@ModelAttribute("daytimeScheduleList")
+	public List<DaytimeScheduleVO> daytimeScheduleList(){
+		return commonDAO.selectDaytimeScheduleList();
+	}
+	
+//	@ModelAttribute("lectureSchedule")
+//	public List<LectureScheduleVO>  schedule() {
+//		return new ArrayList<LectureScheduleVO>();
+//	}
+	
+	@ModelAttribute("lectureSchedule")
+	public LectureScheduleVO lecture(String what) {
+		LectureScheduleVO lecture = new LectureScheduleVO();
+		lecture.setLecCd(what);
+		return lecture;
+	}
+	
+	@GetMapping
+	public String lectureScheduleForm(
+			@RequestParam String what
+			,Model model
+	) {
+		return "lectureSchedule/lectureScheduleForm";
+	}
+	
+	@PostMapping
+	public String lectureScheduleInsert(
+			@ModelAttribute("lectureSchedule")LectureScheduleVO schedule
+			,String what
+			,Errors errors
+			,Model model
+	) {
+		String logicalViewName = null;
+		
+		List<String> scheCds = schedule.getScheCds();
+		int count = scheCds.size();
+
+		LectureVO lectureVO = lService.retrieveLecture(what);
+		int cnt = (Integer.parseInt(lectureVO.getLecLectCred()));
+		
+		if(count>cnt) {
+			model.addAttribute("message", "강의시간 학점대비 초과");
+			logicalViewName = "lectureSchedule/lectureScheduleForm";
+		}
+		
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.createLectureSchedule(schedule);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/lectureList.do";
+			}else {
+				model.addAttribute("message", "강의실,강의시간 등록 중 문제 발생");
+				logicalViewName = "lectureSchedule/lectureScheduleForm";
+			}
+		}else {
+			logicalViewName = "lectureSchedule/lectureScheduleForm";
+		}
+		
+		return logicalViewName;
+	}
+}

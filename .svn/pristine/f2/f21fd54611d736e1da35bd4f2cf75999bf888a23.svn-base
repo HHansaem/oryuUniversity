@@ -1,0 +1,69 @@
+package kr.or.ddit.lecture.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.lecture.service.NoticeService;
+import kr.or.ddit.lecture.vo.NoticeVO;
+
+@Controller
+@RequestMapping("/lecture")
+public class NoticeRetrieveController {
+	
+	@Inject
+	private NoticeService service;
+	
+	@RequestMapping("noticeList.do")
+	public String noticeList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			,@RequestParam Map<String, Object> detailCondition
+			, Model model
+			, HttpSession session
+			, String lecCd
+	) {
+		PaginationInfo<NoticeVO> paging = new PaginationInfo<>();
+		
+		session.removeAttribute("lecCd");
+		session.setAttribute("lecCd", lecCd);
+		detailCondition.put("lecCd", lecCd);
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setDetailCondition(detailCondition);
+		
+		List<NoticeVO> noticeList = service.retrieveNoticeList(paging);
+		paging.setDataList(noticeList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "lecture/notice/noticeList";
+	}
+	
+	@RequestMapping("noticeView.do")
+	public String noticeView(
+			@RequestParam(name = "what") String lnNum
+			, Model model
+	) {
+		NoticeVO notice = service.retrieveNotice(lnNum);
+		model.addAttribute("notice", notice);
+		
+		return "lecture/notice/noticeView";
+	}
+}
+
+
+
+
+
+

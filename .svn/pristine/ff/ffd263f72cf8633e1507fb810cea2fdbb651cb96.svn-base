@@ -1,0 +1,53 @@
+package kr.or.ddit.thesis.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.thesis.vo.ThesisVO;
+
+@Mapper
+public interface ThesisDAO {
+
+	public long selectTotalRecord(PaginationInfo paging);
+	
+	/**
+	 * 논문 등록
+	 * @param thesis
+	 * @return row count > 0 : 성공
+	 */
+	public int insertThesis(ThesisVO thesis);
+	
+	/**
+	 * 논문 상세 조회
+	 * @param thesCd
+	 * @return
+	 */
+	public ThesisVO selectThesis(String thesSn);
+	
+	/**
+	 * 등록된 논문 목록 조회
+	 * @param thesis
+	 * @return
+	 */
+	public List<ThesisVO> selectThesisList(PaginationInfo paging);
+	
+	/**
+	 * 논문 수정
+	 * @param thesis
+	 * @return row count > 0 : 조회 성공
+	 */
+	public int updateThesis(ThesisVO thesis);
+	
+	/**
+	 * 논문 삭제
+	 * @param thesCd
+	 * @return row count > 0 : 삭제
+	 */
+	public int deleteThesis(String thesSn);
+	
+	
+	
+	
+}

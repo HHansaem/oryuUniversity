@@ -1,0 +1,13 @@
+package kr.or.ddit.login.vo;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "userId")
+public class AuthInfo {
+	private String userId;
+	private String userPass;
+	private String userRole;
+	private String userStatus;
+}

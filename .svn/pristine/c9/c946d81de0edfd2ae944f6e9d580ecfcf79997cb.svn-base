@@ -1,0 +1,80 @@
+package kr.or.ddit.enrollment.service;
+
+import java.text.MessageFormat;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enrollment.dao.EnrollmentDAO;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.exception.PKNotFoundException;
+import kr.or.ddit.lecture.dao.LectureDAO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO;
+import kr.or.ddit.student.dao.StudentDAO;
+import kr.or.ddit.student.vo.StudentVO;
+
+@Service
+public class EnrollmentServiceImpl implements EnrollmentService {
+	
+	@Inject
+	private EnrollmentDAO enrollmentDAO;
+	@Inject
+	private StudentDAO studentDAO;
+	@Inject
+	private LectureDAO lectureDAO;
+	@Inject
+	private LectureScheduleDAO lectureScheduleDAO;
+	
+	
+	// 수강 신청 (학생)
+	@Override
+	public int sendEnrollement(EnrollmentVO enrollment) throws RuntimeException{
+		
+		int count = 0;
+		String stCd = enrollment.getStCd();
+		String[] lecCds = enrollment.getLecCds();
+		StudentVO student = studentDAO.selectStudent(stCd);
+
+		for(String cd : lecCds) {
+		
+		enrollment.setLecCd(cd);
+		
+		LectureVO lecture = lectureDAO.selectLecture(cd);
+		
+		// 학생 본인의 제한학점
+		int stLiCre = student.getStLiCre();
+		// 수강 중인 학점 총합
+		int lecLectCred = enrollmentDAO.checkCred(stCd);
+		// 현재 등록 하려는 강의학점
+		int presentCred = Integer.parseInt(lecture.getLecLectCred());
+		
+		if(stLiCre<lecLectCred+presentCred) {
+			System.out.println("학생 제한 학점 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("현학기 제한 학점을 초과했습니다.", stCd));
+		}
+		
+		// 강의 제한 인원 체크
+		int limitStudent = Integer.parseInt(lecture.getLecEnroLimit());
+		// 강의 등록한 인원 체크
+		int presentStudent = enrollmentDAO.countStudent(cd);
+		
+		if(limitStudent<presentStudent+1) {
+			System.out.println("강의 인원 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("강의 인원 제한을 초과했습니다.", stCd));
+		}
+		
+		// 강의시간 중복 체크
+		int dupli = enrollmentDAO.duplicateCheck(enrollment);
+		if (dupli>0) {
+			System.out.println("강의시간 중복 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("선택한 강의는 기존 신청한 강의와 시간이 중복됩니다.", stCd));
+		}
+		count++;
+		}
+		
+		return count;
+	}
+
+}

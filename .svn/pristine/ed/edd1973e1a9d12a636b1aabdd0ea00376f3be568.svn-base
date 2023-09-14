@@ -1,0 +1,46 @@
+package kr.or.ddit.lectureContents.examSubmission.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.lectureContents.examSubmission.service.ExamSubmitService;
+import kr.or.ddit.lectureContents.vo.ExamSubmitVO;
+import kr.or.ddit.lectureContents.vo.ExamVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.validate.groups.UpdateGroup;
+
+@Controller
+@RequestMapping("/lecture/examScoreUpdate.do")
+public class ExamScoreUpdateController {
+	
+	@Inject
+	ExamSubmitService service;
+	
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> examScoreUpdate(ExamSubmitVO examSubmit) {
+		Map<String, Object> respMap = new HashMap<>();
+		ServiceResult result = service.modifyExamSubmitScore(examSubmit);
+		switch(result) {
+		case OK:
+			respMap.put("result", "성공");
+			break;
+		case FAIL:
+			respMap.put("result", "실패");
+		}
+		
+		return ResponseEntity.ok(respMap);
+	}
+}

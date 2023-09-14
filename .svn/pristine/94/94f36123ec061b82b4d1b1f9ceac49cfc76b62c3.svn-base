@@ -1,0 +1,66 @@
+package kr.or.ddit.lectureContents.assignment.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.lectureContents.assignment.service.AssignmentService;
+import kr.or.ddit.lectureContents.vo.AssignmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+@RequestMapping("/lecture/homeworkInsert.do")
+public class HomeworkInsertController {
+	
+	@Inject
+	AssignmentService service;
+	
+	@ModelAttribute("homework")
+	public AssignmentVO assignment(String lecture) {
+		return new AssignmentVO(lecture); 
+	}
+	
+	@GetMapping
+	public String homeworkForm() {
+		
+		return "lecture/homework/homeworkForm";
+	}
+	
+	@PostMapping
+	public String homeworkInsert(@Validated(InsertGroup.class) @ModelAttribute("homework") AssignmentVO assignment
+			, Errors errors, Model model) {
+		String logicalViewName = null;
+		if (!errors.hasErrors()) {
+			ServiceResult result = service.registerAssignment(assignment);
+			switch(result) {
+				case OK:
+					logicalViewName = "redirect:/lecture/homeworkDetail.do?assiCd="+assignment.getAssiCd();
+					break;
+				case FAIL:
+					logicalViewName = "lecture/homework/homeworkForm";
+					break;
+				default:
+					model.addAttribute("message","서버 오류, 잠시 뒤 다시 시도하시오.");
+					logicalViewName = "lecture/homework/homeworkForm";
+					break;
+			}
+		} else {
+			logicalViewName = "lecture/homework/homeworkForm";
+		}
+
+		return logicalViewName;
+		
+	}
+	
+}

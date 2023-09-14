@@ -1,0 +1,266 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<style>
+	/* 모달 스타일 */
+    #detailModal {
+        margin-top: -150px;
+    }
+    .modal-dialog {
+	    max-width: 800px;
+	    width: 90%;
+	  }
+	  .custom-modal {
+	    height: 400px; /* 원하는 높이로 조절 */
+	  }
+    .modal-data {
+        margin-bottom: 10px;
+        display: block;
+    }
+    .modal-data strong {
+        display: inline-block;
+        width: 80px;
+        font-weight: bold;
+    }
+     #scoreInput {
+        width: 180px;
+        padding: 5px;
+        margin-right: 20px;
+    }
+</style>
+<div class="list-container">
+<!-- 	<table class="table"> -->
+<!-- 		<tr> -->
+<!-- 			<td> -->
+<!-- 				<h4><br>제출 목록</h4> -->
+<!-- 			</td> -->
+<!-- 		</tr> -->
+<!-- 	</table> -->
+	<table class="table">
+		<thead class="table-light">
+			<tr>
+				<th>학번</th>
+				<th>이름</th>
+				<th>제출방식</th>
+				<th>제출일</th>
+				<th>점수</th>
+			<tr>
+		</thead>
+		<tbody>
+			<c:set var="assignSubList" value="${paging.dataList }"/>
+			<c:choose>
+				<c:when test="${empty assignSubList }">
+					<tr>
+						<td colspan="5">제출된 과제가 없습니다.</td>
+					</tr>
+				</c:when>
+				<c:otherwise>
+					<c:forEach items="${assignSubList }" var="assignSub">
+						<tr class="clickable-row"
+							data-stCd="${assignSub.stCd }"
+							data-assiCd="${assignSub.assiCd }"
+							data-assuCd="${assignSub.assuCd }"
+							data-stNm="${assignSub.stNm }"
+							data-subAtchFileId="${assignSub.atchFileId }"
+							data-submDate="${assignSub.submDate }"
+							data-assiNm="${assignSub.assiNm }"
+							data-assiScore="${assignSub.assiScore }"
+						>
+							<c:url value="/lecture/assignSubList.do" var="viewURL">
+								<c:param name="what" value="${assignSub.assuCd }"></c:param>
+							</c:url>
+							<td>${assignSub.stCd }</td>
+							<td>${assignSub.stNm }</td>
+							<td>
+							    <c:choose>
+							        <c:when test="${not empty assignSub.fileGroup and not empty assignSub.fileGroup.detailList }">
+										파일
+							        </c:when>
+							        <c:otherwise>
+							            텍스트
+							        </c:otherwise>
+							    </c:choose>
+							</td>
+							<td>
+							    <c:choose>
+							        <c:when test="${not empty assignSub.submDate}">
+							            <c:set var="submDate" value="${assignSub.submDate}" />
+							            ${submDate.toLocalDate()}
+							        </c:when>
+							        <c:otherwise>
+							        </c:otherwise>
+							    </c:choose>
+							</td>
+							<td id="assuScoreCell">${assignSub.assuScore }</td>
+						</tr>
+					</c:forEach>
+				</c:otherwise>
+				
+			</c:choose>
+		</tbody>
+	</table>
+</div>
+	
+<!-- 과제 제출 상세 MODAL -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><span class="exampleModalLongTitle"></span> -
+        	<span class="modal-stNm"></span>(<span class="modal-stCd"></span>)</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	      <p class="modal-data"><strong>학번</strong> <span class="modal-stCd"></span></p>
+	      <p class="modal-data"><strong>이름</strong> <span class="modal-stNm"></span></p>
+	      <p class="modal-data"><strong>제출일시</strong> <span id="modal-submDate"></span></p>
+	      <div id="file"></div>
+	      <p class="modal-data"><strong>점수</strong> <span id="modal-assuScore"></span> / <span class="modal-assiScore"></span></p>
+	  </div>
+
+      <div class="modal-footer">
+  	    <form id="scoreForm">
+  	    <input type="hidden" id="assuCdInput" name="assuCd" value="">
+  	    <input type="hidden" id="assiCdInput" name="assiCd" value="">
+          <label for="scoreInput">점수 : </label>
+          <input type="number" id="scoreInput" name="assuScore" min="0" max="100" required
+      			placeholder="점수를 입력해주세요" onfocus="clearInputHint(this)" onblur="restoreInputHint(this)" />
+	      <button type="submit" class="btn btn-primary">저장</button>
+	      <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        </form>	
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(".clickable-row").click(function(){
+    var stCd = $(this).data("stcd");
+    var assiCd = $(this).data("assicd");
+    var assuCd = $(this).data("assucd");
+    var stNm = $(this).data("stnm");
+    var submDate = $(this).data("submdate");
+    var atchFileId = $(this).data("subatchfileid");
+    var assiNm = $(this).data("assinm");
+    var assiScore = $(this).data("assiscore");
+
+    loadAssignSubDetail(stCd, assiCd, assuCd, stNm, submDate, atchFileId, assiNm, assiScore);
+});
+
+function loadAssignSubDetail(stCd, assiCd, assuCd, stNm, submDate, atchFileId, assiNm, assiScore){
+	$("#assuCdInput").val(assuCd);
+    //console.log(this);
+    
+    var requestData = {
+        stCd: stCd,
+        assiCd: assiCd
+    };
+    //console.log(requestData);
+    
+    $.ajax({
+        url: "/oryuUniversity/lecture/assignSubDetail.do",
+        type: "GET",
+        data: requestData,
+        dataType: "json",
+        success: function(assignSub){
+        	//console.log("atchFileId",assignSub.atchFileId);
+            //console.log("assignSub.assuScore::",assignSub.assuScore);
+            $(".modal-stCd").text(assignSub.stCd);
+            $(".modal-stNm").text(stNm);
+            $("#modal-submDate").text(submDate);
+            $("#modal-assuScore").text(assignSub.assuScore);
+            $("#modal-subAtchFileId").text(assignSub.atchFileId);
+            $("#scoreForm").find("input[name='assiCd']").val(assignSub.assiCd);
+            $(".exampleModalLongTitle").text(assiNm);
+            $(".modal-assiScore").text(assiScore);
+            $("#scoreInput").attr("max", assiScore);
+            $("#file").empty();
+            console.log(assignSub);
+            if(assignSub.atchFileId != null){
+	            $(assignSub.fileGroup.detailList).each(function(idx,element){
+	            	 var newSpan = $("<span>");
+	            	 var newP = $("<p>").attr("class","modal-data");
+	            	 var newLink = $("<a>").attr("href", "/oryuUniversity/download.do?atchFileId="+element.atchFileId+"&fileSn="+element.fileSn).text(element.orignlFileNm);
+	            	 console.log(idx);
+	            	 if(idx==0){
+	            	 	var newStrong = $("<strong>").text("제출문서");
+	            	 }else{
+	            		var newStrong = $("<strong>"); 
+	            	 }
+	            	 newSpan.append(newLink);
+	            	 var newTag = newP.append(newStrong).append(newSpan);
+	            	 $("#file").append(newTag);
+	            	 
+	            });
+            }else{
+            	var newSpan = $("<span>").text(assignSub.assuText);
+            	var newP = $("<p>").attr("class","modal-data");
+            	var newStrong = $("<strong>").text("제출텍스트");
+            	var newTag = newP.append(newStrong).append(newSpan);
+            	$("#file").append(newTag);
+            }
+            $("#detailModal").modal('show');
+        },
+        error: function(xhr, status, error, data){
+            console.log(error);
+        }
+     });
+}
+
+$('#scoreForm').on('submit', function(event){
+// 	alert("저장버튼 누름");
+	event.preventDefault();
+	var formData = new FormData(this);
+	var assiCd = $(this).find("input[name='assiCd']").val();
+	var assuScore = $("#scoreInput").val();
+    formData.append("assuScore", assuScore);
+    
+	$.ajax({
+		type: 'POST',
+		url: '/oryuUniversity/lecture/assignSubUpdate.do',
+		data: formData,
+		processData: false,
+		contentType: false,
+		dataType:'xml',
+		success: function(response){
+			// 업데이트된 점수 바로 보이게
+			console.log(response);
+			var newAssuScore = $(response).find('assuScore').text();
+			console.log(newAssuScore);
+// 			$('#assuScoreCell').text(newAssuScore);
+			fetchHomeworkSub(assiCd);
+			$('#detailModal').modal('hide');
+		},
+	    error: function(xhr, status, error){
+            // 업데이트 실패 시 처리
+            console.log('업데이트 실패:', error);
+        }
+	});
+	
+});
+
+function clearInputHint(inputElement) {
+    if (inputElement.placeholder === "점수를 입력해주세요") {
+        inputElement.placeholder = "";
+    }
+}
+
+function restoreInputHint(inputElement) {
+    if (inputElement.value === "") {
+        inputElement.placeholder = "점수를 입력해주세요";
+    }
+}
+// 모달 타이틀 변경
+function updateModalTitle(title) {
+    document.querySelector('#exampleModalLongTitle').textContent = title;
+  }
+
+// 취소 버튼 클릭
+$(document).on('click', '#detailModal button[data-dismiss="modal"]', function () {
+  console.log('취소 버튼 클릭');
+  // 모달 닫기
+  $('#detailModal').modal('hide');
+});	
+</script>

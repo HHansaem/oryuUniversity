@@ -1,0 +1,78 @@
+package kr.or.ddit.graduation.service;
+
+import java.text.MessageFormat;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.exception.PKNotFoundException;
+import kr.or.ddit.graduation.dao.GraduationDAO;
+import kr.or.ddit.graduation.vo.GraduationVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class GraduationServiceImpl implements GraduationService {
+	
+	@Inject
+	private GraduationDAO graduationDAO;
+
+	@Override
+	public List<GraduationVO> retrieveGraduationStudentList(String stCd) {
+		
+		return graduationDAO.selectGraduationStudentList(stCd);
+	}
+
+	@Override
+	public GraduationVO retrieveGraduationStudentBelong(String stCd) {
+
+		return graduationDAO.selectGraduationStudentBelong(stCd);
+	}
+
+	@Override
+	public List<GraduationVO> retrieveGraduationTypeList() {
+		
+		return graduationDAO.selectGraduationTypeList();
+	}
+
+	@Override
+	public List<CollegeVO> retrieveCollegeTypeList() {
+
+		return graduationDAO.selectCollegeTypeList();
+	}
+
+	@Override
+	public List<GraduationVO> retrieveGraduationConditionList() {
+
+		return graduationDAO.selectGraduationConditionList();
+	}
+
+	@Override
+	public ServiceResult createGraduation(GraduationVO graduation) {
+		ServiceResult result = null;
+		String geGradCondType = graduation.getGeGradCondType();
+		try {
+			retrieveGraduation(graduation);
+			result = ServiceResult.PKDUPLICATE;
+		}catch (PKNotFoundException e) {
+			if(geGradCondType.contains("직접입력")) {
+				String subCondType = geGradCondType.substring(5);
+				graduation.setGeGradCondType(subCondType);
+			}
+			int cnt = graduationDAO.insertGraduation(graduation);
+			result = cnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		}
+		return result;
+	}
+
+	@Override
+	public GraduationVO retrieveGraduation(GraduationVO graduation) throws PKNotFoundException {
+		GraduationVO saved = graduationDAO.selectGraduation(graduation);
+		if(saved==null)
+			throw new PKNotFoundException(MessageFormat.format("{0}, {1}에 해당하는 정보 없음.", graduation.getGeGradCondType(), graduation.getColgeCd()));
+		return saved;
+	}
+
+}

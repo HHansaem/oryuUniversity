@@ -1,0 +1,48 @@
+package kr.or.ddit.club.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.club.service.ClubService;
+import kr.or.ddit.club.vo.ClubVO;
+
+@Controller
+public class ClubView {
+	@Inject
+	private ClubService service;
+	
+	@RequestMapping("/club/myClubView.do")
+	public ModelAndView myClubView(
+			HttpSession session
+)
+	{
+		String Cd= "1";
+		session.setAttribute("userId", Cd);
+		ModelAndView mav =new ModelAndView();
+		ClubVO InsertRequest = service.myClub(Integer.parseInt(Cd));
+		mav.addObject("club", InsertRequest);
+		mav.setViewName("club/myClubView");
+		return mav;
+	}
+	
+	@RequestMapping("/club/clubView.do")
+	public ModelAndView clubView(
+			@RequestParam(name = "who", required = true) String clubCd ,
+			HttpSession session
+)
+	{
+		ModelAndView mav =new ModelAndView();
+		ClubVO InsertRequest = service.clubDetail(clubCd);
+		mav.addObject("club", InsertRequest);
+		mav.setViewName("club/clubAdmiAppl");
+		return mav;
+	}
+	
+	
+}
+

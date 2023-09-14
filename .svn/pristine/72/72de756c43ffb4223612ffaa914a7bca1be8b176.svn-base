@@ -1,0 +1,65 @@
+package kr.or.ddit.thesis.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.thesis.service.ThesisService;
+import kr.or.ddit.thesis.vo.ThesisVO;
+
+@Controller
+@RequestMapping("/thesis/thesisUpdate.do")
+public class ThesisUpdateController {
+
+	@Inject
+	private ThesisService service;
+
+	@ModelAttribute("thesis")	
+	public ThesisVO thesis() {
+		return new ThesisVO();
+		
+	}
+	
+	@GetMapping
+	public String updateForm(
+		Model model
+		, @RequestParam("who") String thesSn
+	) {
+		ThesisVO thesis = service.retrieveThesis(thesSn);
+		model.addAttribute("thesis", thesis);
+		
+		return "thesis/thesisEdit";
+	}
+	
+	@PostMapping
+	public String updateProcess(
+		Model model
+		, @ModelAttribute("thesis") ThesisVO thesis
+		, BindingResult errors
+	) {
+		String logicalViewName = null;
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifyThesis(thesis);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/thesis/thesisView.do?who="+thesis.getThesSn();
+			}else {
+				logicalViewName = "thesis/thesisEdit";
+			}
+		}else {
+			logicalViewName = "thesis/thesisEdit";
+		}
+		return logicalViewName;
+	}
+	
+}
+	
+	
+

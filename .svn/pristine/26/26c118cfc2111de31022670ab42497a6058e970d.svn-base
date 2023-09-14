@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.assignmentSub.dao.AssignmentSubDAO">
+	<sql id="searchFrag">
+		<where>
+			<if test="detailCondition neq null">
+				<choose>
+					<when test="detailCondition.lecCd neq null and not detailCondition.lecCd.isEmpty">
+						AND LEC_CD = #{detailCondition.lecCd}
+					</when>
+					<when test="detailCondition.assiCd neq null and not detailCondition.assiCd.isEmpty">
+						AND ASSI_CD = #{detailCondition.assiCd}
+					</when>
+					<when test="detailCondition.stCd neq null and not detailCondition.stCd.isEmpty">
+						AND ST_CD = #{detailCondition.stCd}
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectAssignmentSubList" resultType="kr.or.ddit.lectureContents.vo.AssignmentSubVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT
+		    A.ASSU_CD
+		    , A.LEC_CD
+		    , A.ASSI_CD
+		    , A.ST_CD
+		    , A.ATCH_FILE_ID
+		    , A.SUBM_DATE
+		    , A.SUBM_STAT
+		    , A.ASSU_SCORE
+		    , A.ASSU_TEXT
+		    , S.ST_NM
+		FROM
+		    ASSIGN_SUBMISSION A
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD
+		    <include refid="searchFrag"></include>
+		ORDER BY SUBM_DATE DESC
+		
+	</select>
+
+</mapper>

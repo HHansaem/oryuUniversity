@@ -1,0 +1,91 @@
+package kr.or.ddit.lectureContents.attendance.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lectureContents.attendance.service.AttendanceService;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+import kr.or.ddit.lectureSchedule.service.LectureScheduleService;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+
+@Controller
+@RequestMapping("/lecture")
+public class AttendanceRetreiveController {
+	
+	@Inject
+	AttendanceService atService;
+	@Inject
+	LectureScheduleService lecScheService;
+	
+//	@ModelAttribute("lectureSchedule")
+//	public List<LectureScheduleVO> lectureSchedule(String lecCd) {
+//		if(!StringUtils.isBlank(lecCd)) {
+//			List<LectureScheduleVO> lectureSchedule = lecScheService.retrieveLectureScheduleDetail(lecCd);
+//			scheCd = lectureSchedule.get(0).getScheCd();
+//			return lectureSchedule;
+//		}
+//		List<LectureScheduleVO> lectureSchedule = new ArrayList<>();
+//		return lectureSchedule;
+//	}
+	
+//	@ModelAttribute("attendanceList")
+//	public List<AttendanceVO> attendanceList(@RequestBody AttendanceVO attendance, Model model){
+//		if(!StringUtils.isBlank(attendance.getLecCd())) {
+//			List<LectureScheduleVO> lectureSchedule = lecScheService.retrieveLectureScheduleDetail(attendance.getLecCd());
+//			scheCd = lectureSchedule.get(0).getScheCd();
+//			model.addAttribute("lectureSchedule", lectureSchedule);
+//		}
+//		if(StringUtils.isBlank(attendance.getAttsSche())) {
+//			attendance.setAttsSche(scheCd);
+//			attendance.setAttsWeek("1주차");
+//		}
+//		List<AttendanceVO> attendanceList = atService.retrieveAttendanceList(attendance);
+//		return attendanceList;
+//	}
+	
+	@GetMapping
+	@RequestMapping("/AttendanceView.do")
+	public String getAttendance() {
+		
+		return "lecture/attendance/attendanceView";
+	}
+	
+	@GetMapping
+	@RequestMapping("/AttendanceList.do")
+	public String getAttendanceList(String lecCd, String attsSche, String attsWeek, Model model) {
+		String scheCd = "";
+		AttendanceVO attendance =  new AttendanceVO();
+		attendance.setLecCd(lecCd);
+		
+		if(!StringUtils.isBlank(lecCd)) {
+			List<LectureScheduleVO> lectureSchedule = lecScheService.retrieveLectureScheduleDetail(lecCd);
+			scheCd = lectureSchedule.get(0).getScheCd();
+			model.addAttribute("lectureSchedule", lectureSchedule);
+		}
+		if(StringUtils.isBlank(attsSche)) {
+			attendance.setAttsSche(scheCd);
+			attendance.setAttsWeek("1");
+		}else {
+			attendance.setAttsSche(attsSche);
+			attendance.setAttsWeek(attsWeek);
+		}
+		List<AttendanceVO> attendanceList = atService.retrieveAttendanceList(attendance);
+		model.addAttribute("attendanceList", attendanceList);
+		model.addAttribute("attsSche",attsSche);
+		model.addAttribute("attsWeek",attsWeek);
+		
+		return "lecture/attendance/ajax/attendanceList";
+	}
+	
+}

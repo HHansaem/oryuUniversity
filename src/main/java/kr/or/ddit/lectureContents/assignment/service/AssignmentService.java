@@ -1,0 +1,21 @@
+package kr.or.ddit.lectureContents.assignment.service;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+import kr.or.ddit.lectureContents.vo.AssignmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface AssignmentService {
+	// 교수 과제 등록
+	public ServiceResult registerAssignment(AssignmentVO assign);
+	// 과제 상세 조회
+	public AssignmentVO retrieveAssignmentDetail(String assiCd);
+	// 과제 목록 조회
+	public List<AssignmentVO> retrieveAssignmentList(String lecCd);
+	// 과제 수정
+	public ServiceResult modifyAssignment(AssignmentVO assign); 
+	// 과제 삭제 상태
+	public ServiceResult removeAssignment(String assiCd);
+	
+}

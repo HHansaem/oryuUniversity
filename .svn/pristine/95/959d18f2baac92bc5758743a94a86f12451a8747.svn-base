@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.job.dao.JobDAO">
+	<sql id="searchFrag">
+		<where>
+			
+			
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'company'">
+						INSTR(JOB_NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'location'">
+						INSTR(JOB_PLACE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(JOB_NAME, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(JOB_PLACE, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT
+		   COUNT(*)
+		FROM
+		    JOB
+	    <include refid="searchFrag"></include>
+	</select>
+	
+	<select id="selectJobList" resultType="kr.or.ddit.job.vo.JobVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+		    SELECT ROWNUM RNUM, A.*
+		    FROM(
+		    SELECT
+		      JOB_NAME
+		      , JOB_TITLE
+		      , JOB_SECTOR
+		      , JOB_PLACE
+		      , JOB_REQ
+		      , JOB_REQ2
+		      , JOB_LINK
+		    FROM JOB
+		    <include refid="searchFrag"></include>
+		    ) A       
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+		
+	</select>
+	
+	<insert id="insertJobAd" parameterType="kr.or.ddit.job.vo.JobVO">
+		INSERT INTO job (
+		    JOB_NAME
+		    , JOB_TITLE
+		    , JOB_SECTOR
+		    , JOB_PLACE
+		    , JOB_REQ
+		    , JOB_REQ2
+		    , JOB_LINK
+		) VALUES (
+		  	#{jobName,jdbcType=VARCHAR}
+			, #{jobTitle,jdbcType=VARCHAR}
+			, #{jobSector,jdbcType=VARCHAR}
+			, #{jobPlace,jdbcType=VARCHAR}
+			, #{jobReq,jdbcType=VARCHAR}
+			, #{jobReq2,jdbcType=VARCHAR}
+			, #{jobLink,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectTotalAd" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT 
+			COUNT(*)
+		FROM 
+			AD
+	</select>
+	
+	<select id="selectAdList" resultType="kr.or.ddit.job.vo.AdVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+		    SELECT ROWNUM RNUM, A.*
+		    FROM(
+		    SELECT
+		    	AD_TITLE
+		    	, AD_IMG
+		    	, AD_DESC
+		    	, AD_DETAIL
+		    FROM AD
+		    ) A       
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<insert id="insertAd" parameterType="kr.or.ddit.job.vo.AdVO">
+		INSERT INTO AD (
+		    AD_TITLE
+		    , AD_IMG
+		    , AD_DESC
+		    , AD_DETAIL
+		) VALUES (
+			#{adTitle,jdbcType=VARCHAR}
+			, #{adImg,jdbcType=VARCHAR}
+			, #{adDesc,jdbcType=VARCHAR}
+			, #{adDetail,jdbcType=VARCHAR}
+		)
+	</insert>
+
+</mapper>

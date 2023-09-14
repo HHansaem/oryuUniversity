@@ -1,0 +1,169 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<style>
+	.narrow-modal-button {
+		width: 100px; /* 원하는 가로폭을 지정 */
+	    padding: 5px; /* 원하는 패딩을 지정 */
+	    margin: 20px;
+	    }
+	.modal-title {
+	    font-size: 18px; /* 원하는 글씨 크기로 조정 */
+	    font-weight: bold; /* 굵게 표시 */
+	    }
+</style>
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th colspan="2">졸업 이수 조건</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>단과 / 졸업요건</th>
+			<c:forEach items="${graduationTypeList}" var="graduationType">
+				<th>${graduationType.geGradCondType}</th>
+			</c:forEach>
+		</tr>
+		<c:set var="graduationConditionList" value="${graduationConditionList}" />
+		<c:forEach items="${collegeTypeList}" var="collegeType" varStatus="loop">
+			<tr>
+				<td>${collegeType.colgeNm}</td>
+				<c:forEach begin="0" end="${fn:length(graduationTypeList) - 1}" varStatus="gradLoop">
+					<td>${graduationConditionList[loop.index + (gradLoop.index * fn:length(collegeTypeList))].gradCond}</td>
+				</c:forEach>
+			</tr>
+		</c:forEach>
+	</tbody>
+</table>
+
+<div class="text-end" style="padding-right: 100px;">
+	<button type="button" class="btn btn-primary narrow-modal-button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">졸업요건수정</button>
+	<button type="button" class="btn btn-primary narrow-modal-button" data-bs-toggle="modal" data-bs-target="#exampleModal2" data-bs-whatever="@getbootstrap">졸업요건추가</button>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">졸업 요건 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<form:form method="post" modelAttribute="graduation" action="${pageContext.request.contextPath}/graduation/updateGraduation.do">
+          <div class="mb-3">
+            <label for="select-box1" class="col-form-label">단과</label>
+            <select class="form-select" id="select-box" name="colgeCd">
+              <c:forEach items="${collegeTypeList}" var="collegeType">
+              	<option value="${collegeType.colgeCd }">
+              		${collegeType.colgeNm}
+              	</option>
+              </c:forEach>
+            </select>
+          </div>
+
+			<c:forEach items="${graduationTypeList}" var="graduationType">
+	            <div class="mb-3">
+	                <label class="col-form-label">
+	                    ${graduationType.geGradCondType}
+	                </label>
+	                <form:input path="gradCond" class="form-control" />
+	                <span class="error" style="color: red;"></span>
+	                <input type="hidden" value="${graduationType.geGradCondType}" name="geGradCondType">
+	            </div>
+	        </c:forEach>
+
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	        <button type="submit" class="btn btn-primary">수정</button>
+	      </div>
+	    </form:form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">졸업 요건 추가</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<form:form method="post" modelAttribute="graduation" action="${pageContext.request.contextPath}/graduation/insertGraduation.do">
+          <div class="mb-3">
+            <label class="col-form-label" style="font-weight: bold;">졸업요건</label>
+            	<form:input path="geGradCondType" class="form-control" />
+          </div>
+
+			<c:forEach items="${collegeTypeList}" var="collegeType">
+	            <div class="mb-3">
+	                <label class="col-form-label">
+	                    ${collegeType.colgeNm}
+	                </label>
+	                <form:input path="gradCond" class="form-control" style="width: 50%;" />
+	                <span class="error" style="color: red;"></span>
+	                <input type="hidden" value="${collegeType.colgeCd}" name="colgeCd">
+	            </div>
+	        </c:forEach>
+
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	        <button type="submit" class="btn btn-primary">등록</button>
+	      </div>
+	    </form:form>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function(event) {
+            const gradCondInputs = document.getElementsByName("gradCond");
+            let valid = true;
+
+            gradCondInputs.forEach(function(input) {
+                const errorSpan = input.nextElementSibling;
+                if (input.value.trim() === "") {
+                    errorSpan.textContent = "졸업 요건을 입력해주세요.";
+                    valid = false;
+                } else {
+                    errorSpan.textContent = "";
+                }
+            });
+
+            if (!valid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form2 = document.getElementById("exampleModal2").querySelector("form");
+        form2.addEventListener("submit", function(event) {
+            const gradCondInputs = form2.querySelectorAll('input[name="gradCond"]');
+            let valid = true;
+
+            gradCondInputs.forEach(function(input) {
+                const errorSpan = input.nextElementSibling;
+                if (input.value.trim() === "") {
+                    errorSpan.textContent = "졸업 요건을 입력해주세요.";
+                    valid = false;
+                } else {
+                    errorSpan.textContent = "";
+                }
+            });
+
+            if (!valid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>

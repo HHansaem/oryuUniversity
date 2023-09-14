@@ -1,0 +1,25 @@
+package kr.or.ddit.lectureContents.attendance.service;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.AttendanceStateVO;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+
+public interface AttendanceService {
+	
+		//출석 목록조회
+		public List<AttendanceVO> retrieveAttendanceList(AttendanceVO attendance);
+		
+		// 강의 출석 등록
+		public int registerAttendance(AttendanceVO attendance);
+		
+		// 강의 출석상태 등록
+		public int registerAttendanceState(AttendanceStateVO attendanceState);
+		
+		// 강의 출석일수,상태 변경
+		public int modifyAttendance(AttendanceVO attendance);
+		
+		// 강의 출석일수,출석상태 변경
+		public int modifyAttendanceState(AttendanceStateVO attendanceState);
+
+}

@@ -1,0 +1,273 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+    <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<script
+	src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<link rel="stylesheet"
+	href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+<link rel="stylesheet"
+	href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+<style>
+    .header {
+	    background-color: #154FA9;
+	    border-radius: 0 10px 10px 0;
+	    padding: 10px;
+	    margin: 15px 25px 0 0;
+	    height: 230px;
+/* 	    display: flex; */
+	    align-items: center;
+	}
+	.header h3 {
+        color: white;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        margin: 15px 0 15px 15px;
+    }
+    .line {
+        flex-grow: 1; 
+        height: 1px;
+        background-color: #BDBDBD;
+        margin: 0 10px 50px 10px;
+        position: relative;
+    }
+
+    .circle {
+        width: 10px;
+        height: 10px;
+        background-color: #BDBDBD;
+        border-radius: 50%;
+        position: absolute;
+        right: 0;
+        top: -5px;
+    }
+
+	.content {
+	    padding: 35px;
+	    margin-top: -130px;
+	    margin-right: 25px;
+	}
+	
+	.card-badge {
+	  width: 50px;
+	  height: 50px;
+	  position: absolute;
+	  margin-top: 25px;
+	  left: 0;
+	  border-radius: 0 10px 10px 0;
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  z-index: 1;
+	}
+	
+	.card-badge i {
+	  font-size: 25px;
+		padding-top: 4px;
+	}
+	
+	.card-name {
+	  display: inline-block;
+	  align-items: center;
+	  padding-left: 65px;
+	  padding-top: 37px;
+	  font-size: 15px;
+ 	  font-weight: bold;
+	}
+.fontStyle {
+	margin-top: -3px;
+	font-size: 18px;
+/*     font-family: 'Do Hyeon', sans-serif; */
+    font-weight: 500;
+}
+.rightArrow{
+	width: 14%;
+    margin: -10px 0 0 143px;
+}
+.todayFood{
+    margin-left: 16px;
+    width: 46%;
+    margin-top: 20px;
+    height: 235px;
+}
+.todayWeather{
+	margin-left: 27px;
+    width: 47%;
+    margin-top: 20px;
+    height: 235px;
+}
+.meal:hover {
+    background-color: whitesmoke;
+}
+.meal-container {
+width: 65%;
+    display: flex;
+    margin: -30px 0 0 106px;
+ }
+
+ .meal {
+     flex: 1;
+     border: 1px solid #ccc;
+     padding: 3px;
+     text-align: center;
+ }
+.mealTitle{
+width: 30%;
+    /* background-color: wheat; */
+    margin: 3px 0 0 1px;
+    border-radius: 13px;
+    padding: 4px 10px 4px 8px;
+}
+.mealInfo{
+border: 1px solid silver;
+    border-radius: 15px;
+    margin-top: 10px;
+    height: 102px;
+    padding: 10px 0 0 39px;
+}
+#weatherImg{
+	width: 80%;
+}
+.weather-container{
+    border: 1px solid silver;
+    border-radius: 15px;
+    margin-top: 23px;
+    height: 102px;
+    padding: 18px 0 0 44px;
+}
+</style>
+
+<div class="content-wrapper">
+	<div class="header">
+		<h3>MY CAMPUS</h3>
+			<div class="line">
+	           <div class="circle"></div>
+	       </div>
+	</div>
+	<div class="content">
+		<div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+			  <div class="card tale-bg box-shadow" style="height: 675px">
+			    <div class="card-badge" style="background-color: #04B431;">
+			      <i class="mdi mdi-calendar-check text-white"></i>
+			    </div>
+			    <div class="card-name">일정</div>
+			    <div id="calendarJSP" class="card-people mt-3"></div>
+			  </div>
+			</div>
+
+            <div class="col-md-6 grid-margin transparent">
+            <div class="card tale-bg box-shadow" style="height: 420px">
+            	<div class="card-badge" style="background-color: #FF5733;">
+              		<i class="mdi mdi-tooltip-outline text-white"></i>
+              	</div>
+              	<div class="card-name">공지사항</div>
+              <div class="row ml-5">
+                <div class="col-md-5 mb-4 mt-4 ml-4 stretch-card transparent">
+                  <div class="card card-light-danger">
+                    <div class="card-body">
+                      <p class="mb-4">봉사활동<img class="rightArrow" alt="arrow" src="<%=request.getContextPath()%>/resources/images/file-icons/right-arrow.png"></p>
+                      <p class="fs-30 mb-2 fontStyle">교내 헌혈버스 방문 안내</p>
+                      <p>2023.09.05</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5 mb-4 mt-4 stretch-card transparent">
+                  <div class="card card-dark-blue">
+                    <div class="card-body">
+                      <p class="mb-4">학습법<img class="rightArrow" style="margin-left: 158px;" alt="arrow" src="<%=request.getContextPath()%>/resources/images/file-icons/right-arrow.png"></p>
+                      <p class="fs-30 mb-2 fontStyle">스터디그룹 모집 안내</p>
+                      <p>2023.09.05</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row ml-5">
+                <div class="col-md-5 mb-4 mb-4 ml-4 stretch-card transparent">
+                  <div class="card card-light-blue">
+                    <div class="card-body">
+                      <p class="mb-4">학부<img class="rightArrow" style="margin-left: 167px;" alt="arrow" src="<%=request.getContextPath()%>/resources/images/file-icons/right-arrow.png"></p>
+                      <p class="fs-30 mb-2 fontStyle">수강정정 안내</p>
+                      <p>2023.09.05</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5 mb-4 stretch-card transparent">
+                  <div class="card card-light-danger">
+                    <div class="card-body">
+                      <p class="mb-4" >학부<img class="rightArrow" style="margin-left: 167px;" alt="arrow" src="<%=request.getContextPath()%>/resources/images/file-icons/right-arrow.png"></p>
+                      <p class="fs-30 mb-2 fontStyle">등록/환불 안내</p>
+                      <p>2023.09.05</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+			  <div class="card tale-bg box-shadow todayFood">
+			    <div class="card-badge" style="background-color: #FFBF00;">
+			      <i class="mdi mdi-silverware-spoon text-white"></i>
+			    </div>
+			    <div class="card-name" style="margin-left: -10px;">오늘의 학식</div>
+			    <div id="calendarJSP" class="card-people mt-3">
+			      <div class="mealTitle"><i class="mdi mdi-food-fork-drink text-slategray"></i>
+			      	<span style="margin-left: 5px; font-size: 16px;">학생회관</span></div>
+			      	<div class="meal-container">
+			      		<div class="meal">조식</div>
+			      		<div class="meal">중식</div>
+			      		<div class="meal">석식</div>
+			      	</div>
+			      	<div class="mealInfo">
+			      	 	<p style="margin: 4px 0 3px 0px;">- 소고기해장국&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 깍두기</p>
+			      	 	<p>- 떡잡채&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 잔멸치땅콩볶음</p>
+			      	 	<p style="margin: -5px 0 0px 0px;">- 비엔나브로콜리볶음</p>
+			      	</div>
+			    </div>
+			</div>
+			<div class="card tale-bg box-shadow todayWeather">
+			    <div class="card-badge" style="background-color: burlywood;">
+			      <i class="mdi mdi-weather-cloudy text-white"></i>
+			    </div>
+			    <div class="card-name" style="margin-left: -10px;">오늘의 날씨</div>
+			    <div id="calendarJSP" class="card-people mt-3">
+			    <div>
+			    	9/13 (수)
+			    </div>
+			    <div class="weather-container">
+			    	<img id="weatherImg" alt="날씨" src="<%=request.getContextPath()%>/resources/images/file-icons/weather.JPG">
+			    </div>
+			    </div>
+			</div>
+			</div>
+            </div>
+          </div>
+		</div>
+	</div>
+
+<script>
+$(document).ready(function() {
+	$( "#calendarJSP" ).load( "<c:url value='/schedule/acaCalendar.do' />" , {type: "inner"});
+});
+
+// 캘린더jsp 불러오기
+// function fetchCalendar(){
+// 	$.ajax({
+// 		url: "/oryuUniversity/schedule/acaCalendar.do",
+// 		method: "get",
+// 		data: {
+// 			type: "inner"
+// 		},
+// 		dataType: "html",
+// 		success: function(data){
+// 			$('#calendarJSP .card-people').html(data);
+// 		},
+// 		error: function(jqXHR, status, error){
+// 			console.log(jqXHR);
+//             console.log(status);
+//             console.log(error);
+// 		}
+// 	});
+// }
+</script>

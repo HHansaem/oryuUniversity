@@ -1,0 +1,35 @@
+package kr.or.ddit.academicBusinessPlan.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.academicBusinessPlan.service.ABPService;
+import kr.or.ddit.academicBusinessPlan.vo.ABPVO;
+
+@Controller
+public class ABPDeleteController {
+	@Inject
+	private ABPService aBPService;
+	
+	@GetMapping("/academicBusinessPlan/aBPDelete.do")
+	public String getHandler(
+	        Model model
+	        , @RequestParam(name = "what") String buPlSn
+	) {
+	    ABPVO aBPVO = aBPService.retrieveABP(buPlSn);
+	    
+	    String logicalViewName = null;
+	    boolean result = aBPService.removeABP(aBPVO);
+	    if (result) {
+            logicalViewName = "redirect:/academicBusinessPlan/aBPList.do";
+        } else {
+            model.addAttribute("message", "학술 사업 계획서 삭제 삭제 중 문제 발생");
+            logicalViewName = "redirect:/academicBusinessPlan/aBPList.do";
+        }
+	    return logicalViewName;
+	}
+}

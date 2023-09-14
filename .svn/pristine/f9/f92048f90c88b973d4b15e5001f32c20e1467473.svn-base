@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.NoticeDAO">
+	<sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'title'">
+                    INSTR(LN_TITLE, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'content'">
+                    INSTR(LN_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(LN_TITLE, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(LN_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+        </where>
+   </sql>
+   
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM LECTURE_NOTICE
+		<include refid="searchFrag"></include>
+	</select>
+	
+	<select id="selectNoticeList" resultType="kr.or.ddit.lecture.vo.NoticeVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+			SELECT ROWNUM RNUM, A.*
+			FROM(
+				SELECT
+					LN_NUM
+				    , LEC_CD
+				    , ATCH_FILE_ID
+				    , LN_TITLE
+				    , LN_CONT
+				    , LN_POST_DATE
+				FROM LECTURE_NOTICE
+				<include refid="searchFrag"></include>
+				ORDER BY LN_NUM DESC
+			) A
+		) B
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	
+	<resultMap type="kr.or.ddit.lecture.vo.NoticeVO" id="noticeMap" autoMapping="true">
+		<id property="lnNum" column="LN_NUM"/>
+		<association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID"/>
+	        <result property="creatDt" column="CREAT_DT"/>
+	        <result property="useAt" column="USE_AT"/>
+	        <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            	<id property="atchFileId" column="ATCH_FILE_ID"/>
+            	<id property="fileSn" column="FILE_SN"/>
+         	</collection>
+		</association>
+	</resultMap>
+	
+	<select id="selectNotice" parameterType="string" resultMap="noticeMap">
+		WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+                      USING(ATCH_FILE_ID)
+      )
+      select  LN_NUM
+		    , LEC_CD
+		    , ATCH_FILE_ID
+		    , LN_TITLE
+		    , LN_CONT
+		    , LN_POST_DATE
+          
+          , ATCH_FILE_ID, FILE_SN, FILE_STRE_COURS
+          , STRE_FILE_NM, ORIGNL_FILE_NM, FILE_EXTSN
+          , FILE_SIZE, FILE_MIME
+          
+          , CREAT_DT
+          , USE_AT
+      FROM LECTURE_NOTICE LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+      WHERE LN_NUM = #{lnNum}
+	</select>
+	
+	<insert id="insertNotice" parameterType="kr.or.ddit.lecture.vo.NoticeVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="lnNum">
+			SELECT LECTURE_NOTICE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO LECTURE_NOTICE (
+		    LN_NUM
+		    , LEC_CD
+		    , ATCH_FILE_ID
+		    , LN_TITLE
+		    , LN_CONT
+		    , LN_POST_DATE
+		) VALUES (
+		    #{lnNum,jdbcType=VARCHAR}
+			, #{lecCd}
+			, #{atchFileId,jdbcType=NUMERIC}
+			, #{lnTitle,jdbcType=VARCHAR}
+			, #{lnCont,jdbcType=CLOB}
+			, SYSDATE
+		)
+	</insert>
+	
+	<update id="updateNotice" parameterType="kr.or.ddit.lecture.vo.NoticeVO">
+		UPDATE LECTURE_NOTICE
+		SET
+		    LN_NUM = #{lnNum, jdbcType=VARCHAR}
+			, LEC_CD = #{lecCd}
+			, ATCH_FILE_ID = #{atchFileId, jdbcType=NUMERIC}
+			, LN_TITLE = #{lnTitle, jdbcType=VARCHAR}
+			, LN_CONT = #{lnCont, jdbcType=CLOB}
+			, LN_POST_DATE = SYSDATE
+		WHERE LN_NUM = #{lnNum}
+	</update>
+
+</mapper>
+
+
+
+
+

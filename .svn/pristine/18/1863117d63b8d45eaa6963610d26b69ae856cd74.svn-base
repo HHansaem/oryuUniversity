@@ -1,0 +1,52 @@
+package kr.or.ddit.graduation.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.graduation.service.GraduationService;
+import kr.or.ddit.graduation.vo.GraduationVO;
+
+@Controller
+@RequestMapping("/graduation/graduationInsert.do")
+public class GraduationInsertController {
+	
+	@Inject
+	private GraduationService service;
+	
+	@ModelAttribute("graduation")
+	public GraduationVO graduation() {
+		return new GraduationVO();
+	}
+	
+	@ModelAttribute("graduationTypeList")
+	public List<GraduationVO> graduationTypeList() {
+		return service.retrieveGraduationTypeList();
+	}
+	
+	@ModelAttribute("CollegeList")
+	public List<CollegeVO> retrieveCollegeTypeList() {
+		return service.retrieveCollegeTypeList();
+	}
+	
+	@GetMapping
+	public String getHandler() {
+		return "graduation/graduationForm";
+	}
+	
+	@PostMapping
+	public void postHandler(
+		@ModelAttribute("graduation") GraduationVO graduation
+	){
+		service.createGraduation(graduation);
+		System.out.println("asdasd"+graduation);
+	}
+	
+}

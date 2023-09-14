@@ -1,0 +1,90 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+
+
+<table class="table" align="center" border="0">
+<tr><td><h1 align="center"><br>연구일지 목록</h4></td></tr>
+</table>
+
+<p>&nbsp;</p>
+<a href="<c:url value='/researchJournal/researchJournalInsert.do'/>" align="right" border="1">연구일지등록</a>
+<p>&nbsp;</p>
+<hr />
+<br><p>&nbsp;</p>
+<table align="center" border="1" cellpadding="1" cellspacing="1" style="width:900px" summary="연구일지 목록을 볼 수 있는 테이블입니다.">
+	
+	<tbody>
+		<tr>
+			<td>순번</td>
+			<td>연구코드</td>
+			<td>연구일지명</td>
+			<td>작성자</td>
+			<td>연구일지첨부파일</td>
+			<td>연구일지작성일</td>
+		</tr>
+		
+		<c:set var="researchJournalList" value="${paging.dataList }" />
+		<c:if test="${empty researchJournalList }">
+			<tr>
+				<td colspan="7">등록된 연구일지가 없습니다.</td>
+			</tr>
+		</c:if>
+		<c:if test="${not empty researchJournalList }">
+			<c:forEach items="${researchJournalList }" var="researchJournal">
+				<c:url value="/researchJournal/researchJournalView.do" var="researchJournalURL">
+					<c:param name="who" value="${researchJournal.rjSn }" />
+				</c:url>
+				<tr>
+					<td>${researchJournal.rnum }</td>
+					<td><a href="${researchJournalURL }">${researchJournal.rjSn }</a></td>
+					<td>${researchJournal.rjNm }</td>
+					<td>${researchJournal.rjNm }</td>
+					<td>${researchJournal.atchFileId }</td>
+					<td>${researchJournal.rjDate }</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+		
+	</tbody>
+</table>
+<br><p>&nbsp;</p>
+<table >
+<br><p>&nbsp;</p>
+<tfoot align="center" border="1">
+		<tr>
+			<td colspan="7" >
+				${paging.pagingHTML }
+				<div id="searchUI">
+					<form:select path="simpleCondition.searchType">
+						<form:option value="" label="전체" />
+						<form:option value="rjNm" label="연구일지명" />
+						<form:option value="rjAutNm" label="저자명" />
+					</form:select>
+					<form:input path="simpleCondition.searchWord" />
+					<input type="button" value="검색" id="searchBtn"/>
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+
+<script src="<c:url value='/resources/js/app/researchJournal/researchJournal.js' />"></script>
+
+<p>&nbsp;</p>
+
+<style>
+  table {
+    width: 100%;
+    border: 1px solid #444444;
+  }
+  th, td {
+    border: 1px solid #444444;
+  }
+</style>

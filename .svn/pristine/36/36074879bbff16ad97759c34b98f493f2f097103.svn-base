@@ -1,0 +1,241 @@
+package kr.or.ddit.lecture.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.college.dao.CollegeDAO;
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.common.vo.ClassRoomVO;
+import kr.or.ddit.common.vo.DaytimeScheduleVO;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.dao.SubjectDAO;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+@RequestMapping("/lecture/")
+public class LectureManagementController {
+	
+	@Inject
+	private LectureService service;
+	
+	@ModelAttribute("lecture")
+	public LectureVO lecture() {
+		return new LectureVO();
+	}
+	
+	@Inject 
+	private DepartmentDAO departmentDAO;
+	@Inject
+	private CollegeDAO collegeDAO;
+	@Inject
+	private SubjectDAO subjectDAO;
+	@Inject
+	private CommonDAO commonDAO;
+	
+	@ModelAttribute("classRoomList")
+	public List<ClassRoomVO> classRoomList(){
+		return commonDAO.selectClassRoomList();
+	}
+	
+	@ModelAttribute("daytimeScheduleList")
+	public List<DaytimeScheduleVO> daytimeScheduleList(){
+		return commonDAO.selectDaytimeScheduleList();
+	}
+
+	@ModelAttribute("subjectList")
+	public List<SubjectVO> subjectList(){
+		return subjectDAO.SubjectList();
+	}
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		return departmentDAO.selectDepartmentList();
+	}
+	@ModelAttribute("collegeList")
+	public List<CollegeVO> collegeList(){
+		return collegeDAO.selectCollegeList();
+	}
+	
+	// 강의 등록(교직원) get
+	@GetMapping("lectureInsert.do")
+	public String lectureForm() {
+		return "lecture/ajax/modal/lectureForm";
+	}
+	// 강의 등록(교직원) post
+	@PostMapping(value = "lectureInsert.do", produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String lectureInsert(
+		@RequestBody LectureVO lecture
+		, Errors errors
+		, Model model
+	) {
+		String response = null;
+		ServiceResult result = service.createLecture(lecture);
+		if(ServiceResult.OK == result) {
+			response = "강의 등록 완료";
+		}else {
+			response = "강의 등록 실패, 다시 진행해주세요.";
+		}  
+		return response;
+	}
+	
+	// 강의 수정 (교직원) get
+	@GetMapping("lectureUpdate.do")
+	public String updateForm(
+		@RequestParam String lecCd
+		, Model model	
+	) {
+		LectureVO lecture = service.retrieveLecture(lecCd);
+		model.addAttribute("lecture",lecture);
+		return "lecture/ajax/modal/lectureForm";
+	}
+	// 강의 수정 (교직원) post
+	@PostMapping("lectureUpdate.do")
+	public String lectureUpdate(
+		@ModelAttribute("lecture") LectureVO lecture
+		, Errors errors
+		, Model model	
+	) {
+		String logicalViewName = null;
+		
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifyLecture(lecture);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/mngLectureList.do";
+			}else {
+				model.addAttribute("message", "강의 수정 중 문제 발생");
+				logicalViewName = "lecture/lectureForm";
+			}
+		}else {
+			logicalViewName = "redirect:/lecture/mngLectureList.do";
+			model.addAttribute("message","실패");
+		}
+		return logicalViewName;
+	}
+	
+	// 강의 요청(교수) get
+	@GetMapping("lectureRequest.do")
+	public String requestForm() {
+		return "lecture/lectureForm";
+	}
+	// 강의 요청(교수) post
+	@PostMapping("lectureRequest.do")
+	public String lectureRequest(
+		@Validated(InsertGroup.class)@ModelAttribute("lecture") LectureVO lecture
+		, Errors errors
+		, Model model
+	) {
+		String logicalViewName = null;
+
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.submitLecture(lecture);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/prfLectureList.do";
+			}else {
+				model.addAttribute("message", "강의 요청 중 문제 발생");
+				logicalViewName = "lecture/lectureForm";
+			}
+		}else {
+			logicalViewName = "lecture/lectureForm";
+		}
+		
+		return logicalViewName;
+	}
+
+	// 강의 요청 수락(교직원) ->3
+	@PostMapping("allowLecture.do")
+	@ResponseBody
+	public String allowLecture(
+			String[] lecCd
+	) {
+		int cnt = 0;
+		String result = null;
+		for(String cd : lecCd) {
+			LectureVO lecture = service.retrieveLecture(cd);
+			cnt += service.allowLecture(lecture);
+		}
+		System.out.println(cnt);
+		if(cnt==lecCd.length) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+	// 강의 요청 거절(교직원) ->5
+	@PostMapping("refuseLecture.do")
+	@ResponseBody
+	public String refuseLecture(
+			String[] lecCd
+	) {
+		int cnt = 0;
+		String result = null;
+		for(String cd : lecCd) {
+			LectureVO lecture = service.retrieveLecture(cd);
+			cnt += service.rejectLecture(lecture);
+		}
+		if(cnt==lecCd.length) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+	// 수강 등록 완료(교직원) ->1
+	@PostMapping("commitEnrollment.do")
+	@ResponseBody
+	public String commitEnrollment(
+			String[] lecCd
+	) {
+		int cnt = 0;
+		String result = null;
+		for(String cd : lecCd) {
+			LectureVO lecture = service.retrieveLecture(cd);
+			cnt += service.commitEnrollment(lecture);
+		}
+		if(cnt==lecCd.length) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+	// 휴강 등록 완료(교직원) ->2
+	@PostMapping("standEnrollment.do")
+	@ResponseBody
+	public String standEnrollment(
+			String[] lecCd
+	) {
+		int cnt = 0;
+		String result = null;
+		for(String cd : lecCd) {
+			LectureVO lecture = service.retrieveLecture(cd);
+			cnt += service.stateEnrollment(lecture);
+		}
+		if(cnt==lecCd.length) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+	
+}

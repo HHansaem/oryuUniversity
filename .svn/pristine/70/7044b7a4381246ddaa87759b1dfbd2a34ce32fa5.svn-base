@@ -1,0 +1,32 @@
+package kr.or.ddit.lecture.vo;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "examCd")
+public class ExamVO {
+	@NotBlank
+	private String examCd;
+	@NotBlank
+	private String lecCd;
+	private String examNm;
+	private String examCont;
+	private String examType;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	private LocalDateTime examStaTime;
+	private Integer examScore;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	private LocalDateTime examEndTime;
+	private String examScoreReveal;
+
+}

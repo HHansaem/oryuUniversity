@@ -1,0 +1,13 @@
+package kr.or.ddit.lectureContents.attendance.dao;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+
+public interface AttendanceDAO {
+	
+	//출석 목록조회
+	public List<AttendanceVO> selectAttendanceList();
+	
+	
+}

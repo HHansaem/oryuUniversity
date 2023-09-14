@@ -1,0 +1,41 @@
+package kr.or.ddit.lectureContents.vo;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.common.validate.DeleteGroup;
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.validate.groups.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "examCd")
+public class ExamVO {
+	@NotBlank(groups = {UpdateGroup.class,DeleteGroup.class})
+	private String examCd;
+	@NotBlank(groups=InsertGroup.class)
+	private String lecCd;
+	private String examNm;
+	private String examCont;
+	private String examType;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	private LocalDateTime examStaTime;
+	private Integer examScore;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	private LocalDateTime examEndTime;
+	private String examScoreReveal;
+	private Integer examTakeTime;
+	private String examState;
+	private Integer eqNum;
+	
+	private List<ExamQuestionVO> examQueList;
+
+}

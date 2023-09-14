@@ -1,0 +1,46 @@
+package kr.or.ddit.lectureContents.attendance.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lectureContents.attendance.service.AttendanceService;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+import kr.or.ddit.lectureSchedule.service.LectureScheduleService;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+
+@Controller
+@RequestMapping("/lecture")
+public class AttendanceRetreiveController {
+	
+	@Inject
+	AttendanceService atService;
+	@Inject
+	LectureScheduleService lecScheService;
+	
+	
+	@GetMapping
+	@RequestMapping("/AttendanceView.do")
+	public String getAttendance() {
+		
+		return "lecture/attendance/attendanceView";
+	}
+	
+	@GetMapping
+	@RequestMapping("/AttendanceList.do")
+	public String getAttendanceList(AttendanceVO attendance, Model model) {
+		List<LectureScheduleVO> lectureSchedule = lecScheService.retrieveLectureScheduleDetail(attendance.getLecCd());
+		List<AttendanceVO> attendanceList = atService.retrieveAttendanceList(attendance);
+		
+		model.addAttribute("lectureSchedule", lectureSchedule);
+		model.addAttribute("attendanceList", attendanceList);
+		return "lecture/attedance/ajax/attendanceList";
+	}
+	
+}

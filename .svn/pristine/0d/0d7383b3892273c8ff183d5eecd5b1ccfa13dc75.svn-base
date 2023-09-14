@@ -1,0 +1,58 @@
+package kr.or.ddit.academicbusinessmanagement.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.academicbusinessmanagement.dao.AcademicBusinessManagementDAO;
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessManagementVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.serviceresult.ServiceResult;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class AcademicBusinessManagementServiceImpl implements AcademicBusinessManagementService {
+	
+	@Inject
+	private AcademicBusinessManagementDAO abmDAO;
+	
+	@Override
+	public List<AcademicBusinessManagementVO> retrieveAcademicBusinessManagementList(PaginationInfo paging) {
+		
+		//자료 총 개수
+		long totalRecord = abmDAO.selectTotalRecord(paging);
+		
+		//paging 객체에 totalRecord저장
+		paging.setTotalRecord(totalRecord);
+		
+		//abmDAO 리턴
+		return abmDAO.selectAcademicBusinessManagementList(paging);
+	}
+
+	//학술사업 단일 조회 (acBuCd 학술사업코드)
+	@Override
+	public AcademicBusinessManagementVO retrieveAcademicBusinessManagementVO(String acBuCd) {
+		//abmDAO에서 학술코드로 selectAcademicBusinessManagement사용
+		return abmDAO.selectAcademicBusinessManagement(acBuCd);
+	}
+
+	//학술사업관리 등록
+	@Override
+	public ServiceResult createAcademicBusinessManagement(AcademicBusinessManagementVO abm) {
+		
+		// abmDAO에서 abm 값이 0보다 크면 ok, 0이면 fail
+		return abmDAO.insertAcademicBusinessManagement(abm)>0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+	//학술사업 수정
+	@Override
+	public ServiceResult modifyAcademicBusinessManagement(AcademicBusinessManagementVO abm) {
+		
+		// abmDAO에서 abm 값이 0보다 크면 ok, 0이면 fail
+		return abmDAO.updateAcademicBusinessManagement(abm)>0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+}

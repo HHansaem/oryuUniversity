@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.schedule.dao.AcademicScheduleDAO">
+	
+	<sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'title'">
+                    INSTR(AS_NM, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'content'">
+                    INSTR(AS_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(AS_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(AS_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+           
+      <if test="detailCondition.asDistinction neq null and not detailCondition.asDistinction.isEmpty">
+         AND AS_DISTINCTION = #{detailCondition.asDistinction}
+      </if>
+      <if test="detailCondition.month neq null and not detailCondition.month.isEmpty">
+         AND EXTRACT(MONTH FROM AS_START) = #{detailCondition.month}
+      </if>
+      
+        </where>
+   </sql>
+	
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM ACA_SCHEDULE
+      <include refid="searchFrag"></include>
+   </select>
+   
+	<select id="selectAcademicScheduleLsit" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+                  AS_CD
+			    , AS_NM
+			    , AS_DISTINCTION
+			    , AS_START
+			    , AS_END
+			    , AS_CONT
+			    , AS_ACCE_PERM
+              FROM ACA_SCHEDULE
+              <include refid="searchFrag"/>
+              ORDER BY AS_CD DESC
+          ) A
+      ) B
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+   <select id="selectAcademicSchedule" parameterType="string" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+		 select  
+		 	AS_CD
+		    , AS_NM
+		    , AS_DISTINCTION
+		    , AS_START
+		    , AS_END
+		    , AS_CONT
+		    , AS_ACCE_PERM
+	      FROM ACA_SCHEDULE
+	      WHERE AS_CD = #{asCd}
+   </select>
+   
+   
+   
+   <insert id="insertAcademicSchedule" parameterType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   	<selectKey order="BEFORE" resultType="string" keyProperty="asCd">
+         SELECT ACA_SCHEDULE_SEQ.NEXTVAL FROM DUAL
+      </selectKey>
+      INSERT INTO ACA_SCHEDULE (
+            AS_CD
+		    , AS_NM
+		    , AS_DISTINCTION
+		    , AS_START
+		    , AS_END
+		    , AS_CONT
+		    , AS_ACCE_PERM
+      ) VALUES (
+         #{asCd,jdbcType=VARCHAR}
+		, #{asNm,jdbcType=VARCHAR}
+		, #{asDistinction,jdbcType=VARCHAR}
+		, #{asStart,jdbcType=DATE}
+		, #{asEnd,jdbcType=DATE}
+		, #{asCont,jdbcType=CLOB}
+		, #{asAccePerm,jdbcType=VARCHAR}
+      )
+   </insert>
+   
+   <update id="updateAcademicSchedule" parameterType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   		UPDATE ACA_SCHEDULE
+   		SET
+   			AS_CD = #{asCd, jdbcType=VARCHAR}
+			, AS_NM = #{asNm, jdbcType=VARCHAR}
+			, AS_DISTINCTION = #{asDistinction, jdbcType=VARCHAR}
+			, AS_START = #{asStart, jdbcType=DATE}
+			, AS_END = #{asEnd, jdbcType=DATE}
+			, AS_CONT = #{asCont, jdbcType=CLOB}
+			, AS_ACCE_PERM = #{asAccePerm, jdbcType=VARCHAR}
+   		WHERE AS_CD = #{asCd}
+   </update>
+   
+   <delete id="deleteAcademicSchedule" parameterType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   		DELETE FROM ACA_SCHEDULE
+		WHERE AS_CD = #{asCd}
+   </delete>
+   
+   <select id="getCalendar" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+   		SELECT 
+			AS_CD
+		    , AS_NM
+		    , AS_START
+		    , AS_END
+		    , AS_DISTINCTION
+		    , AS_ACCE_PERM
+	     FROM ACA_SCHEDULE
+	     <where>
+	     	<choose>
+	     		<when test="role == 'ROLE_TS'"></when>
+	     		<when test="role == 'ROLE_ST'">
+	     			AND AS_ACCE_PERM IN('BOTH', 'STUDENT')
+	     		</when>
+	     		<when test="role == 'ROLE_PR'">
+	     			AND AS_ACCE_PERM IN('BOTH', 'PROFESSOR')
+	     		</when>
+	     		<otherwise>
+	     			AND 1=0
+	     		</otherwise>
+	     	</choose>
+	     </where>
+   </select>
+
+</mapper>

@@ -1,0 +1,51 @@
+package kr.or.ddit.student.vo;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "stCd")
+public class StudentVO implements Serializable {
+	private long rnum;
+	private String stAddr1;
+	private String stAddr2;
+	@NotBlank
+	private String stReg1;
+	@NotBlank
+	private String stReg2;
+	@NotBlank
+	private String stCd;
+	@NotBlank
+	private String dtCd;
+	@NotBlank
+	private String stNm;
+	@NotBlank
+	private String stPh;
+	private String stEmail;
+	@NotBlank
+	private String stPass;
+	private String stFic;
+	private Integer stLiCre;
+	private String stTmCd;
+	private String stStatus;
+	private String stRole; 
+	
+	private String dtNm;
+	
+	private MultipartFile stImage;
+	public void setStImage(MultipartFile stImage) {
+		if(!stImage.isEmpty()) {
+			this.stImage = stImage;
+			this.stFic = UUID.randomUUID().toString();
+		}
+		
+	}
+	
+}

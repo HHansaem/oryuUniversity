@@ -1,0 +1,510 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+
+<style>
+	.test{
+		width: 80%;
+		
+	}
+	.text-center{
+		background-color: white;
+	}
+	
+	.modal-content {
+	    background-color: white;
+	    margin: 15% auto;
+	    padding: 20px;
+	    width: 70%; /* 모달의 가로 크기를 조절할 수 있습니다. */
+	}
+	.larger-list {
+    	font-size: 18px; /* 원하는 크기로 변경 */
+    	margin-left: 25px; /* 원하는 여백을 지정 */
+	}
+	.pencil-icon {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    background: #36ed2f;
+    border: 2px solid #13d80c;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
+  	}
+
+  .pencil-icon::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #13d80c;
+  }
+  
+  .pencil-icon2 {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    background: #ff828e;
+    border: 2px solid #dc3545;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
+  	}
+
+  .pencil-icon2::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #dc3545;
+  }
+  .mdi-checkbox-blank-circle{
+  	font-size: 0.8em;
+  }
+  .examView{
+      border-radius: 15px;
+      background: #7fe2ff7d;
+  }
+	
+</style>
+<div id="container">
+	<div class="row row-cols-1 row-cols-md-2 mb-3 text-center p-4 m-4">
+	      <div class="col d-flex justify-content-end">
+	        <div class="card mb-3 rounded-3 shadow-sm test">
+	          <div class="card-header py-3">
+	            <h4 class="my-0 fw-normal">중간고사</h4>
+	          </div>
+	          <div class="card-body">
+	            <h1 class="card-title pricing-card-title">23학년도 1학기 중간고사</h1>
+	            <sec:authorize access="hasRole('ROLE_ST')">
+	            <c:choose>
+		            <c:when test="${not empty midterm and midterm.testAvailable}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: 60분</li>
+			              <li>총점: 100점</li>
+			              <li>시작일시: 8월19일 13시 00분</li>
+			              <li>마감일시: 8월19일 15시 00분</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" onclick = "checkAvailable(${midterm.testAvailable})" href="<%=request.getContextPath()%>/lecture/examQueView.do?examCd=${midterm.examCd}&lecCd=${lecCd}">시험풀기</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험결과" onclick="mySubmitView(${midterm.examCd},${pageContext.request.userPrincipal.name})"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>중간고사 기간이 아닙니다.</h3>
+			            	</ul>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	            <sec:authorize access="hasRole('ROLE_PR')">
+	            <c:choose>
+		            <c:when test="${not empty midterm}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: 60분</li>
+			              <li>총점: 100점</li>
+			              <li>시작일시: 8월19일 13시 00분</li>
+			              <li>마감일시: 8월19일 15시 00분</li>
+			              <li>활성화 여부: 비활성</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${midterm.examCd}&lecture=${lecCd}&type=중간고사">시험출제</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험채점" onclick="examSubmitResult(${midterm.examCd})"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5" style="height:70%;">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>출제된 시험이 존재하지 않습니다.</h3>
+			            	</ul>
+			            </div>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${midterm.examCd}&lecture=${lecCd}&type=중간고사">시험출제</a>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	          </div>
+	        </div>
+	      </div>
+	      <div class="col d-flex">
+	        <div class="card mb-3 rounded-3 shadow-sm test">
+	          <div class="card-header py-3">
+	            <h4 class="my-0 fw-normal">기말고사</h4>
+	          </div>
+	          <div class="card-body">
+	            <h1 class="card-title pricing-card-title">23학년도 1학기 기말고사</h1>
+	            <sec:authorize access="hasRole('ROLE_ST')">
+	            <c:choose>
+		            <c:when test="${not empty finals and finals.testAvailable}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: 60분</li>
+			              <li>총점: 100점</li>
+			              <li>시작일시: 8월19일 13시 00분</li>
+			              <li>마감일시: 8월19일 15시 00분</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" onclick = "checkAvailable(${finals.testAvailable})" href="<%=request.getContextPath()%>/lecture/examQueView.do?examCd=${finals.examCd}&lecCd=${lecCd}">시험풀기</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험결과"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>기말고사 기간이 아닙니다.</h3>
+			            	</ul>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	            <sec:authorize access="hasRole('ROLE_PR')">
+	            <c:choose>
+		            <c:when test="${not empty finals}">
+			            <ul class="list-unstyled mt-3 mb-4">
+			              <li>시험시간: 60분</li>
+			              <li>총점: 100점</li>
+			              <li>시작일시: 8월19일 13시 00분</li>
+			              <li>마감일시: 8월19일 15시 00분</li>
+			              <li>활성화 여부: 비활성</li>
+			            </ul>
+			            <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${finals.examCd}&lecture=${lecCd}&type=기말고사">시험출제</a>
+				            <input type="button" class="w-70 btn btn-lg btn-outline-primary p-2" value="시험채점"/>
+			            </div>
+		            </c:when>
+		            <c:otherwise>
+		            	 <div class="d-flex align-item-center justify-content-center pt-5" style="height:70%;">
+			              	<ul class="list-unstyled mt-3 mb-4">
+			              		<h3>출제된 시험이 존재하지 않습니다.</h3>
+			            	</ul>
+			            </div>
+			             <div>
+				            <a type="button" class="w-70 btn btn-lg btn-outline-primary p-2" href="<%=request.getContextPath()%>/lecture/examInsert.do?examCd=${finals.examCd}&lecture=${lecCd}&type=기말고사">시험출제</a>
+			            </div>
+		            </c:otherwise>
+	            </c:choose>
+	            </sec:authorize>
+	          </div>
+	        </div>
+	      </div>
+	</div>
+	<div id="ajax" class="p-2 m-3">
+	
+	</div>
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel"></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="pt-3">
+			        <p>다음 중 올바르지 않은 것은?</p>
+			        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+			        <div class="d-flex flex-column">
+			        	<div class="m-2 examView p-2">
+			        		<i class="mdi mdi-checkbox-blank-circle"></i>
+			        		<span class="p-2">보기입니다~</span>
+			        		<div class="pencil-icon">정답입니다!</div>
+			        	</div>
+			        	<div class="m-2 p-2">
+				        	<i class="mdi mdi-checkbox-blank-circle"></i>
+				        	<span class="p-2">보기입니다~</span>
+			        	</div>
+			        	<div class="m-2 p-2">
+				        	<i class="mdi mdi-checkbox-blank-circle"></i>
+				        	<span class="p-2">보기입니다~</span>
+			        	</div>
+			        	<div class="m-2 p-2">
+				        	<i class="mdi mdi-checkbox-blank-circle"></i>
+				        	<span class="p-2">보기입니다~</span>
+			        	</div>
+			        </div>
+		        </div>
+		        <div class="d-flex justify-content-end align-items-center">
+			        <span class="m-2">부여점수:</span>
+	            	<input class="m-2" type="number" id="score1" name="score1" value="5" />
+            	</div>
+		    </div>
+		    <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="p-3">
+		        <p>다음 중 올바르지 않은 것은?</p>
+		        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="1"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="2"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="3"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="4"> 1번 보기입니다~</label><br>
+		        </div>
+		    </div>
+		    <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="p-3">
+		        <p>다음 중 올바르지 않은 것은?</p>
+		        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="1"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="2"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="3"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="4"> 1번 보기입니다~</label><br>
+		        </div>
+		    </div>
+		    <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="p-3">
+		        <p>다음 중 올바르지 않은 것은?</p>
+		        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="1"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="2"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="3"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="4"> 1번 보기입니다~</label><br>
+		        </div>
+		    </div>
+		    <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="p-3">
+		        <p>다음 중 올바르지 않은 것은?</p>
+		        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="1"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="2"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="3"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="4"> 1번 보기입니다~</label><br>
+		        </div>
+		    </div>
+		    <div class="border m-3" id="${cnt.index+1}">
+				<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+		        	<h5>문제 1번</h5>
+		        	<div>5점</div>
+		        </div>
+		        <div class="p-3">
+		        <p>다음 중 올바르지 않은 것은?</p>
+		        <input type="hidden" name="examQueSubmitList[0].eqCd" value="0"/>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="1"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="2"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="3"> 1번 보기입니다~</label><br>
+		        <label><input type="radio" data-id="quest1" name="examQueSubmitList[0].esAnswer" value="4"> 1번 보기입니다~</label><br>
+		        </div>
+		    </div>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary">Save changes</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</div>
+
+<!-- <div class="col-lg-12 stretch-card"> -->
+<!-- 	<div class="card"> -->
+<!-- 		<div class="card-body"> -->
+<%-- 			<sec:authorize access="hasRole('ROLE_PR')">	 --%>
+<!-- 			<div class="d-flex justify-content-end"> -->
+<!-- 				<a -->
+<%-- 					href="<%=request.getContextPath()%>/lecture/examInsert.do?lecture=${lecCd}" --%>
+<!-- 					class="btn btn-primary">시험 등록</a> -->
+<!-- 			</div> -->
+<%-- 			</sec:authorize> --%>
+<%-- 			<c:choose> --%>
+<%-- 				<c:when test="${progressingExamList.size() > 0 or openExamList.size() > 0 or closedExamList.size() > 0}"> --%>
+<%-- 				<sec:authorize access="hasRole('ROLE_PR')">	 --%>
+<%-- 				<c:if test="${not empty progressingExamList and progressingExamList.size() > 0}"> --%>
+<!-- 				<div class="table-responsive pt-3"> -->
+<!-- 					<table class="table table-bordered"> -->
+<!-- 						<thead> -->
+<!-- 							<tr class="table-primary"> -->
+<!-- 								<th>출제중인 시험</th> -->
+<!-- 							</tr> -->
+<!-- 						</thead> -->
+<!-- 						<tbody> -->
+<%-- 							<c:forEach items="${progressingExamList}" var="progressingExam" varStatus="cnt"> --%>
+<%-- 							<tr data-id="${progressingExam.examCd}" class="clickable-progress"> --%>
+<!-- 								<td> -->
+<!-- 									<div class="d-flex align-items-center"> -->
+<%-- 										<div class="custom-flex-item">${cnt.index+1}. 출제중인 시험</div> --%>
+<!-- 										<div class="justify-content-end"> -->
+											
+<!-- 										</div> -->
+<!-- 									</div> -->
+<!-- 								</td> -->
+<!-- 							</tr> -->
+<%-- 							</c:forEach> --%>
+<!-- 						</tbody> -->
+<!-- 					</table> -->
+<!-- 				</div> -->
+<%-- 				</c:if> --%>
+<%-- 				</sec:authorize> --%>
+<%-- 				<c:if test="${not empty openExamList and openExamList.size() > 0}"> --%>
+<!-- 				<div class="table-responsive pt-3"> -->
+<!-- 					<table class="table table-bordered"> -->
+<!-- 						<thead> -->
+<!-- 							<tr class="table-primary"> -->
+<!-- 								<th>진행중인 시험</th> -->
+<!-- 							</tr> -->
+<!-- 						</thead> -->
+<!-- 						<tbody> -->
+<%-- 							<c:forEach items="${openExamList}" var="openExam" varStatus="cnt"> --%>
+<%-- 							<tr data-lec="${lecCd}" data-exam="${openExam.examCd}" class="clickable-row"> --%>
+<!-- 								<td> -->
+<!-- 									<div class="d-flex align-items-center"> -->
+<%-- 										<div class="custom-flex-item">${cnt.index+1}. ${openExam.examNm}</div> --%>
+<!-- 									</div> -->
+<!-- 								</td> -->
+<!-- 							</tr> -->
+<%-- 							</c:forEach> --%>
+<!-- 						</tbody> -->
+<!-- 					</table> -->
+<!-- 				</div> -->
+<%-- 				</c:if> --%>
+<%-- 			<c:if test="${not empty closedExamList and closedExamList.size() > 0}"> --%>
+<!-- 			<div class="table-responsive pt-3"> -->
+<!-- 				<table class="table table-bordered"> -->
+<!-- 					<thead> -->
+<!-- 						<tr class="table-primary"> -->
+<!-- 							<th>마감된 시험</th> -->
+<!-- 						</tr> -->
+<!-- 					</thead> -->
+<!-- 					<tbody> -->
+<%-- 						<c:forEach items="${closedExamList}" var="closedExam" varStatus="cnt"> --%>
+<%-- 						<tr data-id="${closedExam.examCd}" class="clickable-row"> --%>
+<!-- 							<td> -->
+<!-- 								<div class="d-flex align-items-center"> -->
+<%-- 									<div class="custom-flex-item">${cnt.index+1}. ${closedExam.examNm}</div> --%>
+<!-- 									<div class="justify-content-end"> -->
+<%-- 										시작일시: ${closedExam.examStaTime} --%>
+<%-- 										마감일시: ${closedExam.examEndTime} --%>
+<%-- 										배점: ${closedExam.examScore} --%>
+<!-- 									</div> -->
+<!-- 								</div> -->
+<!-- 							</td> -->
+<!-- 						</tr> -->
+<%-- 						</c:forEach> --%>
+<!-- 					</tbody> -->
+<!-- 				</table> -->
+<!-- 			</div> -->
+<%-- 			</c:if> --%>
+<%-- 			</c:when> --%>
+<%-- 			<c:otherwise> --%>
+<!-- 				<div class="table-responsive pt-3"> -->
+<!-- 				<table class="table table-bordered"> -->
+<!-- 					<thead> -->
+<!-- 						<tr class="table"> -->
+<!-- 						</tr> -->
+<!-- 					</thead> -->
+<!-- 					<tbody> -->
+<!-- 						<tr> -->
+<!-- 							<td> -->
+<!-- 								등록된 시험이 존재하지 않습니다. -->
+<!-- 							</td> -->
+<!-- 						</tr> -->
+<!-- 					</tbody> -->
+<!-- 				</table> -->
+<!-- 			</div> -->
+<%-- 			</c:otherwise> --%>
+<%-- 		</c:choose> --%>
+<!-- 		</div> -->
+<!-- 	</div> -->
+<!-- </div> -->
+<script>
+	function checkAvailable(checkFlag){
+		if(checkFlag=="false"){
+			 event.preventDefault(); 
+	         alert("시험 기간이 아닙니다.");
+		}
+	}
+	function examSubmitResult(examCd){
+		
+		var data = 
+		{
+			examCd : examCd	
+		}
+		$.ajax({
+	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	        data: data,
+	        url: "${pageContext.request.contextPath}/lecture/examSubmitList.do",
+	        success: function(response) {
+	    	   	$("#ajax").html(response);
+	        },
+	        error: function(xhr, status, error) {
+	            console.error(error);
+	        }
+	    });
+	}
+	
+	function mySubmitView(examCd,stCd){
+		
+		var data = 
+		{
+			examCd : examCd,
+			stCd : stCd
+		}
+		$.ajax({
+	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	        data: data,
+	        url: "${pageContext.request.contextPath}/lecture/examStSubmitView.do",
+	        success: function(response) {
+	    	   	$("#ajax").html(response);
+	        },
+	        error: function(xhr, status, error) {
+	            console.error(error);
+	        }
+	    });
+	}
+
+    $(document).ready(function() {
+    	
+        $(".clickable-row").click(function() {
+	        var lec = $(this).data("lec");
+	        var exam = $(this).data("exam");
+	        window.location.href = "<%=request.getContextPath()%>/lecture/examQueView.do?examCd=" + exam + "&lecCd="+lec;
+        });
+        
+        $(".clickable-progress").click(function() {
+	        var id = this.getAttribute("data-id");
+	        window.location.href = "<%=request.getContextPath()%>/lecture/examInsert.do?examCd=" + id;
+        });
+        
+        $("#ajax").on("click",".stSubmitView", function() {
+        	var stName = $(this).closest("tr").find(".stName").text();
+        	var stCd = $(this).closest("tr").find(".stCd").text();
+        	var dtNm = $(this).closest("tr").find(".dtNm").text();
+            $("#exampleModalLabel").text("2023학년도 중간고사");
+        });
+        
+    });
+   
+</script>

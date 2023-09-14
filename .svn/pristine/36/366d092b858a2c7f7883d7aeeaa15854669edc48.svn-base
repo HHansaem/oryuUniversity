@@ -1,0 +1,30 @@
+package kr.or.ddit.tuition.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.tuition.service.TuitionService;
+
+@Controller
+public class ScholarshipApplyController {
+	
+	@Inject
+	TuitionService service;
+	
+	@RequestMapping("/scholarship/scholarshipApply.do")
+	public String getHandler(
+		Authentication authentication
+		, Model model
+	){
+		
+		String stCd = authentication.getName();
+		model.addAttribute("stCd", stCd);
+
+		return "tuition/scholarshipForm";
+	}
+
+}

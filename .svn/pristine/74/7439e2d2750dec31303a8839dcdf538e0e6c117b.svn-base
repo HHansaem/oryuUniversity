@@ -1,0 +1,31 @@
+package kr.or.ddit.email.controller;
+
+import java.util.Properties;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.email.service.MailServiceImpl;
+import kr.or.ddit.email.vo.MailVO;
+
+@Controller
+public class MailMapController {
+
+	@Inject
+	private MailServiceImpl service;
+	
+	@RequestMapping("/mail/mailMapController.do")
+	public String mailMapController(
+	    Authentication authentication,
+	    Model model
+	) {
+        return null;
+	}
+	
+	
+	
+}

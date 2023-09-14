@@ -1,0 +1,19 @@
+package kr.or.ddit.lectureContents.vo;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "attsCd")
+public class AttendanceStateVO {
+	@NotBlank
+	private String attsCd;
+	@NotBlank
+	private String attsSche;
+	@NotBlank
+	private String attsState;
+	@NotBlank
+	private String attCd;
+}

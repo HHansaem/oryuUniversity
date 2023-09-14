@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO">
+
+	<insert id="insertLectureSchedule" parameterType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO">
+		INSERT INTO LECTURESCHEDULE (
+		    CLAS_CD,
+		    SCHE_CD,
+		    LEC_CD
+		) VALUES (
+		    #{clasCd,jdbcType=VARCHAR}
+			, #{scheCd,jdbcType=VARCHAR}
+			, #{lecCd,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectedLectureSchedule" resultType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" parameterType="String">
+		SELECT
+		MON.SCHE_TIME SCHETIME
+		, MONSCHE.LEC_CD LECMON
+		, TUESCHE.LEC_CD LECTUE
+		, WEDSCHE.LEC_CD LECWED
+		, THUSCHE.LEC_CD LECTHU
+		, FRISCHE.LEC_CD LECFRI
+		FROM DAYTIMESCHEDULE MON
+		, DAYTIMESCHEDULE TUE
+		, DAYTIMESCHEDULE WED
+		, DAYTIMESCHEDULE THU
+		, DAYTIMESCHEDULE FRI
+		, LECTURESCHEDULE MONSCHE
+		, LECTURESCHEDULE TUESCHE
+		, LECTURESCHEDULE WEDSCHE
+		, LECTURESCHEDULE THUSCHE
+		, LECTURESCHEDULE FRISCHE
+		
+		WHERE MON.SCHE_DAY = 'mon'
+		AND TUE.SCHE_DAY = 'tue'
+		AND WED.SCHE_DAY = 'wed'
+		AND THU.SCHE_DAY = 'thu'
+		AND FRI.SCHE_DAY = 'fri'
+		AND MON.SCHE_TIME = TUE.SCHE_TIME
+		AND MON.SCHE_TIME = WED.SCHE_TIME
+		AND MON.SCHE_TIME = THU.SCHE_TIME
+		AND MON.SCHE_TIME = FRI.SCHE_TIME
+		AND MON.SCHE_CD = MONSCHE.SCHE_CD (+)
+		and monsche.clas_cd (+)= #{scheCd}
+		AND TUE.SCHE_CD = TUESCHE.SCHE_CD (+)
+		and tuesche.clas_cd (+)= #{scheCd}
+		AND WED.SCHE_CD = WEDSCHE.SCHE_CD (+)
+		and wedsche.clas_cd (+)= #{scheCd}
+		AND THU.SCHE_CD = THUSCHE.SCHE_CD (+)
+		and thusche.clas_cd (+)= #{scheCd}
+		AND FRI.SCHE_CD = FRISCHE.SCHE_CD (+)
+		and frische.clas_cd (+)= #{scheCd}
+		ORDER BY MON.SCHE_TIME
+		
+	</select>
+	
+	<delete id="deleteLectureShcedule" parameterType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO">
+		DELETE
+		FROM LECTURESCHEDULE
+		WHERE LEC_CD = #{lecCd,jdbcType=VARCHAR}
+	</delete>
+
+
+
+
+
+
+
+
+</mapper>

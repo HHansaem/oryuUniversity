@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.dao.StudentDAO">
+
+	<sql id="searchFrag">
+		<trim prefix=" WHERE ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(ST_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'stnum'">
+        				INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(ST_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+	<select id="selectTotalRecord" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM STUDENT	
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectStudentList" resultType="kr.or.ddit.student.vo.StudentVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, D.DT_NM
+		    FROM (
+				SELECT 
+					ST_CD, DT_CD, ST_NM, ST_PH, ST_EMAIL
+					,ST_PASS, ST_FIC, ST_LI_CRE, ST_TM_CD
+					,ST_STATUS, ST_ROLE, ST_ADDR1, ST_ADDR2
+					,ST_REG1, ST_REG2 
+				FROM STUDENT
+				<include refid="searchFrag" />
+		       	ORDER BY ROWID DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+	<select id="selectStudent" parameterType="string" resultType="kr.or.ddit.student.vo.StudentVO">
+		SELECT S.ST_CD, D.DT_NM, S.ST_NM, S.ST_PH, S.ST_EMAIL, S.ST_PASS
+			, S.ST_FIC, S.ST_LI_CRE, S.ST_TM_CD, S.ST_STATUS, S.DT_CD
+			, S.ST_ROLE, S.ST_ADDR1, S.ST_ADDR2, S.ST_REG1, S.ST_REG2 
+		FROM STUDENT S 
+		INNER JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD 
+		WHERE S.ST_CD = #{stCd}
+	</select>
+	
+	<insert id="insertStudent" parameterType="kr.or.ddit.student.vo.StudentVO">
+		INSERT INTO STUDENT(
+				ST_ADDR1
+				,ST_ADDR2
+				,ST_REG1
+				,ST_REG2
+				,ST_CD
+				,DT_CD
+				,ST_NM
+				,ST_PH
+				,ST_EMAIL
+				,ST_PASS
+				,ST_FIC
+				,ST_STATUS
+				) 
+			VALUES(
+				 #{stAddr1,jdbcType=VARCHAR}
+				, #{stAddr2,jdbcType=VARCHAR}
+				, #{stReg1,jdbcType=VARCHAR}
+				, #{stReg2,jdbcType=VARCHAR}
+				, #{stCd,jdbcType=VARCHAR}
+				, #{dtCd,jdbcType=VARCHAR}
+				, #{stNm,jdbcType=VARCHAR}
+				, #{stPh,jdbcType=VARCHAR}
+				, #{stEmail,jdbcType=VARCHAR}
+				, #{stPass,jdbcType=VARCHAR}
+				, #{stFic,jdbcType=VARCHAR}
+				, #{stStatus,jdbcType=VARCHAR}
+				)
+	</insert>
+	
+	<update id="updateStudent" parameterType="kr.or.ddit.student.vo.StudentVO">
+		UPDATE STUDENT SET 
+			 DT_CD = #{dtCd,jdbcType=VARCHAR}
+			, ST_NM = #{stNm,jdbcType=VARCHAR}
+			, ST_PH = #{stPh,jdbcType=VARCHAR}
+			, ST_PASS = #{stPass,jdbcType=VARCHAR}
+			, ST_STATUS = #{stStatus,jdbcType=VARCHAR}
+			, ST_EMAIL = #{stEmail,jdbcType=VARCHAR}
+			, ST_ADDR1 = #{stAddr1,jdbcType=VARCHAR}
+			, ST_ADDR2 = #{stAddr2,jdbcType=VARCHAR}
+			<if test="stFic neq null and not stFic.isEmpty()">
+			, ST_FIC = #{stFic,jdbcType=VARCHAR}
+			</if>
+		WHERE ST_CD = #{stCd,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteStudent" parameterType="string">
+		UPDATE STUDENT 
+		SET 
+		ST_STATUS = '탈퇴' 
+		WHERE ST_CD = #{stCd}
+	</delete>
+	
+</mapper>

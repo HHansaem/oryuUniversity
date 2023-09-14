@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.research.dao.ResearchDAO">
+
+	
+	<sql id="searchFrag">
+		<where>
+			
+			
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'code'">
+						INSTR(RESE_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'name'">
+						INSTR(RESE_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(RESE_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(RESE_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.acBuCd neq null and not detailCondition.acBuCd.isEmpty">
+			            AND AC_BU_CD = #{detailCondition.acBuCd}
+			        </when>
+			        <otherwise>
+			            <!-- Do nothing when 'dtCd' key is not present or has a null value -->
+			        </otherwise>
+			    </choose>
+			</if>
+
+		</where>
+	</sql>
+	
+		<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM RESEARCH
+		<include refid="searchFrag"></include>
+	</select>
+	
+	<select id="selectResearchList" resultType="kr.or.ddit.research.vo.ResearchVO">
+	SELECT
+		RESE_CD
+		, AC_BU_CD
+		, RESE_NM
+		, RESE_SHORT_CONT
+		, RESE_CONT
+		, RESE_DATE
+		, RESE_STAT
+		, RESE_AUT_NM
+		, ATCH_FILE_ID
+	FROM
+    RESEARCH
+	</select>
+	
+	<select id="selectResearch" resultType="kr.or.ddit.research.vo.ResearchVO" parameterType="String" > <!--  resultMap="researchMap"> -->
+	
+			SELECT *
+		FROM RESEARCH
+		WHERE RESE_CD = #{RESE_CD}
+	
+	</select>
+	
+	<insert id="insertResearch" parameterType="kr.or.ddit.research.vo.ResearchVO">
+	
+	INSERT INTO RESEARCH (
+			RESE_CD
+			, AC_BU_CD
+			, RESE_NM
+			, RESE_SHORT_CONT
+			, RESE_CONT
+			, RESE_DATE
+			, RESE_STAT
+			, RESE_AUT_NM
+			, ATCH_FILE_ID
+		) VALUES (
+			RESE_CD = #{reseCd,jdbcType=VARCHAR}
+			, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+			, RESE_NM = #{reseNm,jdbcType=VARCHAR}
+			, RESE_SHORT_CONT = #{reseShortCont,jdbcType=CLOB}
+			, RESE_CONT = #{reseCont,jdbcType=CLOB}
+			, RESE_DATE = #{reseDate,jdbcType=DATE}
+			, RESE_STAT = #{reseStat,jdbcType=VARCHAR}
+			, RESE_AUT_NM = #{reseAutNm,jdbcType=VARCHAR}
+			, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+		)
+	
+	</insert>
+	
+	<update id="updateResearch" parameterType="kr.or.ddit.research.vo.ResearchVO">
+	
+	UPDATE RESEARCH
+	SET
+		RESE_CD = #{reseCd,jdbcType=VARCHAR}
+		, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+		, RESE_NM = #{reseNm,jdbcType=VARCHAR}
+		, RESE_SHORT_CONT = #{reseShortCont,jdbcType=CLOB}
+		, RESE_CONT = #{reseCont,jdbcType=CLOB}
+		, RESE_DATE = #{reseDate,jdbcType=DATE}
+		, RESE_STAT = #{reseStat,jdbcType=VARCHAR}
+		, RESE_AUT_NM = #{reseAutNm,jdbcType=VARCHAR}
+		, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+	
+	</update>
+	
+	
+	
+	<delete id="deleteResearch" parameterType="String">
+	
+		DELETE FROM RESEARCH
+		WHERE
+		RESE_CD = #{reseCd,jdbcType=VARCHAR}
+	
+	</delete>
+
+
+</mapper>

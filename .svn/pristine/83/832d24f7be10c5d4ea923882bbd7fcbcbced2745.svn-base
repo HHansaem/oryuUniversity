@@ -1,0 +1,81 @@
+package kr.or.ddit.thesis.service;
+
+import java.text.MessageFormat;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.exception.PKNotFoundException;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.thesis.dao.ThesisDAO;
+import kr.or.ddit.thesis.vo.ThesisVO;
+
+@Service
+public class ThesisServiceImpl implements ThesisService {
+
+	@Inject
+	 private ThesisDAO thesisDAO;
+	 
+	/**
+	 * thesis 등록
+	 * @param thesis
+	 * @return
+	 */
+	@Override
+	 public ServiceResult createThesis(ThesisVO thesis) {
+		 return thesisDAO.insertThesis(thesis) > 0 ? ServiceResult.OK : ServiceResult.FAIL ;
+
+	}
+
+	/**
+	 * thesCd를 통한 thesis 조회
+	 * @param thesCd
+	 * @return ThesisVO thesCd
+	 */
+	@Override
+	public ThesisVO retrieveThesis(String thesCd) {
+		ThesisVO thesis = thesisDAO.selectThesis(thesCd);
+		if(thesCd==null)
+			throw new PKNotFoundException(MessageFormat.format("{0} 해당 논문이 없습니다.", thesCd));
+		return thesis;
+	}
+
+	/**
+	 * 논문 목록 조회
+	 * @return
+	 */
+	@Override
+	public List<ThesisVO> retrieveThesisList() {
+		return thesisDAO.selectThesisList();
+	}
+
+	/**
+	 * @param thesis
+	 * @return
+	 */
+	@Override
+	public ServiceResult modifyThesis(ThesisVO thesis) {
+		return thesisDAO.updateThesis(thesis)>0 ? ServiceResult.OK : ServiceResult.FAIL ;
+	}
+
+	/**
+	 * @param thesCd
+	 * @return
+	 */
+	@Override
+	public ServiceResult removeThesis(String thesis) {
+		ServiceResult result = null;
+		try {
+			int cnt = thesisDAO.deleteThesis(thesis);
+			result = cnt >0 ? ServiceResult.OK : ServiceResult.FAIL ;
+		} catch (Exception e) {
+			result = ServiceResult.INVALIDPASSWORD;
+		}
+		return null;
+	}
+	 
+	 
+	
+}

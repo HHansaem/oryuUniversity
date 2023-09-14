@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.login.dao.AuthDAO">
+	<select id="selectUserForAuth" parameterType="string" resultType="kr.or.ddit.login.vo.AuthInfo">
+	SELECT 
+	pr_cd as userId, pr_pass as userPass, 
+	pr_role as userRole, PR_STATUS as userStatus, pr_nm as userName 
+	FROM professor
+	WHERE pr_cd = #{userId}
+	UNION
+	SELECT 
+	st_cd as userId, st_pass as userPass, 
+	st_role as userRole, ST_STATUS as userStatus, st_nm as userName 
+	FROM STUDENT
+	WHERE st_cd = #{userId}
+	UNION
+	SELECT 
+	ts_cd as userId, ts_pass as userPass, 
+	ts_role as userRole, TS_STATUS as userStatus, ts_nm as userName 
+	FROM TEACHING_STAFF
+	WHERE ts_cd = #{userId}
+	</select>
+</mapper>

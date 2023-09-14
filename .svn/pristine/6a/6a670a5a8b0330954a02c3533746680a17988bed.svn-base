@@ -1,0 +1,66 @@
+package kr.or.ddit.internship.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.internship.vo.InternshipVO;
+
+
+@Mapper
+public interface InternshipDAO {
+	
+	/**
+	 * 인턴십 insert
+	 * @param intern
+	 * @return
+	 */
+	public int internshipInsert(InternshipVO intern);
+	
+	/**
+	 * 인턴십 목록
+	 * @return
+	 */
+	public List<InternshipVO> internshipList(PaginationInfo paging);
+	
+	/**
+	 * 인턴십 상세보기
+	 * @param inteCd
+	 * @return
+	 */
+	public InternshipVO internshipView(String inteCd);
+	
+	/**
+	 * 인턴십 업데이트
+	 * @param inteCd
+	 * @return
+	 */
+	public int internshipUpdate(InternshipVO intern);
+	
+	/**
+	 * 인턴십 제거
+	 * @param inteCd
+	 * @return
+	 */
+	public int internshipDelete(String inteCd);
+	
+	/**
+	 * 총 레코드 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long selectTotalRecord(PaginationInfo paging);
+	
+	/**
+	 * 조회수
+	 * @param inteCd
+	 * @return
+	 */
+	public int internshipViewCount(String inteCd);
+	
+	/**
+	 * 해당 인턴십 신청자 수
+	 */
+	public int reqCont(String inteCd);
+}

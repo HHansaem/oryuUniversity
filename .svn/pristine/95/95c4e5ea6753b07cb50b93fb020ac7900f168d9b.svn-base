@@ -1,0 +1,54 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>    
+	<table class="table table-border">
+		
+		
+		<tr>
+			<th>동아리 대표 성명</th>
+			<td>${club.studentVO.stNm}</td>
+		</tr>
+		<tr>
+			<th>동아리 대표 학번</th>
+			<td>${club.stCd }</td>
+		</tr>
+		<tr>
+			<th>동아리명</th>
+			<td>${club.clubNm }</td>
+		</tr>
+		<tr>
+			<th>동아리 지도 교수</th>
+			<td>${club.professorVO.prNm }</td>
+		</tr>
+		<tr>
+			<th>동아리 상태</th>
+			<td>${club.clubStatus }</td>
+		</tr>
+		<tr>
+			<th>동아리 설명</th>
+			<td>${club.clubDetail }</td>
+		</tr>
+		<tr>
+			<th>동아리 계획서</th>
+			<td>${club.clubPlan }</td>
+		</tr>
+		<tr>
+			<th>동아리사진파일</th>
+			<td>${club.clubFicFile}</td>
+		</tr>
+		
+		
+		<tr>
+		<td colspan="2">
+				<input class="btn btn-success" type="submit" value="수정"> 
+				<input class="btn btn-secondary" type=button value="뒤로가기" onclick="history.back();">
+				<c:if test="${sessionScope.userId.length() == 7}"> <!-- 교수 -->
+				<input class="btn btn-danger" type="button" value="폐부신청">
+				</c:if>
+			</td>
+		</tr>
+	</table>
+		
+		

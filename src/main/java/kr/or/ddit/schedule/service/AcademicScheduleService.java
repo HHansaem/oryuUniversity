@@ -1,0 +1,20 @@
+package kr.or.ddit.schedule.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+
+public interface AcademicScheduleService {
+	
+	public List<AcademicScheduleVO> retrieveAcademicScheduleList(PaginationInfo paging);
+	public AcademicScheduleVO retrieveAcademicSchedule(String asCd);
+	
+	public boolean createAcademicSchedule(AcademicScheduleVO acaSchedule);
+	public boolean modifyAcademicSchedule(AcademicScheduleVO acaSchedule);
+	public boolean removeAcademicSchedule(AcademicScheduleVO acaSchedule);
+
+	public long getTotalRecordCount(PaginationInfo paging);
+	
+	public List<AcademicScheduleVO> getCalendar(String asCd);
+}

@@ -1,0 +1,58 @@
+package kr.or.ddit.research.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.research.dao.ResearchDAO;
+import kr.or.ddit.research.vo.ResearchVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class ResearchServiceImpl implements ResearchService {
+
+	ResearchDAO researchDAO;
+	
+	//단일 연구 조회
+	@Override
+	public ResearchVO retrieveResearch(String reseCd) {
+		
+		return researchDAO.selectResearch(reseCd);
+	}
+
+	//연구 리스트 조회
+	@Override
+	public List<ResearchVO> retrieveResearchList(PaginationInfo paging) {
+		// 토탈자료 개수
+		long totalRecord = researchDAO.selectTotalRecord(paging);
+		// 페이징 객체에 토탈레코드 저장
+		paging.setTotalRecord(totalRecord);
+		// 페이징 객체를 이용하여 전체과목조회 후 리턴
+		return researchDAO.selectResearchList(paging);
+	}
+
+	//연구 생성
+	@Override
+	public ServiceResult createResearch(ResearchVO research) {
+		
+		return researchDAO.insertResearch(research)> 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+	//연구 수정
+	@Override
+	public ServiceResult modifyResearch(ResearchVO research) {
+		
+		return researchDAO.updateResearch(research)> 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+	//연구 삭제
+	@Override
+	public ServiceResult removeResearch(ResearchVO research) {
+		
+		return researchDAO.deleteResearch(research)> 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+}

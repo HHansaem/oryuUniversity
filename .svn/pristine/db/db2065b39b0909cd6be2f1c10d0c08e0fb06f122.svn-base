@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.exam.dao.ExamQuestionDAO">
+	<insert id="insertExamQuestion" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestionVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="eqCd">
+		SELECT EXAM_QUE_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+	INSERT INTO exam_question (
+	    eq_cd, exam_cd, eq_type
+	    , eq_qt, eq_answ, eq_score
+	    , eq_num,eq_view1,eq_view2
+	    ,eq_view3,eq_view4
+	) VALUES (
+	 #{eqCd,jdbcType=VARCHAR}
+	,#{examCd,jdbcType=VARCHAR}
+	,#{eqType,jdbcType=VARCHAR}
+	,#{eqQt,jdbcType=VARCHAR}
+	,#{eqAnsw,jdbcType=VARCHAR}
+	,#{eqScore,jdbcType=NUMERIC}
+	,#{eqNum,jdbcType=NUMERIC}
+	,#{eqView1,jdbcType=VARCHAR}
+	,#{eqView2,jdbcType=VARCHAR}
+	,#{eqView3,jdbcType=VARCHAR}
+	,#{eqView4,jdbcType=VARCHAR}
+	)
+	</insert>
+	<select id="selectExamQuestionList" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.ExamQuestionVO">
+	SELECT
+   	eq_cd, exam_cd, eq_type,
+    eq_qt, eq_answ, eq_score,
+    eq_num, eq_view1, eq_view2,
+    eq_view3, eq_view4
+	FROM
+    exam_question where exam_cd = #{examCd}
+	</select>
+	
+	<update id="updateExamQuestion" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestionVO">
+		UPDATE exam_question
+		SET
+ 		EQ_CD = #{eqCd,jdbcType=VARCHAR}
+		, EXAM_CD = #{examCd,jdbcType=VARCHAR}
+		, EQ_TYPE = #{eqType,jdbcType=VARCHAR}
+		, EQ_QT = #{eqQt,jdbcType=VARCHAR}
+		, EQ_ANSW = #{eqAnsw,jdbcType=VARCHAR}
+		, EQ_SCORE = #{eqScore,jdbcType=NUMERIC}
+		, EQ_NUM = #{eqNum,jdbcType=NUMERIC}
+		, EQ_VIEW1 = #{eqView1,jdbcType=VARCHAR}
+		, EQ_VIEW2 = #{eqView2,jdbcType=VARCHAR}
+		, EQ_VIEW3 = #{eqView3,jdbcType=VARCHAR}
+		, EQ_VIEW4 = #{eqView4,jdbcType=VARCHAR}
+		WHERE
+		EQ_CD = #{eqCd}
+    
+	</update>
+	
+	<delete id="deleteExamQuestion" parameterType="string">
+		DELETE FROM exam_question
+		WHERE EQ_CD = #{eqCd}
+	</delete>
+	
+	<update id="reduceExamQueNumber" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestionVO">
+		UPDATE EXAM_QUESTION
+		SET 
+		EQ_NUM = EQ_NUM - 1
+		WHERE 
+		EQ_NUM > #{eqNum}
+		AND
+		EXAM_CD = #{examCd}
+	</update>
+	
+	<select id="selectExamQuestion" parameterType="kr.or.ddit.lectureContents.vo.ExamQuestionVO" resultType="kr.or.ddit.lectureContents.vo.ExamQuestionVO">
+		SELECT
+    	eq_cd,exam_cd,eq_type,
+    	eq_qt,eq_answ,eq_score,
+    	eq_num,eq_view1,eq_view2,
+    	eq_view3,eq_view4
+		FROM
+    	exam_question
+    	WHERE
+    	EXAM_CD = #{examCd} and eq_num = #{eqNum};
+	</select>
+	
+	<select id="selectCountExamQuestion" parameterType="string" resultType="int">
+		SELECT
+    	count(*)
+		FROM
+    	exam_question
+		where exam_cd = #{examCd};
+	</select>
+</mapper>

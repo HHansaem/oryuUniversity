@@ -1,0 +1,44 @@
+package kr.or.ddit.graduation.service;
+
+import java.util.List;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.graduation.vo.GraduationVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface GraduationService {
+
+	/**
+	 * 학생이 속한 단과의 졸업이수조건종류와 그에대한 최소요구치를 가져옴
+	 * @param stCd
+	 * @return
+	 */
+	public List<GraduationVO> retrieveGraduationStudentList(String stCd);
+	/**
+	 * 학생이 속한 단과와 학과를 가져옴
+	 * @param stCd
+	 * @return
+	 */
+	public GraduationVO retrieveGraduationStudentBelong(String stCd);
+	/**
+	 * 모든 졸업이수조건의 종류를 가져옴
+	 * @return
+	 */
+	public List<GraduationVO> retrieveGraduationTypeList();
+	/**
+	 * 모든 단대종류를 가져옴
+	 * @return
+	 */
+	public List<CollegeVO> retrieveCollegeTypeList();
+	/**
+	 * 모든 졸업이수조건종류에 대한 최소요구치를 가져옴
+	 * @return
+	 */
+	public List<GraduationVO> retrieveGraduationConditionList();
+	/**
+	 * 졸업요건의 종류와 최소조건 생성
+	 * @return
+	 */
+	public ServiceResult createGraduation(GraduationVO graduation);
+	
+}

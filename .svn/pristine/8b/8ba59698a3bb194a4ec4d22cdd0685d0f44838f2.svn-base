@@ -1,0 +1,47 @@
+package kr.or.ddit.research.service;
+
+import java.util.List;
+
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.research.vo.ResearchVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface ResearchService {
+
+	/**
+	 * 연구 신규등록
+	 * @param research
+	 * @return
+	 */
+	public ServiceResult createResearch(ResearchVO research);
+	
+	/**
+	 * 연구 조회
+	 * @param reseCd
+	 * @return
+	 */
+	public ResearchVO retrieveResearch(String reseCd);
+	
+	/**
+	 * 연구 목록 조회
+	 * @return
+	 */
+	public List<ResearchVO> retrieveResearchList(PaginationInfo<ResearchVO> paging);
+	
+	/**
+	 * 연구 내용 수정
+	 * @param research
+	 * @return
+	 */
+	public ServiceResult modifyResearch(ResearchVO research);
+	
+	/**
+	 * 연구 삭제
+	 * @param research
+	 * @return
+	 */
+	public ServiceResult removeResearch(ResearchVO research);
+
+	
+}

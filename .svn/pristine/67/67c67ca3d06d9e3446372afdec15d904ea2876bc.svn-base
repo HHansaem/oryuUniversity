@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.academicChange.dao.AcademicChangeDAO">
+	
+	<insert id="insertAcaChange" parameterType="kr.or.ddit.academicChange.vo.AcademicChangeVO"> 
+	INSERT INTO ACADEMIC_CHANGE (
+     AC_CH_CD
+    , ST_CD
+    , AC_CH_APP_DATE
+    , AC_CH_DIV
+    , AC_CH_STA
+    , ATCH_FILE_ID
+    , AC_CH_RE
+) VALUES (
+    ACADEMIC_CHANGE_SEQ.NEXTVAL
+  , #{stCd,jdbcType=VARCHAR}
+  , SYSDATE
+  , #{acChDiv,jdbcType=VARCHAR}
+  , #{acChSta,jdbcType=VARCHAR}
+  , #{atchFileId,jdbcType=NUMERIC}
+  , #{acChRe,jdbcType=VARCHAR}
+)	
+	</insert>
+<select id="acaChangeRequestList" parameterType="String" resultType="kr.or.ddit.academicChange.vo.AcademicChangeVO">
+            SELECT
+                A.AC_CH_CD
+                , A.ST_CD
+                , S.ST_NM AS "STUDENTVO.stNm"
+                , S.ST_STATUS "STUDENTVO.stStatus"
+                , A.AC_CH_APP_DATE
+                , A.AC_CH_CER_DATE
+                , A.AC_CH_DIV
+                , A.AC_CH_STA
+                , A.ATCH_FILE_ID
+                , A.AC_CH_RE
+            FROM ACADEMIC_CHANGE A
+            INNER JOIN STUDENT S ON A.ST_CD = S.ST_CD
+            WHERE A.ST_CD=#{stCd}
+            ORDER BY A.AC_CH_APP_DATE DESC
+</select>
+
+<resultMap type="kr.or.ddit.academicChange.vo.AcademicChangeVO" id="acaChangeMap" autoMapping="true">
+      <id property="acChCd" column="AC_CH_CD"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+      <association property="studentVO" javaType="kr.or.ddit.student.vo.StudentVO">
+      	<id property="stCd" column="ST_CD"/>
+      	<result property="stNm" column="ST_NM"/>
+      	<result property="stStatus" column="ST_STATUS"/>
+      </association>
+   </resultMap>
+
+
+
+<select id="acaChangeView" parameterType="kr.or.ddit.academicChange.vo.AcademicChangeVO" resultMap="acaChangeMap">
+    WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+                      USING(ATCH_FILE_ID)
+      )
+    SELECT
+        A.AC_CH_CD
+        , A.ST_CD
+        , A.AC_CH_APP_DATE, A.AC_CH_CER_DATE
+        , A.AC_CH_DIV, A.AC_CH_STA
+        , A.ATCH_FILE_ID , A.AC_CH_RE
+        
+        , S.ST_NM , S.ST_STATUS
+        
+        , V.ATCH_FILE_ID, V.FILE_SN, V.FILE_STRE_COURS
+        , V.STRE_FILE_NM, V.ORIGNL_FILE_NM, V.FILE_EXTSN
+        , V.FILE_SIZE, V.FILE_MIME
+        
+        , V.CREAT_DT
+        , V.USE_AT
+        
+    FROM ACADEMIC_CHANGE A
+    INNER JOIN STUDENT S ON A.ST_CD = S.ST_CD
+    LEFT OUTER JOIN ATCH_FILE_VIEW V ON A.ATCH_FILE_ID = V.ATCH_FILE_ID
+    WHERE A.AC_CH_CD=#{acChCd}
+</select>
+
+<select id="stffacaChangeRequestList" resultType="kr.or.ddit.academicChange.vo.AcademicChangeVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.*
+          FROM(
+        SELECT
+        AC.AC_CH_CD
+        , AC.ST_CD
+        , S.ST_NM AS "STUDENTVO.stNm"
+        , S.ST_STATUS "STUDENTVO.stStatus"
+        , AC.ATCH_FILE_ID
+        , AC.AC_CH_APP_DATE
+        , AC.AC_CH_CER_DATE
+        , AC.AC_CH_DIV
+        , AC.AC_CH_STA
+        , AC.AC_CH_RE
+    FROM ACADEMIC_CHANGE AC
+    INNER JOIN STUDENT S ON AC.ST_CD = S.ST_CD
+    <include refid="searchFrag"/>
+              ORDER BY AC.AC_CH_APP_DATE DESC
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+]]>
+</select>
+
+
+
+
+
+
+
+<!-- ACADEMIC_CHANGE 업데이트 쿼리문 -->
+<update id="updateAcademicChange" parameterType="String">
+    UPDATE ACADEMIC_CHANGE
+    SET AC_CH_STA = #{acChSta}, AC_CH_CER_DATE = SYSDATE
+    WHERE AC_CH_CD = #{acChCd}
+</update>
+
+
+<!-- STUDENT 업데이트 쿼리문 -->
+<update id="updateStudentStatus" parameterType="String">
+    UPDATE STUDENT
+    SET ST_STATUS = #{acChDiv}
+    WHERE ST_CD = #{stCd}
+</update>
+
+
+
+<sql id="searchFrag">
+    <trim prefix=" WHERE ">
+        <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            <choose>
+                <when test="simpleCondition.searchType eq 'stCd'">
+                    INSTR(AC.ST_CD, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'studentVO.stNm'">
+                    INSTR(ST_NM, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'acChDiv'">
+                    INSTR(AC_CH_DIV, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <otherwise>
+                    INSTR(AC.ST_CD, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(ST_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(AC_CH_DIV, #{simpleCondition.searchWord}) > 0
+                </otherwise>
+            </choose>
+        </if>
+    </trim>
+</sql>
+
+<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM ACADEMIC_CHANGE AC
+      INNER JOIN student S ON AC.ST_CD = S.ST_CD
+      <include refid="searchFrag"></include>
+   </select>
+	
+</mapper>

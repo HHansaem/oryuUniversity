@@ -1,0 +1,40 @@
+package kr.or.ddit.acBuDoc.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.acBuDoc.vo.AcBuDocVO;
+import kr.or.ddit.acBuDoc.vo.AcBuDocVO.YearAndTotalCount;
+import kr.or.ddit.common.vo.PaginationInfo;
+
+//mapper acBuDoc가 호출되었을때 인터페이스 기능 제공
+@Mapper
+public interface AcBuDocDAO {
+	
+//--- paging ---
+	
+	public long selectTotalRecord(PaginationInfo<AcBuDocVO> paging);
+
+//--- Retrieve ---
+	
+	public List<AcBuDocVO> selectAcBuDocList(PaginationInfo<AcBuDocVO> paging);
+	
+	public AcBuDocVO selectAcBuDoc(String buDocCd);
+	
+//--- insert ---
+	
+	public int insertAcBuDoc(AcBuDocVO acBuDocVO);
+	
+//--- update ---
+	
+	public int updateAcBuDoc(AcBuDocVO acBuDocVO);
+	
+//--- delete ---
+	
+	public int deleteAcBuDoc(AcBuDocVO acBuDocVO);
+	
+//-- 총갯수.
+	public int getYearAndTotalCount (YearAndTotalCount yearAndTotalCount);
+
+}

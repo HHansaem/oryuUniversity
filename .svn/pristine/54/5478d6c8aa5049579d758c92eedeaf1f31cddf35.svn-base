@@ -1,0 +1,151 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>    
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<table class="table">
+<tr><td><h4><br>학술사업관리 목록</h4><td></tr>
+</table>
+<table class="table">
+<tr>
+		<td colspan="2">
+			<div>
+				<select name="abm" class="form-select">
+		               <option value>학술사업코드선택</option>
+		               <c:forEach items="${abmList }" var="amb">
+		                  <option value="${abm.acBuCd }" >${abm.buNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="2">
+			<div>
+				<select name="dtCd" class="form-select">
+		               <option value>학술사업상태선택</option>
+		               <c:forEach items="${abmList }" var="amb">
+		                  <option value="${abm.acBuCd }" class="${abm.buStatNm }" >${abm.buStatNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+
+	<tr>
+		<td colspan="5">
+	
+			<div id="searchUI" class="row justify-content-center">
+				<div  class="col-auto">
+					<form:select path="simpleCondition.searchType" class="form-select">
+						<form:option value="" label="전체" />
+						<form:option value="code" label="학술사업코드" />
+						<form:option value="name" label="학술사업명" />
+					</form:select>
+				</div>
+				<div  class="col-auto">
+					<form:input path="simpleCondition.searchWord" class="form-control"/>
+				</div>
+				<div  class="col-auto">
+					<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+					<a href="<c:url value='/academicBusinessManagement/academicBusinessManagementInsert.do'/>" 
+										class="btn btn-primary">학술사업등록</a>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+
+<table class="table">
+	<thead class="table-light">
+		<tr>
+			<th>학술사업코드</th>
+			<th>학술사업명</th>
+			<th>사업책임자</th>
+			<th>사업관리자</th>
+			<th>학술사업요약내용</th>
+			<th>학술사업게시일자</th>
+			<th>학술사업상태명</th>
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="academicBusinessManagementList" value="${paging.dataList }"/>
+			<c:choose>
+				<c:when test="${empty academicBusinessManagementList }">
+					<tr>
+						<td colspan="8">조건에 맞는 사업이 없음.</td>
+					</tr>	
+				</c:when>
+				<c:otherwise>
+					<c:forEach items="${academicBusinessManagementList }" var="abm">
+						<tr>
+							<td>${abm.acBuCd}</td>
+							<td>${abm.buNm}</td>
+							<td>${abm.professorList.prNm}</td>
+							<td>${abm.teachingStaffList.tsNm}</td>
+							<td>${abm.buShortCont}</td>
+							<td>${abm.buDate}</td>
+							<td>${abm.buStatNm}</td>
+							<c:url value='/academicBusinessManagement/academicBusinessManagementUpdate.do' var="updateURL">
+								<c:param name="what" value="${abm.acBuCd}" />
+							</c:url>
+							<td><a href="${updateURL }" class="btn btn-primary" >학술사업수정</a></td>
+						</tr>
+					</c:forEach>
+				</c:otherwise>
+			</c:choose>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan="7">
+				<div class="d-flex justify-content-center mb-3">
+				${paging.pagingHTML }
+				</div>
+			<td>
+		</tr>
+	</tfoot>
+</table>
+	
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="academicBusinessManagement" id="academicBusinessManagement" />
+	<input type="hidden" name="acBuCd" id="acBuCd" />
+	<input type="hidden" name="classfication" id="classfication" />
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<script>
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+	$(searchBtn).on("click", function(event){
+		$(searchUI).find(":input[name]").each(function(idx, input){
+			let name = input.name;
+			let value = $(input).val();
+			$(searchForm).find(`[name=\${name}]`).val(value);
+			
+			console.log("name : " + name + ", value : " + value);
+		});
+		
+		let academicBusinessManagement = $("select[name='academicBusinessManagement']").val();
+		let dtCd = $("select[name='acBuCd']").val();
+		let classfication = $("select[name='classfication']").val();
+		
+		$("#searchForm input[name='academicBusinessManagement']").val(academicBusinessManagement);
+    	$("#searchForm input[name='acBuCd']").val(acBuCd);
+		$("#classfication").val(classfication);
+		
+		$(searchForm).submit();
+	});
+</script>
+<script>
+ 	let $acBuCd = $('[name="acBuCd"]');
+ 	$('[name="academicBusinessManagement"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${acBuCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+</script>

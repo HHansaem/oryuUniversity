@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.exam.dao.ExamDAO">
+	<select id="selectExamList" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.ExamVO">
+		SELECT
+		exam_cd, lec_cd, exam_nm
+		, exam_cont, exam_type, exam_sta_time
+		, exam_score, exam_end_time, exam_score_reveal
+		, exam_take_time, exam_state
+		FROM
+		exam where lec_cd = #{lecCd}
+	</select>
+	
+	<insert id="insertExam" parameterType="kr.or.ddit.lectureContents.vo.ExamVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="examCd">
+		SELECT EXAM_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+		INSERT INTO exam (
+		      exam_cd
+		    , lec_cd
+		    , exam_nm
+		    , exam_cont
+		    , exam_type
+		    , exam_sta_time
+		    , exam_score
+		    , exam_end_time
+		    , exam_score_reveal
+		    , exam_take_time
+		    , exam_state
+		) VALUES (
+		     #{examCd,jdbcType=VARCHAR}
+		    ,#{lecCd,jdbcType=VARCHAR}
+		    ,#{examNm,jdbcType=VARCHAR}
+		    ,#{examCont,jdbcType=VARCHAR}
+		    ,#{examType,jdbcType=VARCHAR}
+		    ,#{examStaTime,jdbcType=DATE}
+		    ,#{examScore,jdbcType=NUMERIC}
+		    ,#{examEndTime,jdbcType=DATE}
+		    ,#{examScoreReveal,jdbcType=VARCHAR}
+		    ,#{examTakeTime,jdbcType=NUMERIC}
+		    , '임시'
+		)
+	</insert>
+	
+	<select id="selectExamDetail" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.ExamVO">
+		SELECT
+		exam_cd, lec_cd, exam_nm
+		, exam_cont, exam_type, exam_sta_time
+		, exam_score, exam_end_time, exam_score_reveal
+		, exam_take_time, exam_state
+		FROM
+		exam where exam_cd = #{examCd}
+	</select>
+	
+	<update id="updateExam" parameterType="kr.or.ddit.lectureContents.vo.ExamVO">
+		UPDATE exam
+		SET 
+		  EXAM_CD = #{examCd,jdbcType=VARCHAR}
+		, LEC_CD = #{lecCd,jdbcType=VARCHAR}
+		, EXAM_NM = #{examNm,jdbcType=VARCHAR}
+		, EXAM_CONT = #{examCont,jdbcType=VARCHAR}
+		, EXAM_TYPE = #{examType,jdbcType=VARCHAR}
+		, EXAM_STA_TIME = #{examStaTime,jdbcType=DATE}
+		, EXAM_SCORE = #{examScore,jdbcType=NUMERIC}
+		, EXAM_END_TIME = #{examEndTime,jdbcType=DATE}
+		, EXAM_SCORE_REVEAL = #{examScoreReveal,jdbcType=VARCHAR}
+		, exam_take_time = #{examTakeTime,jdbcType=NUMERIC}
+		, EXAM_STATE = #{examState,jdbcType=VARCHAR}
+		WHERE
+        exam_cd = #{examCd}
+	</update>
+	
+	<update id="updateExamState" parameterType="kr.or.ddit.lectureContents.vo.ExamVO">
+		UPDATE EXAM
+		SET
+		EXAM_STATE = '활성'
+		WHERE
+		EXAM_CD = #{examCd}
+	</update>
+	
+</mapper>

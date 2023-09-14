@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.job.dao.JobDAO">
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'company'">
+						INSTR(JOB_NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'location'">
+						INSTR(JOB_PLACE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(JOB_NAME, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(JOB_PLACE, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	<sql id="frag">
+		<where>
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(ST_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'stnum'">
+        				INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'dtNm'">
+        				INSTR(D.DT_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(ST_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+	        			OR
+	        			INSTR(D.DT_NM, #{simpleCondition.searchWord}) > 0 
+        			</otherwise>
+        		</choose>
+        	</if>
+        	<if test="detailCondition neq null">
+        		<choose>
+			        <when test="detailCondition.grad neq null and not detailCondition.grad.isEmpty">
+			            AND S.ST_STATUS = #{detailCondition.grad}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>	
+       			<choose>
+			        <when test="detailCondition.year neq null and not detailCondition.year.isEmpty">
+			            AND S.ST_GRAD = #{detailCondition.year}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>	
+				<choose>
+			        <when test="detailCondition.college neq null and not detailCondition.college.isEmpty">
+			            AND D.COLGE_CD = #{detailCondition.college}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND S.DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.status neq null and not detailCondition.status.isEmpty">
+			            AND S.EMP_STAT = #{detailCondition.status}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.year2 neq null and not detailCondition.year2.isEmpty">
+			            AND S.EMP_YEAR = #{detailCondition.year2}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.category neq null and not detailCondition.category.isEmpty">
+			            AND S.EMP_FIELD = #{detailCondition.category}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.stStatus neq null and not detailCondition.stStatus.isEmpty">
+			            AND S.ST_STATUS = #{detailCondition.stStatus}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			</if>
+        </where>
+	</sql>
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT
+		   COUNT(*)
+		FROM
+		    JOB
+	    <include refid="searchFrag"></include>
+	</select>
+	
+	<select id="selectJobList" resultType="kr.or.ddit.job.vo.JobVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+		    SELECT ROWNUM RNUM, A.*
+		    FROM(
+		    SELECT
+		      JOB_NAME
+		      , JOB_TITLE
+		      , JOB_SECTOR
+		      , JOB_PLACE
+		      , JOB_REQ
+		      , JOB_REQ2
+		      , JOB_LINK
+		    FROM JOB
+		    <include refid="searchFrag"></include>
+		    ) A       
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+		
+	</select>
+	
+	<insert id="insertJobAd" parameterType="kr.or.ddit.job.vo.JobVO">
+		INSERT INTO job (
+		    JOB_NAME
+		    , JOB_TITLE
+		    , JOB_SECTOR
+		    , JOB_PLACE
+		    , JOB_REQ
+		    , JOB_REQ2
+		    , JOB_LINK
+		) VALUES (
+		  	#{jobName,jdbcType=VARCHAR}
+			, #{jobTitle,jdbcType=VARCHAR}
+			, #{jobSector,jdbcType=VARCHAR}
+			, #{jobPlace,jdbcType=VARCHAR}
+			, #{jobReq,jdbcType=VARCHAR}
+			, #{jobReq2,jdbcType=VARCHAR}
+			, #{jobLink,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectTotalAd" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT 
+			COUNT(*)
+		FROM 
+			AD
+	</select>
+	
+	<select id="selectAdList" resultType="kr.or.ddit.job.vo.AdVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+		    SELECT ROWNUM RNUM, A.*
+		    FROM(
+		    SELECT
+		    	AD_TITLE
+		    	, AD_IMG
+		    	, AD_DESC
+		    	, AD_DETAIL
+		    FROM AD
+		    ) A       
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<insert id="insertAd" parameterType="kr.or.ddit.job.vo.AdVO">
+		INSERT INTO AD (
+		    AD_TITLE
+		    , AD_IMG
+		    , AD_DESC
+		    , AD_DETAIL
+		) VALUES (
+			#{adTitle,jdbcType=VARCHAR}
+			, #{adImg,jdbcType=VARCHAR}
+			, #{adDesc,jdbcType=VARCHAR}
+			, #{adDetail,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="selectTotal">
+		WITH DEPARTMENT_VIEW AS (
+				    SELECT *
+				    FROM DEPARTMENT
+				    INNER JOIN COLLEGE USING(COLGE_CD)
+				),
+		ORDEREDMEMBER AS (
+		    SELECT 
+		        ROWNUM AS RNUM,
+		        S.ST_CD,
+		        S.DT_CD,
+		        S.ST_NM,
+		        S.ST_PH,
+		        S.ST_EMAIL,
+		        S.ST_PASS,
+		        S.ST_FIC,
+		        S.ST_LI_CRE,
+		        S.ST_STATUS,
+		        S.ST_ROLE,
+		        S.ST_ADDR1,
+		        S.ST_ADDR2,
+		        S.ST_REG1,
+		        S.ST_REG2,
+		        S.ST_GRAD,
+		        S.EMP_STAT,
+		        S.EMP_YEAR,
+		        S.EMP_FIELD,
+		        D.DT_NM,
+		        D.COLGE_NM,
+		        D.COLGE_CD
+		    FROM (
+		        SELECT 
+		            ST_CD, DT_CD, ST_NM, ST_PH, ST_EMAIL,
+		            ST_PASS, ST_FIC, ST_LI_CRE, ST_STATUS,
+		            ST_ROLE, ST_ADDR1, ST_ADDR2,
+		            ST_REG1, ST_REG2, ST_GRAD,
+		            EMP_STAT, EMP_YEAR, EMP_FIELD
+		        FROM STUDENT
+		    ) S
+		    LEFT JOIN DEPARTMENT_VIEW D ON S.DT_CD = D.DT_CD
+		    <include refid="frag" />
+		    ORDER BY ROWNUM DESC
+		)
+		SELECT COUNT(*)
+		FROM ORDEREDMEMBER
+		ORDER BY COLGE_CD,DT_CD,ST_GRAD	DESC
+	</select>
+	
+	<select id="selectStudent">
+		WITH DEPARTMENT_VIEW AS (
+				    SELECT *
+				    FROM DEPARTMENT
+				    INNER JOIN COLLEGE USING(COLGE_CD)
+		),
+		ORDEREDMEMBER AS (
+		    SELECT 
+		        ROWNUM AS RNUM,
+		        S.ST_CD,
+		        S.DT_CD,
+		        S.ST_NM,
+		        S.ST_PH,
+		        S.ST_EMAIL,
+		        S.ST_PASS,
+		        S.ST_FIC,
+		        S.ST_LI_CRE,
+		        S.ST_STATUS,
+		        S.ST_ROLE,
+		        S.ST_ADDR1,
+		        S.ST_ADDR2,
+		        S.ST_REG1,
+		        S.ST_REG2,
+		        S.ST_GRAD,
+		        S.EMP_STAT,
+		        S.EMP_YEAR,
+		        S.EMP_FIELD,
+		        D.DT_NM,
+		        D.COLGE_NM,
+		        D.COLGE_CD
+		    FROM (
+		        SELECT 
+		            ST_CD, DT_CD, ST_NM, ST_PH, ST_EMAIL,
+		            ST_PASS, ST_FIC, ST_LI_CRE, ST_STATUS,
+		            ST_ROLE, ST_ADDR1, ST_ADDR2,
+		            ST_REG1, ST_REG2, ST_GRAD,
+		            EMP_STAT, EMP_YEAR, EMP_FIELD
+		        FROM STUDENT
+		        ORDER BY ST_CD DESC
+		    ) S
+		    LEFT JOIN DEPARTMENT_VIEW D ON S.DT_CD = D.DT_CD
+		    <include refid="frag" />
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+		ORDER BY COLGE_CD,DT_CD,ST_GRAD DESC
+	</select>
+
+
+	<sql id="info">
+		<if test="detailCondition neq null">
+			<choose>
+				<when test="detailCondition.year neq null and not detailCondition.year.isEmpty">
+					 AND S.ST_GRAD = #{detailCondition.year}
+				</when>
+			</choose>
+				<choose>
+				<when test="detailCondition.colg neq null and not detailCondition.colg.isEmpty">
+					 AND C.COLGE_CD = #{detailCondition.colg}
+				</when>
+			</choose>
+			<choose>
+				<when test="detailCondition.dept neq null and not detailCondition.dept.isEmpty">
+					 AND S.DT_CD = #{detailCondition.dept}
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="info2">
+		<where>
+		<if test="detailCondition neq null">
+			<choose>
+				<when test="detailCondition.year neq null and not detailCondition.year.isEmpty">
+					 AND S.ST_GRAD = #{detailCondition.year}
+				</when>
+			</choose>
+			<choose>
+				<when test="detailCondition.colg neq null and not detailCondition.colg.isEmpty">
+					 AND C.COLGE_CD = #{detailCondition.colg}
+				</when>
+			</choose>
+			<choose>
+				<when test="detailCondition.dept neq null and not detailCondition.dept.isEmpty">
+					 AND S.DT_CD = #{detailCondition.dept}
+				</when>
+			</choose>
+		</if>
+		</where>
+	</sql>
+	<select id="selectEmpInfo" resultType="kr.or.ddit.student.vo.StudentVO" parameterType="kr.or.ddit.student.vo.StudentVO">
+		SELECT
+		    COALESCE(EMPLOYED,0)AS EMPLOYED,
+		    COALESCE((TOTAL-EMPLOYED),0) AS UNEMPLOYED
+		FROM (
+		    SELECT COUNT(*) AS TOTAL
+		    FROM STUDENT S
+            LEFT JOIN DEPARTMENT D ON D.DT_CD = S.DT_CD
+            LEFT JOIN COLLEGE C ON C.COLGE_CD = D.COLGE_CD
+		    WHERE ST_STATUS = '졸업'
+		    <include refid="info"></include>
+		) TOTAL, (
+		    SELECT COUNT(*) AS EMPLOYED
+		    FROM STUDENT S
+            LEFT JOIN DEPARTMENT D ON D.DT_CD = S.DT_CD
+            LEFT JOIN COLLEGE C ON C.COLGE_CD = D.COLGE_CD
+		    WHERE ST_STATUS = '졸업' AND EMP_STAT = '취업'
+		    <include refid="info"></include>
+		) EMPLOYED
+	</select>
+	<select id="selectEmpLoc" resultType="kr.or.ddit.student.vo.StudentVO" parameterType="kr.or.ddit.student.vo.StudentVO">
+		SELECT
+		    EMP_LOC,
+		    COALESCE(COUNT(*), 0) AS TOTAL,
+		    COALESCE(SUM(CASE WHEN ST_STATUS = '졸업' AND EMP_STAT = '취업' THEN 1 ELSE 0 END), 0) AS EMPLOYED,
+		    COALESCE(SUM(CASE WHEN ST_STATUS = '졸업' AND EMP_STAT = '미취업' THEN 1 ELSE 0 END), 0) AS UNEMPLOYED
+		FROM STUDENT S
+		LEFT JOIN DEPARTMENT D ON D.DT_CD = S.DT_CD
+		LEFT JOIN COLLEGE C ON C.COLGE_CD = D.COLGE_CD
+		<include refid="info2"></include>
+		GROUP BY EMP_LOC
+		ORDER BY EMP_LOC
+	</select>
+</mapper>

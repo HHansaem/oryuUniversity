@@ -1,0 +1,75 @@
+package kr.or.ddit.student.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.student.dao.OthersDAO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.validate.groups.InsertGroup;
+
+@Controller
+@RequestMapping("/student/studentInsert.do")
+public class StudentInsertController {
+
+	@Inject
+	private StudentService service;
+	@Inject
+	private OthersDAO othersDAO;
+	
+	@ModelAttribute("student")
+	public StudentVO student() {
+		return new StudentVO();
+	}
+	
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList() {
+		return othersDAO.selectDepartmentList();
+	}
+	
+	@GetMapping
+	public String getHandler() {
+		return "student/ajax/studentForm";
+	}
+	
+	@PostMapping
+	public String postHandler(
+		@Validated(InsertGroup.class) @ModelAttribute("student") StudentVO student
+		, Errors errors
+		, Model model
+	) {
+		String logicalViewName = null;
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.createStudent(student);
+			switch(result) {
+			case PKDUPLICATE:
+				model.addAttribute("message", "학번이 중복됩니다. 다시 확인해주세요.");
+				logicalViewName = "student/ajax/studentForm";
+				break;
+			case OK:
+				logicalViewName = "student/ajax/studentForm";
+				break;
+			default:
+				logicalViewName = "student/ajax/studentForm";
+				model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하시오.");
+				break;
+			}
+		}else {
+			logicalViewName = "student/ajax/studentForm";
+			}
+		return logicalViewName;
+	}
+	
+}

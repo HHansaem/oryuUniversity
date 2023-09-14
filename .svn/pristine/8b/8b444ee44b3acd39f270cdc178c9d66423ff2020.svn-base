@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.internship.dao.InternshipDAO">
+
+<update id="internshipUpdate" parameterType="kr.or.ddit.internship.vo.InternshipVO">
+UPDATE INTERNSHIP SET 
+     ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+    , INTE_TITLE = #{inteTitle,jdbcType=VARCHAR}
+    , INTE_PERI = #{intePeri,jdbcType=VARCHAR}
+    , INTE_STA_DATE = #{inteStaDate,jdbcType=DATE}
+    , INTE_END_DATE = #{inteEndDate,jdbcType=DATE}
+    , INTE_CONT_PERSON = #{inteContPerson,jdbcType=VARCHAR}
+    , INTE_EMAIL = #{inteEmail,jdbcType=VARCHAR}
+    , INTE_PH = #{intePh,jdbcType=VARCHAR}
+    , INTE_COMP_NM = #{inteCompNm,jdbcType=VARCHAR}
+    , INTE_COMP_ADDR = #{inteCompAddr,jdbcType=VARCHAR}
+    , INTE_REGION = #{inteRegion,jdbcType=VARCHAR}
+    , INTE_INTRD = #{inteIntrd,jdbcType=CLOB}
+		WHERE INTE_CD = #{inteCd,jdbcType=VARCHAR}
+
+</update>
+
+<update id="internshipViewCount" parameterType="String">
+UPDATE INTERNSHIP
+SET INTE_VIEWS = INTE_VIEWS + 1
+WHERE INTE_CD = #{inteCd,jdbcType=VARCHAR}  
+</update>
+
+<insert id="internshipInsert" parameterType="kr.or.ddit.internship.vo.InternshipVO">
+INSERT INTO INTERNSHIP (
+    INTE_CD
+    , ATCH_FILE_ID
+    , INTE_TITLE
+    , INTE_PERI
+    , INTE_STA_DATE
+    , INTE_END_DATE
+    , INTE_CONT_PERSON
+    , INTE_EMAIL
+    , INTE_PH
+    , INTE_COMP_NM
+    , INTE_COMP_ADDR
+    , INTE_REGION
+    , INTE_INTRD
+    , INTE_VIEWS
+) VALUES (
+INTERNSHIP_SEQ.NEXTVAL
+, #{atchFileId,jdbcType=NUMERIC}
+, #{inteTitle,jdbcType=VARCHAR}
+, #{intePeri,jdbcType=VARCHAR}
+, #{inteStaDate,jdbcType=DATE}
+, #{inteEndDate,jdbcType=DATE}
+, #{inteContPerson,jdbcType=VARCHAR}
+, #{inteEmail,jdbcType=VARCHAR}
+, #{intePh,jdbcType=VARCHAR}
+, #{inteCompNm,jdbcType=VARCHAR}
+, #{inteCompAddr,jdbcType=VARCHAR}
+, #{inteRegion,jdbcType=VARCHAR}
+, #{inteIntrd,jdbcType=CLOB}
+, 0
+)
+</insert>
+
+<select id="internshipList" resultType="kr.or.ddit.internship.vo.InternshipVO">
+ SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.*
+      FROM(
+ SELECT
+    INTE_CD
+  , ATCH_FILE_ID
+  , INTE_TITLE
+  , INTE_PERI
+  , INTE_STA_DATE
+  , INTE_END_DATE
+  , INTE_CONT_PERSON
+  , INTE_EMAIL
+  , INTE_PH
+  , INTE_COMP_NM
+  , INTE_COMP_ADDR
+  , INTE_VIEWS
+  , INTE_REGION
+  , INTE_INTRD
+  , INTE_DELETE
+FROM
+    INTERNSHIP
+    WHERE
+INTE_DELETE IS NULL
+<include refid="searchFrag"/>
+              ORDER BY INTE_VIEWS DESC
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+]]>
+</select>
+
+<sql id="searchFrag">
+    <trim prefix=" AND ">
+        <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            <choose>
+                <when test="simpleCondition.searchType eq 'inteTitle'">
+                    INSTR(INTE_TITLE, #{simpleCondition.searchWord}) > 0
+                </when>
+                <when test="simpleCondition.searchType eq 'inteRegion'">
+                    INSTR(INTE_REGION, #{simpleCondition.searchWord}) > 0
+                </when>
+                <when test="simpleCondition.searchType eq 'inteCompNm'">
+                    INSTR(INTE_COMP_NM, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <otherwise>
+                    INSTR(INTE_TITLE, #{simpleCondition.searchWord}) > 0 
+                    OR
+                    INSTR(INTE_REGION, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(INTE_COMP_NM, #{simpleCondition.searchWord}) > 0
+                </otherwise>
+            </choose>
+        </if>
+    </trim>
+</sql>
+
+
+<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM INTERNSHIP
+      WHERE
+INTE_DELETE IS NULL
+      <include refid="searchFrag"></include>
+   </select>
+
+
+
+<resultMap type="kr.or.ddit.internship.vo.InternshipVO" id="internMap" autoMapping="true">
+      <id property="inteCd" column="INTE_CD"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+   </resultMap>
+
+
+<select id="internshipView" resultMap="internMap" parameterType="String">
+ WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+                      USING(ATCH_FILE_ID)
+      )
+SELECT
+    I.INTE_CD
+  , I.ATCH_FILE_ID
+  , I.INTE_TITLE
+  , I.INTE_PERI
+  , I.INTE_STA_DATE
+  , I.INTE_END_DATE
+  , I.INTE_CONT_PERSON
+  , I.INTE_EMAIL
+  , I.INTE_PH
+  , I.INTE_COMP_NM
+  , I.INTE_COMP_ADDR
+  , I.INTE_VIEWS
+  , I.INTE_REGION
+  , I.INTE_INTRD
+  , I.INTE_DELETE
+  
+   , V.ATCH_FILE_ID, V.FILE_SN, V.FILE_STRE_COURS
+        , V.STRE_FILE_NM, V.ORIGNL_FILE_NM, V.FILE_EXTSN
+        , V.FILE_SIZE, V.FILE_MIME
+        
+        , V.CREAT_DT
+        , V.USE_AT
+FROM
+    INTERNSHIP I
+    LEFT OUTER JOIN ATCH_FILE_VIEW V ON  I.ATCH_FILE_ID = V.ATCH_FILE_ID
+    WHERE I.INTE_CD = #{inteCd}
+</select>
+
+<select id="reqCont" resultType="int" parameterType="String">
+SELECT COUNT(*) FROM INTERNSHIP_APC
+WHERE INTE_CD = #{inteCd}
+
+</select>
+
+
+<update id="internshipDelete" parameterType="String">
+UPDATE INTERNSHIP SET INTE_DELETE = '삭제'  WHERE INTE_CD = #{inteCd,jdbcType=VARCHAR}
+</update>
+
+
+
+
+
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.academic.dao.AcademicNoticeDAO">
+   <sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'writer'">
+                    INSTR(AN_WRITER, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'title'">
+                    INSTR(AN_TITLE, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'content'">
+                    INSTR(AN_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(AN_WRITER, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(AN_TITLE, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(AN_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+        </where>
+   </sql>
+   
+   <select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM ACADEMIC_NOTICE
+      <include refid="searchFrag"></include>
+   </select>
+   
+   <select id="selectAcademicNoticeList" resultType="kr.or.ddit.academic.vo.AcademicNoticeVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+                  AN_NUM, AN_TITLE, AN_WRITER
+                  , AN_POST_DATE, AN_VIEWS
+              FROM ACADEMIC_NOTICE
+              <include refid="searchFrag"/>
+              ORDER BY AN_NUM DESC
+          ) A
+      ) B
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+   <resultMap type="kr.or.ddit.academic.vo.AcademicNoticeVO" id="acaNoticeMap" autoMapping="true">
+      <id property="anNum" column="AN_NUM"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+   </resultMap>
+   
+   <select id="selectAcademicNotice" parameterType="int" resultMap="acaNoticeMap">
+      WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+                      USING(ATCH_FILE_ID)
+      )
+      select  AN_NUM
+          , AN_TITLE
+          , AN_WRITER
+          , AN_POST_DATE
+          , AN_CONT
+          , AN_VIEWS
+          
+          , ATCH_FILE_ID, FILE_SN, FILE_STRE_COURS
+          , STRE_FILE_NM, ORIGNL_FILE_NM, FILE_EXTSN
+          , FILE_SIZE, FILE_MIME
+          
+          , CREAT_DT
+          , USE_AT
+      FROM ACADEMIC_NOTICE LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+      WHERE AN_NUM = #{anNum}
+   </select>
+   
+   <insert id="insertAcademicNotice" parameterType="kr.or.ddit.academic.vo.AcademicNoticeVO">
+      <selectKey order="BEFORE" resultType="int" keyProperty="anNum">
+         SELECT ACADEMIC_NOTICE_SEQ.NEXTVAL FROM DUAL
+      </selectKey>
+      INSERT INTO academic_notice (
+          AN_NUM
+          , AN_TITLE
+          , AN_WRITER
+          , AN_POST_DATE
+          , AN_CONT
+          , AN_VIEWS
+          , ATCH_FILE_ID
+      ) VALUES (
+          #{anNum,jdbcType=VARCHAR}
+         , #{anTitle,jdbcType=VARCHAR}
+         , #{anWriter,jdbcType=VARCHAR}
+         , SYSDATE
+         , #{anCont,jdbcType=CLOB}
+         , 0
+         , #{atchFileId,jdbcType=NUMERIC}
+      )
+   </insert>
+   
+   <update id="updateAcademicNotice" parameterType="kr.or.ddit.academic.vo.AcademicNoticeVO">
+      UPDATE ACADEMIC_NOTICE
+      SET
+          AN_NUM = #{anNum, jdbcType=NUMERIC}
+         , AN_TITLE = #{anTitle, jdbcType=VARCHAR}
+         , AN_WRITER = #{anWriter, jdbcType=VARCHAR}
+         , AN_POST_DATE = SYSDATE
+         , AN_CONT = #{anCont, jdbcType=CLOB}
+         , AN_VIEWS = 0
+         , ATCH_FILE_ID = #{atchFileId, jdbcType=VARCHAR}
+      WHERE AN_NUM = #{anNum}
+   </update>
+   
+   <delete id="deleteAcademicNotice" parameterType="kr.or.ddit.academic.vo.AcademicNoticeVO">
+      DELETE FROM ACADEMIC_NOTICE
+      WHERE
+             AN_NUM = #{anNum}
+   </delete>
+   
+   <update id="increaseViews" parameterType="int">
+      UPDATE ACADEMIC_NOTICE
+      SET
+          AN_VIEWS = AN_VIEWS+1
+      WHERE
+           AN_NUM = #{anNum}
+   </update>
+</mapper>

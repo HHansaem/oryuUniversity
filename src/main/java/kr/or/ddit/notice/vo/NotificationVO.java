@@ -1,0 +1,39 @@
+package kr.or.ddit.notice.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.professor.vo.ProfessorVO;
+import kr.or.ddit.staff.vo.StaffVO;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.teachingStaff.vo.TeachingStaffVO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "notiCd")
+public class NotificationVO {
+
+	private String rnum;
+	private String notiCd;
+	private String notiType;
+	private String notiSender;
+	private String notiReceiver;
+	private String notiTitle;
+	private String notiCont;
+	private LocalDate notiDate;
+	private String notiStat;
+	
+	private String sender;
+	private String receiver;
+	private String count;
+	
+	private String tsNm;
+	private String group;
+	private List<StudentVO> studentList;
+	private List<ProfessorVO> profList;
+	private List<StaffVO> staffList;
+	
+}

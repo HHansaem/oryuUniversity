@@ -1,0 +1,108 @@
+package kr.or.ddit.lecture.controller;
+
+import java.util.Collection;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.enrollment.service.EnrollmentService;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.service.NoticeService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lecture.vo.NoticeVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/lecture")
+public class NoticeRetrieveController {
+	
+	@Inject
+	private NoticeService service;
+	@Inject
+	private EnrollmentService enrollService;
+	
+	private String getUserRole(Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+		String role = "";
+		for(GrantedAuthority authority : authorities) {
+			role = authority.getAuthority();
+		}
+		return role;
+	}
+	
+	@RequestMapping("noticeList.do")
+	public String noticeList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			, @RequestParam Map<String, Object> detailCondition
+			, Model model
+			, Authentication authentication
+			, HttpSession session
+			, String lecCd
+	) {
+		PaginationInfo<NoticeVO> paging = new PaginationInfo<>();
+		
+		session.removeAttribute("lecCd");
+		session.setAttribute("lecCd", lecCd);
+		detailCondition.put("lecCd", lecCd);
+		String role = getUserRole(authentication);
+		detailCondition.put("role", role);
+		
+		LectureVO gradeRate = enrollService.retrieveGradeRate(lecCd);
+		NoticeVO professorInfo = service.retrieveProfessorInfo(lecCd);
+		log.info("컨트롤러!!!");
+
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setDetailCondition(detailCondition);
+		
+		String lecLectTitle = service.retrieveLecName(lecCd);
+		
+		List<NoticeVO> noticeList = service.retrieveNoticeList(paging);
+		
+		paging.setDataList(noticeList);
+		model.addAttribute("lecLectTitle", lecLectTitle);
+		model.addAttribute("professorInfo", professorInfo);
+		model.addAttribute("gradeRate", gradeRate);
+		model.addAttribute("paging", paging);
+		
+		return "lecture/notice/noticeList";
+	}
+	
+	@RequestMapping("noticeView.do")
+	public String noticeView(
+			@RequestParam(name = "what") String lnNum
+			, Model model
+			, Authentication authentication
+	) {
+		String role = getUserRole(authentication);
+		model.addAttribute("role", role);
+		
+		NoticeVO notice = service.retrieveNotice(lnNum);
+		model.addAttribute("notice", notice);
+		
+		return "lecture/notice/noticeView";
+	}
+}
+
+
+
+
+
+

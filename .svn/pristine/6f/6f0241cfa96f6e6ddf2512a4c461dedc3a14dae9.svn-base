@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.internshipAPC.dao.InternshipAPCDAO">
+
+
+<insert id="internshipAPCInsert" parameterType="kr.or.ddit.internshipAPC.vo.InternshipAPCVO">
+INSERT INTO INTERNSHIP_APC (
+    IA_CD,
+    ST_CD,
+    INTE_CD,
+    IA_DATE,
+    IA_STAT,
+    IA_PUR,
+    IA_COU
+) VALUES (
+  INTERNSHIP_APC_SEQ.NEXTVAL
+  , #{stCd, jdbcType=VARCHAR}
+  , #{inteCd, jdbcType=VARCHAR}
+  , SYSDATE
+  , '신청'
+  , #{iaPur, jdbcType=CLOB}
+  , #{iaCou, jdbcType=CLOB}
+)
+</insert>
+
+<select id="stuInfo" parameterType="String" resultType="kr.or.ddit.internshipAPC.vo.InternshipAPCVO">
+SELECT S.ST_CD AS "studentVO.stCd"
+			, D.DT_NM AS "departmentVO.dtNm"
+			, S.ST_NM AS "studentVO.stNm"
+			, S.ST_PH AS "studentVO.stPh"
+			, S.ST_EMAIL AS "studentVO.stEmail"
+			, S.ST_FIC AS "studentVO.stFic" 
+			, S.DT_CD AS "studentVO.dtCd"
+			, S.ST_ADDR1 AS "studentVO.stAddr1"
+			, S.ST_ADDR2 AS "internAPC.studentVO.stAddr2"
+			, S.ST_REG1 AS "studentVO.stReg1"
+			, S.ST_REG2 AS "studentVO.stReg2"
+		FROM STUDENT S 
+		INNER JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD 
+		WHERE S.ST_CD = #{stCd}
+</select>
+
+
+<sql id="searchFrag">
+    <trim prefix=" WHERE ">
+        <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            <choose>
+                <when test="simpleCondition.searchType eq 'inteTitle'">
+                    INSTR(INTETITLE, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'inteRegion'">
+                    INSTR(INTEREGION, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'inteCompNm'">
+                    INSTR(INTECOMPNM, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <otherwise>
+                    INSTR(INTETITLE, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(INTECOMPADDR, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(INTECOMPNM, #{simpleCondition.searchWord}) > 0
+                </otherwise>
+            </choose>
+        </if>
+    </trim>
+</sql>
+
+<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM INTERNSHIPAPC
+      <include refid="searchFrag"></include>
+   </select>
+
+<select id="stuInternshipAPCList" resultType="kr.or.ddit.internshipAPC.vo.InternshipAPCVO">  
+WITH INTERNSHIP_APC_INFO AS (
+SELECT I.INTE_CD AS "internshipVO.inteCd"
+, I.ATCH_FILE_ID AS "internshipVO.atchFileId"
+, I.INTE_TITLE AS "internshipVO.inteTitle"
+, I.INTE_PERI AS "internshipVO.intePeri"
+, I.INTE_STA_DATE AS "internshipVO.inteStaDate"
+, I.INTE_END_DATE AS "internshipVO.inteEndDate"
+, I.INTE_CONT_PERSON AS "internshipVO.inteContPerson"
+, I.INTE_EMAIL AS "internshipVO.inteEmail"
+, I.INTE_PH AS "internshipVO.intePh"
+, I.INTE_COMP_NM AS "internshipVO.inteCompNm"
+, I.INTE_COMP_ADDR AS "internshipVO.inteCompAddr"
+, I.INTE_VIEWS AS "internshipVO.inteViews"
+, I.INTE_REGION AS "internshipVO.inteRegion"
+, I.INTE_INTRD AS "internshipVO.inteIntrd"
+, S.IA_CD 
+, S.ST_CD 
+, S.IA_DATE
+, S.IA_STAT
+, S.IA_PUR 
+, S.IA_COU FROM INTERNSHIP_APC S INNER 
+JOIN INTERNSHIP I ON S.INTE_CD=I.INTE_CD 
+WHERE S.ST_CD=#{stCd} ORDER BY I.INTE_VIEWS DESC 
+)
+SELECT B.* FROM( 
+SELECT ROWNUM RNUM , A.* FROM( 
+SELECT *
+FROM INTERNSHIP_APC_INFO
+) A 
+) B 
+ <![CDATA[
+WHERE B.RNUM >= #{paging.startRow} AND B.RNUM <= #{paging.endRow}
+   ]]>
+</select>
+
+<select id="internshipAPCView" parameterType="String" resultType="kr.or.ddit.internshipAPC.vo.InternshipAPCVO">
+SELECT
+    IA.IA_CD
+  , IA.ST_CD
+  , IA.INTE_CD
+  , IA.IA_DATE
+  , IA.IA_STAT
+  , IA.IA_PUR
+  , IA.IA_COU
+  , S.ST_CD AS "studentVO.stCd"
+  , S.DT_CD AS "departmentVO.dtNm"
+  , S.ST_NM AS "studentVO.stNm"
+  , S.ST_PH AS "studentVO.stPh"
+  , S.ST_EMAIL AS "studentVO.stEmail"
+  , S.ST_PASS AS "studentVO.stPass"
+  , S.ST_FIC AS "studentVO.stFic"
+  , S.ST_LI_CRE AS "studentVO.stLiCre"
+  , S.ST_STATUS AS "studentVO.stStatus"
+  , S.ST_ROLE AS "studentVO.stRole"
+  , S.ST_ADDR1 AS "studentVO.stAddr1"
+  , S.ST_ADDR2 AS "studentVO.stAddr2"
+  , S.ST_REG1 AS "studentVO.stReg1"
+  , S.ST_REG2 AS "studentVO.stReg2"
+  , S.EMP_STAT AS "studentVO.empStat"
+  , S.EMP_YEAR AS "studentVO.empYear"
+  , S.EMP_FIELD AS "studentVO.field"
+  
+FROM
+    INTERNSHIP_APC IA INNER JOIN STUDENT S ON IA.ST_CD = S.ST_CD
+	WHERE IA.IA_CD = #{iaCd}
+</select>
+
+<!-- <select id="staffInternshipAPCList" resultType="">
+WITH INTERNSHIP_APC_INFO AS (
+SELECT I.INTE_CD AS "internshipVO.inteCd"
+, I.ATCH_FILE_ID AS "internshipVO.atchFileId"
+, I.INTE_TITLE AS "internshipVO.inteTitle"
+, I.INTE_PERI AS "internshipVO.intePeri"
+, I.INTE_STA_DATE AS "internshipVO.inteStaDate"
+, I.INTE_END_DATE AS "internshipVO.inteEndDate"
+, I.INTE_CONT_PERSON AS "internshipVO.inteContPerson"
+, I.INTE_EMAIL AS "internshipVO.inteEmail"
+, I.INTE_PH AS "internshipVO.intePh"
+, I.INTE_COMP_NM AS "internshipVO.inteCompNm"
+, I.INTE_COMP_ADDR AS "internshipVO.inteCompAddr"
+, I.INTE_VIEWS AS "internshipVO.inteViews"
+, I.INTE_REGION AS "internshipVO.inteRegion"
+, I.INTE_INTRD AS "internshipVO.inteIntrd"
+, S.IA_CD 
+, S.ST_CD 
+, S.IA_DATE
+, S.IA_STAT
+, S.IA_PUR 
+, S.IA_COU FROM INTERNSHIP_APC S INNER 
+JOIN INTERNSHIP I ON S.INTE_CD=I.INTE_CD 
+<include refid="searchFrag"/>
+ORDER BY I.INTE_VIEWS DESC 
+)
+SELECT B.* FROM( 
+SELECT ROWNUM RNUM , A.* FROM( 
+SELECT *
+FROM INTERNSHIP_APC_INFO
+) A 
+) B 
+ <![CDATA[
+WHERE B.RNUM >= #{paging.startRow} AND B.RNUM <= #{paging.endRow}
+   ]]>
+
+</select>
+ -->
+<update id="internshipAPCUpdate" parameterType="String">
+UPDATE INTERNSHIP_APC
+SET
+IA_PUR = #{iaPur, jdbcType=CLOB}
+,IA_COU= #{iaCou, jdbcType=CLOB}
+WHERE IA_CD = #{iaCd}
+</update>
+
+</mapper>

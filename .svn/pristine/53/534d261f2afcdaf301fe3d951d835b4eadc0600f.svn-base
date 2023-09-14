@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.thesis.dao.ThesisDAO">
+
+	<sql id="searchFrag">
+		<trim prefix=" WHERE ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(THES_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'thesAutNm1'">
+        				INSTR(THES_AUT_NM1, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'thesCont'">
+                    INSTR(THES_CONT, #{simpleCondition.searchWord}) > 0
+                 	</when>
+        			<otherwise>
+	        			INSTR(THES_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(THES_AUT_NM1, #{simpleCondition.searchWord}) > 0 
+	        			OR
+	        			INSTR(THES_CONT, #{simpleCondition.serchWord}) > 0
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+	
+	<select id="selectTotalRecord" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM THESIS	
+		<include refid="searchFrag" />
+	</select>
+
+<select id="selectThesisList" resultType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	      SELECT B.*
+	      FROM(
+	          SELECT ROWNUM RNUM, A.*
+	          FROM(
+	              SELECT 
+					THES_SN
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, THES_NM
+					, THES_SHORT_CONT
+					, THES_CONT
+					, THES_POST_DATE
+					, THES_MOD_DATE
+					, THES_CL_NM
+					, THES_AUT_NM1
+					, THES_AUT_NM2
+					, THES_FIC
+	              FROM THESIS
+	              <include refid="searchFrag"/>
+	              ORDER BY TO_NUMBER(THES_SN) DESC
+	          ) A
+	      ) B
+	       <![CDATA[
+	         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+	         ]]>
+		
+<!-- 	SELECT  -->
+<!-- 		THES_SN -->
+<!-- 		, AC_BU_CD -->
+<!-- 		, ATCH_FILE_ID -->
+<!-- 		, THES_NM -->
+<!-- 		, THES_SHORT_CONT -->
+<!-- 		, THES_CONT -->
+<!-- 		, THES_POST_DATE -->
+<!-- 		, THES_MOD_DATE -->
+<!-- 		, THES_CL_NM -->
+<!-- 		, THES_AUT_NM1 -->
+<!-- 		, THES_AUT_NM2 -->
+<!-- 		, THES_FIC -->
+<!-- 	FROM THESIS -->
+
+</select>
+
+      <resultMap type="kr.or.ddit.thesis.vo.ThesisVO" id="thesisMap" autoMapping="true">
+      <id property="thesSn" column="THES_SN"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+   </resultMap>
+
+
+<select id="selectThesis" parameterType="string" resultMap="thesisMap">
+
+          WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+          USING(ATCH_FILE_ID)
+      )
+      SELECT
+      
+      					THES_SN
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, THES_NM
+					, THES_SHORT_CONT
+					, THES_CONT
+					, THES_POST_DATE
+					, THES_MOD_DATE
+					, THES_CL_NM
+					, THES_AUT_NM1
+					, THES_AUT_NM2
+					, THES_FIC
+					
+					, ATCH_FILE_ID
+		          , FILE_SN
+		          , FILE_STRE_COURS
+		          , STRE_FILE_NM
+		          , ORIGNL_FILE_NM
+		          , FILE_EXTSN
+		          , FILE_SIZE
+		          , FILE_MIME
+		          
+				  , CREAT_DT
+		          , USE_AT
+          
+      FROM THESIS 
+      LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+      WHERE THES_SN = #{thesSn}
+
+</select>
+
+
+
+<insert id="insertThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+<selectKey order="BEFORE" resultType="string" keyProperty="thesSn">
+    		SELECT THESIS_SEQ.NEXTVAL FROM DUAL	 
+</selectKey>	
+	INSERT INTO THESIS(
+		THES_SN
+		, AC_BU_CD
+		, ATCH_FILE_ID
+		, THES_NM
+		, THES_SHORT_CONT
+		, THES_CONT
+		, THES_POST_DATE
+		, THES_MOD_DATE
+		, THES_CL_NM
+		, THES_AUT_NM1
+		, THES_AUT_NM2
+		, THES_FIC
+	)VALUES (
+		#{thesSn,jdbcType=VARCHAR}
+		, #{acBuCd,jdbcType=VARCHAR}
+		, #{atchFileId,jdbcType=NUMERIC}
+		, #{thesNm,jdbcType=VARCHAR}
+		, #{thesShortCont,jdbcType=CLOB}
+		, #{thesCont,jdbcType=CLOB}
+		, SYSDATE
+		, SYSDATE
+		, #{thesClNm,jdbcType=VARCHAR}
+		, #{thesAutNm1,jdbcType=VARCHAR}
+		, #{thesAutNm2,jdbcType=VARCHAR}
+		, #{thesFic,jdbcType=VARCHAR}
+    )
+	
+</insert>
+
+<update id="updateThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	UPDATE THESIS
+	SET
+		THES_SN = #{thesSn,jdbcType=VARCHAR}
+		, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+		, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+		, THES_NM = #{thesNm,jdbcType=VARCHAR}
+		, THES_SHORT_CONT = #{thesShortCont,jdbcType=CLOB}
+		, THES_CONT = #{thesCont,jdbcType=CLOB}
+		, THES_POST_DATE = #{thesPostDate,jdbcType=DATE}
+		, THES_MOD_DATE = SYSDATE
+		, THES_CL_NM = #{thesClNm,jdbcType=VARCHAR}
+		, THES_AUT_NM1 = #{thesAutNm1,jdbcType=VARCHAR}
+		, THES_FIC = #{thesFic,jdbcType=VARCHAR}
+	WHERE THES_SN = #{thesSn} 
+
+</update>
+
+<delete id="deleteThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	DELETE FROM THESIS
+	WHERE
+		THES_SN = #{thesSn,jdbcType=VARCHAR}
+</delete>
+
+
+</mapper>

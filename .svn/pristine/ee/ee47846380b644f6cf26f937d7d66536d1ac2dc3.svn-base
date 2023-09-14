@@ -1,0 +1,11 @@
+let $dtCd = $('[name="dtCd"]');
+$('[name="college"]').on("change", function(event) {
+    let colgeCd = $(this).val();
+    if (colgeCd) {
+        $dtCd.find("option").hide();
+        $dtCd.find(`option:first`).show();
+        $dtCd.find(`option.${colgeCd}`).show(); // colgeCd 앞의 백슬래시 제거
+    } else {
+        $dtCd.find("option").show();
+    }
+}).trigger("change");

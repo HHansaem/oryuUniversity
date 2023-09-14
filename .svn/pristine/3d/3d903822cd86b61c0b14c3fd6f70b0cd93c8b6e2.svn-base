@@ -1,0 +1,15 @@
+package kr.or.ddit.lectureContents.attendance.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/lecture/AttendanceView.do")
+public class AttendanceRetreiveController {
+	
+	@GetMapping
+	public String getAttendance() {
+		return "lecture/attendance/attendanceView";
+	}
+}

@@ -1,0 +1,250 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>    
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<table class="table">
+<tr><td><h4><br>과목 목록</h4><td></tr>
+</table>
+<table class="table">
+	<tr>
+		<td colspan="1">
+			<div>
+				<select name="college" class="form-select">
+		               <option value>단대선택</option>
+		               <c:forEach items="${collegeList }" var="college">
+		                  <option value="${college.colgeCd }" >${college.colgeNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="1">
+			<div>
+				<select name="dtCd" class="form-select">
+		               <option value>학과선택</option>
+		               <c:forEach items="${departmentList }" var="department">
+		                  <option value="${department.dtCd }" class="${department.colgeCd }" >${department.dtNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="1">
+			<div>
+				<select name="classfication" class="form-select">
+		               <option value>이수구분선택</option>
+		               <c:forEach items="${classificationList }" var="classification">
+		                  <option value="${classification.cfCode }" >${classification.cfName }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="2">
+			<div id="searchUI" class="row justify-content-center">
+				<div  class="col-auto">
+					<form:select path="simpleCondition.searchType" class="form-select">
+						<form:option value="" label="전체" />
+						<form:option value="code" label="과목코드" />
+						<form:option value="name" label="과목명" />
+					</form:select>
+				</div>
+				<div  class="col-auto">
+					<form:input path="simpleCondition.searchWord" class="form-control"/>
+				</div>
+				<div  class="col-auto">
+					<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+<table class="table">
+	<thead class="table-light">
+		<tr>
+			<th>체크</th>
+			<th>과목코드</th>
+			<th>학과코드</th>
+			<th>학과명</th>
+			<th>과목명</th>
+			<th>이수구분</th>
+			<th>상태</th>
+			<th>수정</th>
+
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="subjectList" value="${paging.dataList }"/>
+			<c:choose>
+				<c:when test="${empty subjectList }">
+					<tr>
+						<td colspan="8">조건에 맞는 과목이 없음.</td>
+					</tr>	
+				</c:when>
+				<c:otherwise>
+					<c:forEach items="${subjectList }" var="subject">
+						<tr>
+							<td class="col-md-2"><input type="checkbox" name="checkBox"></td>
+							<td class="subjCd">${subject.subjCd}</td>
+							<td>${subject.dtCd}</td>
+							<td>${subject.department.dtNm}</td>
+							<td>${subject.subjNm}</td>
+							<td>${subject.subjComType}</td>
+							<td>${subject.subjStat}</td>
+							<c:url value='/subject/subjectUpdate.do' var="updateURL">
+								<c:param name="subjCd" value="${subject.subjCd}" />
+							</c:url>
+							<td><a href="${updateURL }" class="btn btn-primary" >과목수정</a></td>
+						</tr>
+					</c:forEach>
+				</c:otherwise>
+			</c:choose>
+	</tbody>
+	<tfoot>
+		<tr>
+		<div class="btn-group btn-group-md" role="group">
+			<td colspan="2">
+				<a href="<c:url value='/subject/subjectInsert.do'/>" class="btn btn-primary">과목등록</a>
+				<button id="modifyRow" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">선택수정</button>
+				<button id="deleteRow" class="btn btn-primary" type="button">상태수정</button>
+			</td>
+		</div>	
+		</tr>
+		<tr>	   
+			<td colspan="8">
+				<div class="d-flex justify-content-center mb-3">
+				${paging.pagingHTML }
+				</div>
+			<td>
+		</tr>
+	</tfoot>
+</table>
+<!-- modal body -->
+<div class="modal" data-url="${viewURL}" id="staticBackdrop" tabindex="-1">
+   <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+         <div class="modal-header">
+         <h5 class="modal-title">과목수정</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body"></div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+<!-- 검색조건 받기 -->
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="college" id="college" />
+	<input type="hidden" name="dtCd" id="dtCd" />
+	<input type="hidden" name="classfication" id="classfication" />
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<!-- 검색조건내에 조건걸기 -->
+<script>
+ 	let $dtCd = $('[name="dtCd"]');
+ 	$('[name="college"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${colgeCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+</script>
+<!-- pagination -->
+<script>
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+	$(searchBtn).on("click", function(event){
+		$(searchUI).find(":input[name]").each(function(idx, input){
+			let name = input.name;
+			let value = $(input).val();
+			$(searchForm).find(`[name=\${name}]`).val(value);
+			
+			console.log("name : " + name + ", value : " + value);
+		});
+		
+		let college = $("select[name='college']").val();
+		let dtCd = $("select[name='dtCd']").val();
+		let classfication = $("select[name='classfication']").val();
+		
+// 		console.log("college : " + college);
+// 		console.log("dtCd : " + dtCd);
+// 		console.log("classfication : " + classfication);
+		$("#searchForm input[name='college']").val(college);
+    	$("#searchForm input[name='dtCd']").val(dtCd);
+		$("#classfication").val(classfication);
+		
+		$(searchForm).submit();
+	});
+</script>
+<script>
+<!-- 상태수정 버튼 -->
+$('#deleteRow').on('click',function(){
+    let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+    let subjCd=[];
+    for(let i = 0;i<$checkSubjCd.length;i++){
+    	subjCd.push($checkSubjCd[i].innerText);
+    }
+    let setting = {
+       url : "/oryuUniversity/subject/subjectDelete.do",
+       method : "post",
+       dataType : "text",
+       traditional: true,
+       data : {
+          subjCd : subjCd
+       },
+       success : function(resp) {
+          if(resp=="success"){
+            alert("상태수정 성공")
+            window.location.href="<%=request.getContextPath()%>/subject/subjectList.do";
+          }else{
+			alert("상태수정 실패");
+          }
+       },
+       error : function(jqXHR, status, error) {
+          console.log(jqXHR)
+          console.log(status)
+          console.log(error)
+       }
+    }
+
+    $.ajax(setting);
+ })
+<!--과목수정 버튼 -->
+$(staticBackdrop).on('show.bs.modal',function(event){
+    let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+    console.log($checkSubjCd);
+    if($checkSubjCd.length==1){
+        let $modalBody = $(this).find(".modal-body");
+        let subjCd = $checkSubjCd.text();
+        console.log(subjCd);
+        if(subjCd){
+           let setting = {
+             url : `${pageContext.request.contextPath}/subject/subjectUpdate.do`,
+             dataType : "html",
+             data : {
+            	 subjCd:subjCd
+             },
+             success : function(resp) {
+                $modalBody.html(resp);
+             }
+          }
+          $.ajax(setting);
+        }
+    }else{
+       alert("수정은 한개씩 가능합니다.");
+        event.preventDefault(); 
+       return;
+    }
+ }).on('hidden.bs.modal',function(){
+    let $modalBody = $(this).find(".modal-body");
+    $modalBody.empty();
+ })
+</script>

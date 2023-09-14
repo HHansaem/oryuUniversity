@@ -1,0 +1,41 @@
+package kr.or.ddit.lectureSchedule.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+/**
+ * 강의스케쥴 ServiceImpl
+ * @author rottw
+ *
+ */
+@Service
+public class LectureScheduleServiceImpl implements LectureScheduleService {
+
+	@Inject
+	private LectureScheduleDAO lectureScheduleDAO;
+	
+
+	@Override
+	public List<LectureScheduleVO> retrievedLectureSchedule(String clasCd) {
+		
+		return lectureScheduleDAO.selectedLectureSchedule(clasCd);
+	}
+
+	@Override
+	public ServiceResult saveLectureSchedule(LectureScheduleVO lectureSchedule) {
+		return lectureScheduleDAO.insertLectureSchedule(lectureSchedule) > 0 ? ServiceResult.OK : ServiceResult.FAIL ;
+	}
+
+	@Override
+	public int removeLectureSchedule(LectureScheduleVO lectureSchedule) {
+		return lectureScheduleDAO.deleteLectureShcedule(lectureSchedule);
+	}
+
+}

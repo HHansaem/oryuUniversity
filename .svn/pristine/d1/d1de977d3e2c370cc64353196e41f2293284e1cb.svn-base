@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.tuition.dao.TuitionDAO">
+
+	<sql id="searchFrag">
+		<trim prefix=" WHERE ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'stnum'">
+        				INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'semester'">
+        				INSTR(SEMESTER_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'whether'">
+        				INSTR(TU_WHETHER, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+
+	<select id="selectTotalRecord">
+		SELECT COUNT(*) 
+		FROM TUITION
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectStaffTuitionList" resultType="kr.or.ddit.tuition.vo.TuitionVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, S.ST_NM, D.DT_NM
+		    FROM (
+				SELECT 
+					T.SEMESTER_CD, T.ST_CD, T.DT_CD, T.TU_AMOUNT, T.TU_START
+					,T.TU_END, T.TU_PAY, T.TU_DATE, T.TU_SCH_TYPE, T.TU_SCH_AMO
+					,T.TU_SCH_STA, T.TU_SCH_CON, T.TU_WHETHER
+				FROM TUITION T
+				<include refid="searchFrag" />
+		       	ORDER BY ROWID DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+		    LEFT JOIN STUDENT S ON A.ST_CD = S.ST_CD
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="selectStudentApplyScholarship" resultType="kr.or.ddit.tuition.vo.TuitionVO">
+		SELECT 
+			SEMESTER_CD, ST_CD, DT_CD, TU_AMOUNT, TU_START
+			,TU_END, TU_PAY, TU_DATE, TU_SCH_TYPE, TU_SCH_AMO
+			,TU_SCH_STA, TU_SCH_CON, TU_WHETHER, ATCH_FILE_ID
+			,TU_SCH_DATE, TU_REA
+		FROM 
+			TUITION 
+		WHERE 
+			ST_CD = #{stCd}
+	</select>
+	
+	<update id="submitScholarship" parameterType="kr.or.ddit.tuition.vo.TuitionVO">
+		UPDATE 
+			TUITION 
+		SET 
+			TU_SCH_TYPE = #{tuSchType,jdbcType=VARCHAR}
+			,TU_SCH_CON = #{tuSchCon,jdbcType=CLOB}
+			,ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+			,TU_SCH_DATE = SYSDATE
+			,TU_SCH_STA  = '대기'
+			,TU_SCH_AMO = CASE
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '성적1' THEN '3,500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '성적2' THEN '2,500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '성적3' THEN '1,500,000'
+							WHEN #{tuSchType,jdbcType=VARCHAR} = '근로' THEN '500,000'
+						END
+		WHERE 
+			SEMESTER_CD = ${semesterCd} AND ST_CD = ${stCd}
+	</update>
+
+</mapper>

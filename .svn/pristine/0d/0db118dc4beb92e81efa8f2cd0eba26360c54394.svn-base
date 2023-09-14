@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.exam.dao.ExamDAO">
+	<select id="selectExamList" parameterType="string" resultType="kr.or.ddit.lectureContents.vo.ExamVO">
+		SELECT
+		exam_cd, lec_cd, exam_nm
+		, exam_cont, exam_type, exam_sta_time
+		, exam_score, exam_end_time, exam_score_reveal
+		, exam_reg_date
+		FROM
+		exam where lec_cd = #{lecCd}
+	</select>
+	
+	<insert id="insertExam" parameterType="kr.or.ddit.lectureContents.vo.ExamVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="examCd">
+		SELECT EXAM_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+		INSERT INTO exam (
+		      exam_cd
+		    , lec_cd
+		    , exam_nm
+		    , exam_cont
+		    , exam_type
+		    , exam_sta_time
+		    , exam_score
+		    , exam_end_time
+		    , exam_score_reveal
+		    , exam_reg_date
+		    , exam_state
+		) VALUES (
+		     #{examCd,jdbcType=VARCHAR}
+		    ,#{lecCd,jdbcType=VARCHAR}
+		    ,#{examNm,jdbcType=VARCHAR}
+		    ,#{examCont,jdbcType=VARCHAR}
+		    ,#{examType,jdbcType=VARCHAR}
+		    ,#{examStaTime,jdbcType=DATE}
+		    ,#{examScore,jdbcType=NUMERIC}
+		    ,#{examEndTime,jdbcType=DATE}
+		    ,#{examScoreReveal,jdbcType=VARCHAR}
+		    ,#{examRegDate,jdbcType=DATE}
+		    , '임시'
+		)
+	</insert>
+</mapper>

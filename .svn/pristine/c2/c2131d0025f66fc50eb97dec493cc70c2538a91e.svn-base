@@ -1,0 +1,41 @@
+package kr.or.ddit.subject.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.service.SubjectService;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+public class SubjectDeleteController {
+	@Inject
+	private SubjectService service;
+	
+	@GetMapping("/subject/subjectDelete.do")
+	public String deleteSubject(
+			@RequestParam String what
+			,Errors errors
+			,Model model
+	) {
+		String logicalViewName = null;
+		
+		SubjectVO subject = service.retrieveSubject(what);
+		
+		ServiceResult result = service.removeSubject(subject);
+		
+		if(ServiceResult.OK==result) {
+			logicalViewName = "redirect:/subject/subjectList.do";
+		}else {
+			model.addAttribute("message", "과목 삭제 중 문제 발생");
+			logicalViewName = "redirect:/subject/subjectList.do";
+		}
+		return logicalViewName;
+	}
+}

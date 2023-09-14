@@ -1,0 +1,157 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+#pageVar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+#regBtn {
+	margin-bottom: 15px;
+	margin-right: 500px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+}
+#searchBtn {
+	padding-bottom: 10px;
+	padding-top: 10px;
+}
+.form-select {
+	width: auto;
+}
+.table th {
+	text-align: center;
+}
+.table td {
+	text-align: center;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: auto;">
+      <div class="h-100">
+      <div class="card-header" style="border-radius: 20px 20px 0 0; background-color:#154FA9; font-weight:bold; color:white;">등록금 관리</div>
+<table style="margin-bottom: 15px;">
+	<td style="padding-left: 370px; padding-top:30px; padding-bottom:15px"><select name="semesterCd" class="form-select"
+				id="selectSemesterCd">
+					<option value>년도/학기</option>
+						<option value="20211">2021년 1학기</option>
+						<option value="20212">2021년 2학기</option>
+						<option value="20221">2022년 1학기</option>
+						<option value="20222">2022년 2학기</option>
+						<option value="20231">2023년 1학기</option>
+						<option value="20232">2023년 2학기</option>
+			</select></td>
+	<td style="padding-left: 20px; padding-top:30px; padding-bottom:15px"><select name="dtCd" class="form-select"
+				id="selectDepartment">
+					<option value>학과선택</option>
+					<c:forEach items="${departmentList }" var="department">
+						<option value="${department.dtCd }">${department.dtNm }</option>
+					</c:forEach>
+			</select></td>
+	<td style="padding-left: 20px; padding-top:30px; padding-bottom:15px"><select name="tuWhether" class="form-select"
+				id="selectTuWhether">
+					<option value>납부여부</option>
+						<option value="완료">완료</option>
+						<option value="미납">미납</option>
+			</select></td>
+		<div colspan="11" style="border-radius: 20px">
+			<td style="padding-left: 20px; padding-top:30px; padding-bottom:15px">
+				<div id="searchUI" class="form-inline">
+					<form:select class="form-select mr-2" path="simpleCondition.searchType">
+						<form:option value="name" label="이름" />
+						<form:option value="stnum" label="학번" />
+					</form:select>
+					<form:input class="form-control mr-2" path="simpleCondition.searchWord" style="height: 37px" />
+					<input type="button" value="검색" id="searchBtn" class="btn btn-success text-center" />
+				</div>
+			</td>
+		</div>
+</table>
+
+<div id="tuitionList"></div>
+
+</div></div>
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" id="page" />
+</form:form>
+
+<script>
+
+    // 서버로 데이터 전송하는 함수
+    function sendToServer(stCd, semesterCd) {
+        var xhr = new XMLHttpRequest();
+        var url = "/oryuUniversity/tuition/tuitionPrint/do"; // 컨트롤러 URL
+        var params = "stCd=" + stCd + "&semesterCd=" + semesterCd;
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        xhr.send(params);
+    }
+
+    $(document).ready(function() {
+    	//페이지 처음 로딩
+    	fetchTuition();
+
+    	// 검색 조건 변경 이벤트 처리
+    	$("#selectSemesterCd").on("change", function() {
+	    	$("#page").val(1); // 검색 조건이 변경되면 페이지 번호 초기화
+	    	fetchTuition(); // 검색 조건이 변경 되면 등록금 현황을 업데이트
+    	});
+    	
+    	$("#selectDepartment").on("change", function() {
+	    	$("#page").val(1);
+	    	fetchTuition();
+    	});
+    	
+    	$("#selectTuWhether").on("change", function() {
+	    	$("#page").val(1);
+	    	fetchTuition();
+    	});
+    	
+    	$("#searchBtn").on("click", function() {
+    		fetchTuition(); // 검색 버튼 클릭 시 등록금 현황 업데이트
+        });
+    	
+    });
+    	
+    //등록금 목록 불러오기
+    function fetchTuition() {
+    	const selectedSemesterCd = $("#selectSemesterCd").val();
+    	const selectedDepartment = $("#selectDepartment").val();
+    	const selectedTuWhether = $("#selectTuWhether").val();
+    	const selectedPage = $("#page").val();
+        const selectedSearchType = $("#searchType").val();
+        const selectedSearchWord = $("#searchWord").val();
+        
+        $.ajax({
+        	url : "/oryuUniversity/tuition/staffTuitionList.do",
+        	method : "get",
+        	dataType : "html",
+        	data : {
+        		semesterCd : selectedSemesterCd,
+        		dtCd: selectedDepartment,
+        		tuWhether: selectedTuWhether,
+	            page: selectedPage,
+	            searchType: selectedSearchType,
+	            searchWord: selectedSearchWord
+        	},
+        	success : function(data) {
+        		$("#tuitionList").html(data);
+        	},
+        	error : function(jqXHR, status, error) {
+    			console.log(jqXHR);
+    			console.log(status);
+    			console.log(error);
+        	}
+        });
+    }
+    
+	function fn_paging(page) {
+		searchForm.page.value = page;
+		fetchTuition();
+	}
+</script>

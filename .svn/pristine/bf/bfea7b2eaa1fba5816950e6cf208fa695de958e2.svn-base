@@ -1,0 +1,114 @@
+package kr.or.ddit.club.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import kr.or.ddit.club.service.ClubService;
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.clubMember.service.ClubMemberService;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.student.vo.StudentVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@Slf4j
+public class ClubView {
+	@Inject
+	private ClubService service;
+
+	@Inject
+	private ClubMemberService memService;
+	
+	
+	/**
+	 * 학생이 속한 동아리 목록
+	 */
+	@RequestMapping("/club/myClubList.do")
+	public String myClubList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, Authentication authentication
+			, Model model
+			) {
+		
+		PaginationInfo<ClubVO> paging = new PaginationInfo<>();
+		paging.setCurrentPage(currentPage);
+		
+		List<ClubVO> clubMemberWthdrList = service.myClubList(paging,authentication.getName());
+		
+		paging.setDataList(clubMemberWthdrList);
+		model.addAttribute("club", paging);
+		
+		return "club/myClubList";
+	}
+	
+	/**
+	 * 내가 속한 동아리로 이동
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping("/club/myClubView.do")
+	public String myClubView(
+			Authentication authentication
+			,RedirectAttributes redirectAttributes//리다이렉트 데이터 전달
+			,Model model
+)
+	{
+		ClubVO InsertRequest = service.myClub(Integer.parseInt(authentication.getName()));
+		String message = "현재 속한 동아리가 없습니다.";
+		log.info("내가 속한 동아리 확인 : "+InsertRequest);
+		
+		if(InsertRequest == null || StringUtils.isBlank(InsertRequest.getClubCd())) {// null과 공백 확인 참이면 message 전달
+			if(authentication.getName().length()==7)// 교수에게
+			{ 
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/club/clubPRequestListView.do";
+			}else {//학생에게
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/club/clubListView.do";
+			}
+		}
+		else {// 정상 실행
+			if(authentication.getName().length()==7) {// 교수인 경우
+			List<StudentVO> clubMember = memService.prfClubList(authentication.getName());
+			log.info("clubMember 확인 : "+ clubMember);
+//			redirectAttributes.getFlashAttributes().get("message");
+			model.addAttribute("memClub",clubMember);
+			model.addAttribute("club", InsertRequest);
+			return "club/myClubView";
+			}else {
+				//학생인 경우
+				List<StudentVO> clubMember = memService.stuClubList(authentication.getName());
+				model.addAttribute("memClub",clubMember);
+				model.addAttribute("club", InsertRequest);
+			return "club/myClubView";
+			}
+		}
+	}
+	
+	@RequestMapping("/club/clubView.do")
+	public ModelAndView clubView(
+			@RequestParam(name = "who", required = true) String clubCd
+)
+	{
+		ModelAndView mav =new ModelAndView();
+		ClubVO InsertRequest = service.clubDetail(clubCd);
+		mav.addObject("club", InsertRequest);
+		mav.setViewName("club/clubAdmiAppl");
+		return mav;
+	}
+	
+	
+}
+

@@ -1,0 +1,84 @@
+package kr.or.ddit.schedule.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.schedule.service.AcademicScheduleService;
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+
+@Controller
+@RequestMapping("/schedule/acaScheduleUpdate.do")
+public class AcademicScheduleUpdateController {
+	
+	@Inject
+	private AcademicScheduleService service;
+
+	@GetMapping
+	public String getHandler(
+			Model model
+			, @RequestParam(name = "what") String asCd
+	) {
+		AcademicScheduleVO acaSchedule = service.retrieveAcademicSchedule(asCd);
+		model.addAttribute("acaSchedule", acaSchedule);
+		
+		return "schedule/acaScheduleForm";
+	}
+	
+	@PostMapping
+	public String postHandler(
+			Model model
+			, @ModelAttribute("acaSchedule") AcademicScheduleVO acaSchedule
+			, @RequestParam(value = "asAccePerm", required = false) String[] asAccePerm
+			, BindingResult errors
+	) {
+		String logicalViewName = null;
+		if(!errors.hasErrors()) {
+			
+			if(asAccePerm != null && asAccePerm.length > 0) {
+				StringBuilder permissioinBuilder = new StringBuilder();
+				boolean isProfessorSelected = false;
+				boolean isStudentSelected = false;
+				
+				for(String permission : asAccePerm) {
+					if("professor".equals(permission)) {
+						isProfessorSelected = true;
+					}else if("student".equals(permission)) {
+						isStudentSelected = true;
+					}
+				}
+				
+				if(isProfessorSelected && isStudentSelected) {
+					acaSchedule.setAsAccePerm("BOTH");
+				} else if(isProfessorSelected) {
+					acaSchedule.setAsAccePerm("PROFESSOR");
+				} else if(isStudentSelected) {
+					acaSchedule.setAsAccePerm("STUDENT");
+				} else {
+					acaSchedule.setAsAccePerm("NONE");
+				}
+			}else {
+				acaSchedule.setAsAccePerm("NONE");
+			}
+			
+			boolean result = service.modifyAcademicSchedule(acaSchedule);
+			if(result == true) {
+				logicalViewName = "redirect:/schedule/acaScheduleView.do?what=" + acaSchedule.getAsCd();
+			}else {
+				model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하세요");
+				logicalViewName = "schedule/acaScheduleForm";
+			}
+		}else {
+			logicalViewName = "schedule/acaScheduleForm";
+		}
+		return logicalViewName;
+	}
+
+}

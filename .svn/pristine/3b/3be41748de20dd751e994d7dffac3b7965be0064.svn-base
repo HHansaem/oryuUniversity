@@ -1,0 +1,59 @@
+package kr.or.ddit.club.service;
+
+import java.util.List;
+
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.professor.vo.ProfessorVO;
+
+public interface ClubService {
+	/**
+	 * 동아리 개설 신청
+	 * @param Club 개설 요청
+	 * @return 1
+	 */
+	public boolean createInsertRequest(ClubVO club);
+	
+	/**
+	 * 동아리 목록 보기
+	 * @param club
+	 * @return
+	 */
+	public ClubVO InsertViewClub(String clubCd);
+	
+	public List<ClubVO> insertSListClub(int Cd);
+	
+	public List<ClubVO> insertPListClub(int Cd);
+	
+	public int insertApproval(String clubCd,String clubStatus);
+	
+	public int insertRefuse(ClubVO club);
+	
+	public List<ClubVO> RequestListClub();
+	
+	public ClubVO checkClub(int Cd);
+	
+	public ClubVO myClub(int Cd);
+	
+	public List<ClubVO> ClubListView(PaginationInfo paging);
+	
+	public ClubVO clubDetail(String clubCd);
+	
+	public int clubUpdate(ClubVO club);
+	
+	public List<ProfessorVO> proChoice(PaginationInfo paging);
+	
+	/**
+	 * 총 동아리 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long clubTotalRecord(PaginationInfo paging);
+	
+	/**
+	 * 총 교수 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long profTotalRecord(PaginationInfo paging);
+}

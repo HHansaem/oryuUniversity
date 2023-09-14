@@ -1,0 +1,25 @@
+package kr.or.ddit.lectureContents.exam.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureContents.vo.ExamQuestionVO;
+import kr.or.ddit.lectureContents.vo.ExamVO;
+
+@Mapper
+public interface ExamQuestionDAO {
+	//시험 문제등록
+	public int insertExamQuestion(ExamQuestionVO examQue);
+	//시험 문제 전체조회
+	public List<ExamQuestionVO> selectExamQuestionList(String examCd);
+	//시험 문제수정
+	public int updateExamQuestion(ExamQuestionVO examQue);
+	//시험 문제삭제
+	public int deleteExamQuestion(String eqCd);
+	//시험 문제번호 감소
+	public int reduceExamQueNumber(ExamQuestionVO examQue);
+	//시험 문제 조회
+    public ExamQuestionVO selectExamQuestion(ExamQuestionVO examQue);
+  
+}

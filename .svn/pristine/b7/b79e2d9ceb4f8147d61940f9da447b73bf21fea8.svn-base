@@ -1,0 +1,16 @@
+package kr.or.ddit.lectureSchedule.service;
+
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+/**
+ * 강의스케쥴 service
+ * @author rottw
+ *
+ */
+public interface LectureScheduleService {
+	
+	// 강의 스케쥴 등록
+	public ServiceResult createLectureSchedule(LectureScheduleVO lectureSchedule );
+
+}

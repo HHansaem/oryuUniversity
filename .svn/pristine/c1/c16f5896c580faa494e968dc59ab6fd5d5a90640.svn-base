@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.LectureDAO">
+
+	<select id="selectLectureList" resultType="kr.or.ddit.lecture.vo.LectureVO">
+		SELECT B.*
+		FROM(
+			SELECT ROWNUM RNUM,A.*
+			FROM(
+				SELECT 
+				LEC_CD, SUBJ_CD, LEC_CLASS_CD, PR_CD, LEC_LECT_TITLE, LEC_GRA_CD, LEC_SEME_CD
+				, LEC_LECT_CRED, LEC_LECT_DESC, LEC_CLASS_TIME, LEC_ENRO_LIMIT, LEC_LECT_DIVISION, LEC_STAT
+				, GR_MID, GR_FINAL, GR_ATTEND, GR_ASSI, ATCH_FILE_ID
+				FROM LECTURE
+				ORDER BY LEC_CD DESC
+			) A	
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM LECTURE
+	</select>
+	
+	<insert id="insertLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="lecCd">
+			SELECT LECTURE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO lecture (
+			    LEC_CD,
+			    SUBJ_CD,
+			    LEC_CLASS_CD,
+			    PR_CD,
+			    LEC_LECT_TITLE,
+			    LEC_GRA_CD,
+			    LEC_SEME_CD,
+			    LEC_LECT_CRED,
+			    LEC_LECT_DESC,
+			    LEC_CLASS_TIME,
+			    LEC_ENRO_LIMIT,
+			    LEC_LECT_DIVISION,
+			    LEC_STAT,
+			    GR_MID,
+			    GR_FINAL,
+			    GR_ATTEND,
+			    GR_ASSI,
+			    ATCH_FILE_ID
+			) VALUES (
+			     #{lecCd,jdbcType=VARCHAR}
+				, #{subjCd,jdbcType=VARCHAR}
+				, #{lecClassCd,jdbcType=VARCHAR}
+				, #{prCd,jdbcType=VARCHAR}
+				, #{lecLectTitle,jdbcType=VARCHAR}
+				, #{lecGraCd,jdbcType=VARCHAR}
+				, #{lecSemeCd,jdbcType=VARCHAR}
+				, #{lecLectCred,jdbcType=VARCHAR}
+				, #{lecLectDesc,jdbcType=VARCHAR}
+				, #{lecClassTime,jdbcType=VARCHAR}
+				, #{lecEnroLimit,jdbcType=VARCHAR}
+				, #{lecLectDivision,jdbcType=VARCHAR}
+				, 'ON'
+				, #{atchFileId,jdbcType=NUMERIC}
+				, #{grMid,jdbcType=NUMERIC}
+				, #{grFinal,jdbcType=NUMERIC}
+				, #{grAttend,jdbcType=NUMERIC}
+				, #{grAssi,jdbcType=NUMERIC}
+			)
+	</insert>
+	
+</mapper>

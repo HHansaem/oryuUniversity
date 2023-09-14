@@ -1,0 +1,199 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<h4>논문 목록</h4>
+<hr>
+
+<h4>조건 검색</h4>
+
+<div class="dropdown-group">
+	<select id="dropDownMenu1" style="width: 300px;">
+		<option value ="단대명" selected="selected">학술코드명</option>
+		<option value ="단대명">공과대학교</option>
+		<option value ="단대명">예시2</option>
+		<option value ="단대명">예시3</option>
+	</select>
+	
+	<select id="dropDownMenu2" style="width: 300px;">
+		<option value ="학과명" selected="selected">논문코드명</option>
+		<option value ="학과명">예시1</option>
+		<option value ="학과명">예시2</option>
+		<option value ="학과명">예시3</option>
+	</select>
+	 <br><br>
+	</div>
+
+	<div class="buttongroup">
+	<input type="text" class="form-control input-default"
+	placeholder="검색어를 입력하세요"
+	id="thesis_title" name="thesis_title" style="width: 600px;"> 
+			<button type="button"
+		    class="btn mb-1 btn-primary custom-btn-p" id="c_insert"
+			style="margin-top: 10px;" onclick="">검색</button>
+	<input type="hidden" class="form-control input-flat" name="thesisSearchButton">
+	</div>
+	
+	
+	
+<hr>
+
+<section>
+
+
+<table class="thesisList">
+	<thead>
+		<tr>
+			<th>논문코드</th>
+			<th>학술사업코드</th>
+			<th>첨부파일</th>
+			<th>논문명</th>
+			<th>논문내용</th>
+			<th>논문게시일자</th>
+			<th>논문수정일</th>
+			<th>논문분류명</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+		<c:if test="${empty thesisList }">
+			<tr>
+				<td colspan="7">등록된 논문이 없습니다.</td>
+			</tr>
+		</c:if>
+		
+		<c:if test="${not empty thesisList }">
+			<c:forEach items="${thesisList }" var="thesis">
+				<tr>
+					<td>${thesis.thesCd }</td>
+					<td><a href="javascript:;" data-who="${thesis.thesCd }" data-bs-toggle="modal" data-bs-target="#exampleModal">${thesis.thesNm }</a></td>
+					<td>${thesis.acBuCd }</td>
+					<td>${thesis.attCd }</td>
+					<td>${thesis.thesNm }</td>
+					<td>${thesis.thesCont }</td>
+					<td>${thesis.thesPostDate }</td>
+					<td>${thesis.thesModDate }</td>
+					<td>${thesis.thesClNm }</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+	</tbody>
+</table>
+
+<c:url value="/thesis/thesisView.do" var="viewURL" />
+
+<!-- 부트스트랩 모달 창 생성 -->
+<div class="modal fade" data-url="${viewURL }" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- 모달 헤더 -->
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">논문 상세 정보</h1>
+        <!-- 모달 닫기 버튼 -->
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <!-- 모달 내용 영역 -->
+      <div class="modal-body">
+        <!-- 여기에 모달 내용을 출력합니다. -->
+<table class="thesisListModal">
+	<thead>
+		<tr>
+			<th>논문코드</th>
+			<th>학술사업코드</th>
+			<th>첨부파일</th>
+			<th>논문명</th>
+			<th>논문내용</th>
+			<th>논문게시일자</th>
+			<th>논문수정일</th>
+			<th>논문분류명</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+		<c:if test="${empty thesisList }">
+			<tr>
+				<td colspan="7">등록된 논문이 없습니다.</td>
+			</tr>
+		</c:if>
+		
+		<c:if test="${not empty thesisList }">
+			<c:forEach items="${thesisList }" var="thesis">
+				<tr>
+					<td>${thesis.thesCd }</td>
+					<td><a href="javascript:;" data-who="${thesis.thesCd }" data-bs-toggle="modal" data-bs-target="#exampleModal">${thesis.thesNm }</a></td>
+					<td>${thesis.acBuCd }</td>
+					<td>${thesis.attCd }</td>
+					<td>${thesis.thesNm }</td>
+					<td>${thesis.thesCont }</td>
+					<td>${thesis.thesPostDate }</td>
+					<td>${thesis.thesModDate }</td>
+					<td>${thesis.thesClNm }</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+	</tbody>
+</table>
+      </div>
+      <!-- 모달 하단 영역 -->
+      <div class="modal-footer">
+        <!-- 모달 닫기 버튼 -->
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <!-- 편집 버튼 -->
+        <button type="button" class="btn btn-primary">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<hr>
+<!-- Modal Code End-->
+
+ 
+<script src="<c:url value='/resources/js/app/thesis/thesisList.js' />"></script>
+
+<!--  스타일 start -->
+<style>
+  table.thesisList {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table.thesisList th, table.thesisList td {
+    border: 1px solid #ccc;
+    padding: 8px;
+  }
+
+  table.thesisList th {
+    background-color: #f2f2f2;
+  }
+    h4 {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+  }
+  
+
+</style>
+<!--  스타일 end -->
+
+<!-- JavaScript code -->
+<script>
+    // Wait for the DOM to load before accessing elements
+    document.addEventListener('DOMContentLoaded', function() {
+        const button = document.querySelector('.button');
+        if (button) {
+            button.addEventListener('click', onClickButton);
+        }
+    });
+
+    function onClickButton() {
+        console.log('A click event occurred.');
+    }
+</script>
+

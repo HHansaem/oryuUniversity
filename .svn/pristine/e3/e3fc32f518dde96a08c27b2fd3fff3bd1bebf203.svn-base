@@ -1,0 +1,146 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+
+<style>
+.custom-size{
+    font-size: 1.5em;
+}
+.mdi-check-circle{
+	color: #4B49AC;
+}
+a{
+	color: inherit;
+    text-decoration: none; 
+}
+.custom-border{
+	border:2px solid #9dcbff;
+	border-radius: 10px;
+}
+</style>
+<div class="d-flex">
+	<div class="col-md-9">
+	<input type="hidden" value="${exam.examTakeTime}" id="takeTime"/>
+	<form:form modelAttribute="examSubmit" method="post" id="examForm" action="${pageContext.request.contextPath}/lecture/examSubmitInsert.do" onsubmit="newLine()">
+		<form:hidden path="examCd"/>
+		<form:hidden path="lecCd"/>
+		<form:hidden path="stCd"/>
+		<c:forEach items="${examQueList}" var="examQue" varStatus="cnt">
+		<c:choose>
+		<c:when test="${examQue.eqType eq '객관식'}">
+		<div class="border m-3" id="${cnt.index+1}">
+			<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+	        	<h5>문제 ${examQue.eqNum}번</h5>
+	        	<div>${examQue.eqScore}점</div>
+	        </div>
+	        <div class="p-3">
+	        <p>${examQue.eqQt}</p>
+	        <input type="hidden" name="examQueSubmitList[${cnt.index}].eqCd" value="${examQue.eqCd}"/>
+	        <label><input type="radio" data-id="quest${cnt.index+1}" name="examQueSubmitList[${cnt.index}].eqsAnswer" value="1"> ${examQue.eqView1}</label><br>
+	        <label><input type="radio" data-id="quest${cnt.index+1}" name="examQueSubmitList[${cnt.index}].eqsAnswer" value="2"> ${examQue.eqView2}</label><br>
+	        <label><input type="radio" data-id="quest${cnt.index+1}" name="examQueSubmitList[${cnt.index}].eqsAnswer" value="3"> ${examQue.eqView3}</label><br>
+	        <label><input type="radio" data-id="quest${cnt.index+1}" name="examQueSubmitList[${cnt.index}].eqsAnswer" value="4"> ${examQue.eqView4}</label><br>
+	        </div>
+	    </div>
+	    </c:when>
+	    <c:when test="${examQue.eqType eq '주관식'}">
+	    <div class="border m-3">
+	    	<div class="d-flex justify-content-between p-2" style="background-color: #e0ebf5;">
+	        	<h5>문제 ${examQue.eqNum}번</h5>
+	        	<div>${examQue.eqScore}점</div>
+	        </div>
+	        <div class="p-3">
+	        <p>${examQue.eqQt}</p>
+	        <input type="hidden" name="examQueSubmitList[${cnt.index}].eqCd" value="${examQue.eqCd}"/>
+	    	<textarea class="form-control" data-id="quest${cnt.index+1}" rows="8" cols="100" name="examQueSubmitList[${cnt.index}].eqsAnswer"></textarea>
+	    	</div>
+	   	</div>
+	    </c:when>
+	    </c:choose>
+	    </c:forEach>
+	    <div class="w-50 d-flex justify-content-end">
+	    	<input type="submit" class="btn btn-primary"/>
+	    </div>
+	</form:form>
+	</div>
+	<div class="col-md-2 mt-3">
+	  <ul id="problemList" class="position-fixed col-md-2 p-2 custom-border">
+	  	<h4>문제</h4>
+	  	<c:forEach begin="1" end="${examQueList.size()}" varStatus="cnt">
+	    	<li class="d-flex align-items-center">
+	    		<a href="#${cnt.index}">
+		    		<i class="mdi mdi-help-circle-outline custom-size" id="quest${cnt.index}"></i>
+		    		<span>문제 ${cnt.index}</span>
+	    		</a>
+	    	</li>
+	    </c:forEach>
+	    <br>
+	    <h4 id="timer">남은 시간: ${exam.examTakeTime}분 00초</h4>
+	  </ul>
+	</div>
+</div>
+<script>
+function newLine() {
+  var textareas = document.getElementsByTagName('textarea');
+  
+  for (var i = 0; i < textareas.length; i++) {
+    var textarea = textareas[i];
+    var currentValue = textarea.value;
+    var newValue = currentValue.replace(/\n/g, '<br>');
+    textarea.value = newValue;
+  }
+}
+
+function startTimer(minutes) {
+    var totalSeconds = minutes * 60;
+    
+    var interval = setInterval(function() {
+        if (totalSeconds <= 0) {
+            clearInterval(interval);
+            $("#examForm").submit();
+        } else {
+            var minutes = Math.floor(totalSeconds / 60);
+            var seconds = totalSeconds % 60;
+            $("#timer").text("남은 시간: "+ minutes + "분 " + (seconds < 10 ? "0" : "") + seconds+"초");
+            totalSeconds--;
+        }
+    }, 1000);
+}
+
+$(document).ready(function() {
+	var minutes = $("#takeTime").val();
+	startTimer(minutes);
+	
+	$("input[type='radio']").change(function(){
+		var id = $(this).data("id");
+		$("#"+id).removeClass("mdi-help-circle-outline").addClass("mdi-check-circle");
+		$("#"+id).parent("li").find("span").css("color","#4B49AC");
+	});
+	 $('textarea').on('input change', function() {
+		 var val = $(this).val();
+		 if (val === "") {
+			 var id = $(this).data("id");
+			 $("#"+id).removeClass("mdi-check-circle").addClass("mdi-help-circle-outline");
+			 $("#"+id).parent("li").find("span").css("color","#1F1F1F");
+		 }else{
+			 var id = $(this).data("id");
+			 $("#"+id).removeClass("mdi-help-circle-outline").addClass("mdi-check-circle");
+			 $("#"+id).parent("li").find("span").css("color","#4B49AC");
+		 }
+     });
+	 
+	 $("a[href^='#']").click(function(e) {
+         e.preventDefault(); // 기본 앵커 동작 취소
+         
+         var target = $($(this).attr("href")); // 앵커의 타겟 위치 가져오기
+         var offset = target.offset().top-100; // 타겟 위치의 Y 좌표 가져오기
+         
+         $("html, body").animate({ scrollTop: offset }, 1); // 스크롤 조정 애니메이션
+     });
+});
+
+
+
+</script>

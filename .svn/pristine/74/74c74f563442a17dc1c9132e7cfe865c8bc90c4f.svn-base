@@ -1,0 +1,35 @@
+package kr.or.ddit.graduation.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.graduation.service.GraduationService;
+import kr.or.ddit.graduation.vo.GraduationVO;
+
+@Controller
+public class GraduationRetrieveController {
+
+	@Inject
+	private GraduationService service;
+	
+	@RequestMapping("/graduation/graduationList.do")
+	public String getHandler(Model model) {
+		
+		List<GraduationVO> graduationTypeList = service.retrieveGraduationTypeList();
+		List<CollegeVO> collegeTypeList = service.retrieveCollegeTypeList();
+		List<GraduationVO> graduationConditionList = service.retrieveGraduationConditionList();
+		
+		model.addAttribute("graduationTypeList", graduationTypeList);
+		model.addAttribute("collegeTypeList", collegeTypeList);
+		model.addAttribute("graduationConditionList", graduationConditionList);
+		
+		return "graduation/graduationList";
+	}
+	
+}

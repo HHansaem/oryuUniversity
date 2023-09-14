@@ -1,0 +1,27 @@
+package kr.or.ddit.lectureContents.examSubmission.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureContents.vo.ExamQuestSubmitVO;
+import kr.or.ddit.lectureContents.vo.ExamQuestionVO;
+import kr.or.ddit.lectureContents.vo.ExamSubmitVO;
+
+@Mapper
+public interface ExamSubmitDAO {
+	//학생 시험제출 등록
+	public int insertExamSubmit(ExamSubmitVO examSubmit);
+	//학생 시험제출 상세조회
+	public List<ExamQuestionVO> selectExamSubmit(ExamSubmitVO examSubmit);
+	//학생 시험제출 목록조회
+	public List<ExamSubmitVO> selectExamSubmitList(String examCd);
+	//학생 시험제출 점수업데이트
+	public int updateExamSubmitScore(ExamSubmitVO examSubmit);
+	//학생 시험제출 답안등록
+	public int insertExamQueSubmit(ExamQuestSubmitVO examQueSubmit);
+	//학생 시험제출답안 전체조회
+	public List<ExamQuestSubmitVO> selectExamQueSubmitList(String esCd); 
+	//학생 시험제출답안 점수업데이트
+	public int updateExamQueSubmit(ExamQuestSubmitVO examQueSubmit);
+}

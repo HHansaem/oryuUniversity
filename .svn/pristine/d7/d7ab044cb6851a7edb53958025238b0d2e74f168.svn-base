@@ -1,0 +1,44 @@
+package kr.or.ddit.club.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.club.vo.ClubVO;
+
+@Mapper
+public interface ClubDAO {
+	/**
+	 * 신규 동아리 개설 신청
+	 * @param Club
+	 * @return 1
+	 * 동아리 상태는 요청상태
+	 */
+	public boolean insertClub(ClubVO club);
+	
+	/**
+	 * 동아리 요청 목록
+	 * @param stCd
+	 * @return
+	 */
+	public List<ClubVO> insertListClub(int Cd);
+	
+	/**
+	 * 요청된 동아리 상세 정보
+	 * @param clubCd
+	 * @return
+	 */
+	public ClubVO insertViewClub(String clubCd);
+	
+	/**
+	 * 동아리 승인 처리
+	 */
+	public int insertApproval(String clubCd,String clubStatus); 
+	
+	/**
+	 * 동아리 거절 처리
+	 * @param club
+	 * @return
+	 */
+	public int insertRefuse(ClubVO club);
+}

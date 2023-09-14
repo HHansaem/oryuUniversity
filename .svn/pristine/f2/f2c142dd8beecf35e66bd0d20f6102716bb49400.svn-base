@@ -1,0 +1,12 @@
+package kr.or.ddit.lectureContents.exam.dao;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.lectureContents.vo.ExamQuestionVO;
+import kr.or.ddit.lectureContents.vo.ExamVO;
+
+@Mapper
+public interface ExamQuestionDAO {
+	//시험 문제등록
+	public int insertExamQuestion(ExamQuestionVO examQue);
+}

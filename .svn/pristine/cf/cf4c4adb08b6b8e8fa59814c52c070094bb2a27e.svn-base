@@ -1,0 +1,91 @@
+package kr.or.ddit.club.controller;
+
+
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.club.service.ClubService;
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+//학생 동아리신청서 작성 컨트롤러
+@Controller
+@RequestMapping("/club/clubInsertRequest.do")
+public class StudenClubInsertRequest {
+	
+	@Inject
+	private ClubService service;
+	
+	@Inject
+	private StudentService stuService;
+	
+	
+	@ModelAttribute("club")// ("")이름을 지정하고 그 지정된 이름은 jsp에도 있어야 한다
+	public ClubVO club() {
+		
+		return new ClubVO();
+	}
+	
+	
+	/**
+	 * insert폼으로 이동
+	 * @return
+	 */
+	@GetMapping
+	public String getMapping(
+			Authentication authentication
+			,Model model
+			)
+	{
+		ClubVO check = service.checkClub(Integer.parseInt(authentication.getName()));
+		if(check == null) {
+		StudentVO info = stuService.retrieveStudent(authentication.getName());
+		model.addAttribute("info", info);
+		return "club/clubInsertRequest";
+		}else{
+			return "club/clubCheck";
+		}		
+}
+	
+	
+	
+	@PostMapping
+	/**
+	 * insert폼에서 받은 데이터 db에 입력후 이동
+	 * @param model
+	 * @param club
+	 * @param errors
+	 * @return
+	 */
+	public String clubInsertPost(
+			Model model
+			, @ModelAttribute("club") ClubVO club
+			, Errors errors
+			) {
+		String logicalViewName = null;
+		if(!errors.hasErrors()) {
+			
+			boolean result = service.createInsertRequest(club);
+			if(true == result) {
+				logicalViewName = "redirect:/club/clubInsertRequestListView.do";
+			}else {
+				logicalViewName = "club/clubInesertRequest";
+			}
+		}else {
+			logicalViewName = "club/clubInesertRequest";
+		}
+		return logicalViewName;
+	}
+	
+	
+	
+}

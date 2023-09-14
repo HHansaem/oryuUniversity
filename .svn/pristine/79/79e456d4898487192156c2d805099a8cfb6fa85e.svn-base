@@ -1,0 +1,37 @@
+package kr.or.ddit.lectureContents.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+@Data
+@EqualsAndHashCode(of = "esCd")
+@NoArgsConstructor
+@RequiredArgsConstructor
+public class ExamSubmitVO {
+	@NotBlank
+	private String esCd;
+	@NotBlank
+	@NonNull
+	private String examCd;
+	@NotBlank
+	@NonNull
+	private String lecCd;
+	@NotBlank
+	@NonNull
+	private String stCd;
+	private LocalDate esDate;
+	private Integer esScore;
+	
+	private String stNm;
+	private String dtNm;
+	
+	private List<ExamQuestSubmitVO> examQueSubmitList;
+}

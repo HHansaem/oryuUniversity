@@ -1,0 +1,110 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<!-- Google Charts 라이브러리 불러오기 -->
+<script type="text/javascript"
+	src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- 그래프를 표시할 요소 -->
+<div class="custom-card">
+	<div class="row">
+		<div class="col-sm-6">
+			<div id="piechart_3d" style="width: 700px; height: 300px;"></div>		
+		</div>
+		
+		<div class="col-sm-6">
+			<div id="regions_div" style="width:700px; height: 700px;"></div>		
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-6">
+			<div id="chart_div" style="width: 100%; height: 300px;"></div>		
+		</div>
+	</div>
+	
+</div>
+
+
+
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['bar']});
+    google.charts.setOnLoadCallback(drawChart);
+	google.charts.load("current", {packages : [ "corechart" ]});    
+    google.charts.setOnLoadCallback(drawChart2);
+    google.charts.load('current', {'packages':['geochart'],});
+    google.charts.setOnLoadCallback(drawRegionsMap);
+
+    function drawChart() {
+        var chartData = [['취업연도', '취업인원', '미취업자', '총인원']];
+        <c:forEach var="student" items="${chartList}">
+            chartData.push(['${student.stGrad}', ${student.employed}, ${student.unEmployed}, ${student.total}]);
+        </c:forEach>
+
+        var data = google.visualization.arrayToDataTable(chartData);
+
+        var options = {
+            chart: {
+                title: '전체 취업률 차트',
+                subtitle: 'Sales, Expenses, and Profit by Year',
+            }
+        };
+        
+        
+
+        var chart = new google.charts.Bar(document.getElementById('chart_div'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+    }
+    
+	function drawChart2() {
+		var data = google.visualization.arrayToDataTable([
+				[ 'Task', 'Hours per Day' ], [ 'Work', 11 ], [ 'Eat', 2 ],
+				[ 'Commute', 2 ], [ 'Watch TV', 2 ], [ 'Sleep', 7 ] ]);
+
+		var options = {
+			title : 'My Daily Activities',
+			is3D : true,
+		};
+
+		var chart = new google.visualization.PieChart(document
+				.getElementById('piechart_3d'));
+		chart.draw(data, options);
+	}
+	function drawRegionsMap() {
+        var data = google.visualization.arrayToDataTable([
+			['Province', 'Popularity'],
+			['서울', 100],
+			['부산', 200],
+			['대구', 150],
+			['인천', 180],
+			['광주', 120],
+			['대전', 160],
+			['울산', 90],
+			['세종', 70],
+			['경기', 250],
+			['강원', 80],
+			['충북', 110],
+			['충남', 130],
+			['전북', 140],
+			['전남', 170],
+			['경북', 190],
+			['경남', 220],
+			['제주', 50]
+        ]);
+
+        var options = {
+			region: 'KR', // 한국을 나타내는 국가 코드
+			displayMode: 'regions',
+			resolution: 'provinces', // 지도 해상도를 지역별로 설정
+			colorAxis: { colors: ['green', 'blue'] } // 지도에 표시될 색상 설정
+        };
+
+        var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+
+        chart.draw(data, options);
+      }
+    
+    
+</script>

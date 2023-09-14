@@ -1,0 +1,220 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<script src="${pageContext.request.contextPath }/resources/js/ckeditor/ckeditor.js"></script>
+<style>
+    .custom-hr {
+        border: 0; /* 기본 경계선 제거 */
+        height: 1px; /* 선의 높이 */
+        background-color: #333; /* 선의 색상 */
+        margin: 20px 0; /* 위아래 여백 */
+    }
+     #divMargin{
+    	margin-top: 10px;
+    }
+    .notification {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+    }
+</style>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="tabbable">
+				<ul class="nav nav-tabs" id="myTab" role="tablist">
+					<li class="nav-item"><a class="nav-link active show"
+						href="#exam" data-toggle="tab">세부사항</a></li>
+					<li class="nav-item"><a class="nav-link" href="#examQue"
+						data-toggle="tab">문제작성</a></li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="exam">
+						<form role="form" id="examDetail">
+							<input type="hidden" name="lecCd" value="${lecCd}"/>
+							<input type="hidden" id="examId" name="examCd" />
+							<div class="form-group">
+								<label>제목</label> <input
+									type="text" class="form-control" name="examNm"/>
+							</div>
+							<div class="form-group">
+								<label>시험 전달사항</label> 
+								<textarea class="form-control" name="examCont" rows="8" cols="100"></textarea>
+							</div>
+							<div class="form-group">
+								<label>유형</label>
+								<select class="form-control" id="examType" name="examType">
+									<option value="">고사유형</option>
+        							<option value="중간고사">중간고사</option>
+        							<option value="기말고사">기말고사</option>
+    							</select> 
+							</div>
+							<div class="form-group">
+								<label>마감시간</label> 
+								<input type="datetime-local" class="form-control" id="examDateTime" name="examEndTime">
+							</div>
+							<button type="button" class="btn btn-primary" id="examAjax">저장</button>
+							<div id="notification" class="notification"></div>
+						</form>
+					</div>
+					<div class="tab-pane" id="examQue">
+						<form role="form">
+							<label>1번 문제</label> 
+							<div class="form-group" id="divMargin">
+								<label>문제유형</label>
+								<select class="form-control" id="examQueType" name="examType">
+        							<option value="multi">객관식</option>
+        							<option value="short">주관식</option>
+    							</select> 
+							</div>
+							<div class="form-group">
+								<label>문제지문</label> 
+								<textarea class="form-control" id="examTextarea" rows="8" cols="100"></textarea>
+							</div>
+							<div id="examView">
+								<label>문제보기</label> 
+								<div class="form-group d-flex flex-row" id="divMargin">
+									<label>1번</label>
+									<div class="col-sm-3">
+									<input type="text" class="form-control" id="examView1" />
+									</div>
+								</div>
+								<div class="form-group d-flex flex-row">
+									<label>2번</label>
+									<div class="col-sm-3">
+									<input type="text" class="form-control" id="examView2" />
+									</div>
+								</div>
+								<div class="form-group d-flex flex-row">
+									<label>3번</label>
+									<div class="col-sm-3">
+									<input type="text" class="form-control" id="examView3" />
+									</div>
+								</div>
+								<div class="form-group d-flex flex-row">
+									<label>4번</label>
+									<div class="col-sm-3">
+									<input type="text" class="form-control" id="examView4" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group d-flex flex-row align-items-center">
+								<label>정답</label>
+								<div class="col-sm-3" id="examAnswerDiv">
+									<select class="form-control" id="examAnswer">
+										<option value="">정답선택</option>
+										<option value="1">1번</option>
+										<option value="2">2번</option>
+										<option value="3">3번</option>
+										<option value="4">4번</option>
+									</select>
+								</div> 
+								<label>배점</label>
+								<div class="col-sm-3">
+								<input type="number" class="form-control" />
+								</div> 
+								<button type="submit" class="btn btn-primary">문제 업데이트</button>
+							</div>
+						</form>
+						<hr class="custom-hr">
+						<button type="button" class="btn btn-primary">문제 추가</button>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+<script>
+	$(function() {
+		$('#myTab a').on('click', function(e) {
+			e.preventDefault();
+			$(this).tab('show');
+		});
+	});
+	
+	CKEDITOR.replace('examTextarea',{
+		  // 현재 보내는 주소 설정
+	      filebrowserImageUploadUrl: '${pageContext.request.contextPath }/uploadImage.do' 
+	});
+	$(document).ready(function() {
+		
+		$('#examQueType').on('change', function() {
+		    var selectedValue = this.value; // 선택된 값 가져오기
+		    $("#examAnswerDiv").empty();
+		    $("#examView").empty();
+		    // 선택된 값에 따라 원하는 작업 수행
+		    if (selectedValue === 'multi') {
+		    	var selectElement = $("<select>").addClass("form-control").attr("id", "examAnswer");
+		    	var options = ["1", "2", "3", "4"];
+		    	var examViewDiv = $("<div>").attr("id", "examView");
+		    	var problemLabel = $("<label>").text("문제보기");
+		    	examViewDiv.append(problemLabel);
+			    for (var i = 1; i <= 4; i++) {
+			          var divElement = $("<div>").addClass("form-group d-flex flex-row");
+			          var labelElement = $("<label>").text(i + "번");
+			          var inputElement = $("<input>").attr({
+			              type: "text",
+			              class: "form-control",
+			              id: "examView" + i
+			          });
+			          var innerDivElement = $("<div>").addClass("col-sm-3");
+			          
+			          innerDivElement.append(inputElement);
+			          divElement.append(labelElement, innerDivElement);
+			          examViewDiv.append(divElement);
+			   	}
+			    $("#examView").replaceWith(examViewDiv);
+	    		$.each(options, function(index, value) {
+	    	        var optionElement = $("<option>").text(value+"번").val(value);
+	    	        selectElement.append(optionElement);
+	    	    });
+		    	$("#examAnswerDiv").append(selectElement);			    	
+		    } else if (selectedValue === 'short') {
+		    	var inputElement = $("<input>").attr({
+		            type: "text",
+		            class: "form-control",
+		            id: "examAnswer"
+		        });
+		    	$("#examAnswerDiv").append(inputElement);
+		    }
+		});
+		
+		$("#examAjax").click(function() {
+            $.ajax({
+                type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+                data: $('#examDetail').serializeArray(),
+                success: function(response) {
+                	if(response==='성공'){
+                		 showNotification("정상적으로 저장되었습니다.");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}else if(response=='실패'){
+                		 showNotification("세부사항을 입력해주세요");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        });
+		
+	  function showNotification(message) {
+          $("#notification").text(message);
+          $("#notification").show();
+      }
+         
+       function hideNotification() {
+           $("#notification").hide();
+       }
+	});
+</script>

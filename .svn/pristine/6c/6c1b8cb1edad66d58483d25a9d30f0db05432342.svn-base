@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO">
+
+	<insert id="insertLectureSchedule" parameterType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO">
+		INSERT INTO LECTURESCHEDULE (
+		    CLAS_CD,
+		    SCHE_CD,
+		    LEC_CD
+		) VALUES (
+		    #{clasCd,jdbcType=VARCHAR}
+			, #{scheCd,jdbcType=VARCHAR}
+			, #{lecCd,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectedLectureSchedule" resultType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" parameterType="String">
+		SELECT
+		    MON.SCHE_TIME SCHETIME,
+		    COALESCE(MON_LECT.lec_lect_title, '빈강의실') AS LECMON,
+		    COALESCE(TUE_LECT.lec_lect_title, '빈강의실') AS LECTUE,
+		    COALESCE(WED_LECT.lec_lect_title, '빈강의실') AS LECWED,
+		    COALESCE(THU_LECT.lec_lect_title, '빈강의실') AS LECTHU,
+		    COALESCE(FRI_LECT.lec_lect_title, '빈강의실') AS LECFRI
+		FROM DAYTIMESCHEDULE MON
+		JOIN DAYTIMESCHEDULE TUE ON MON.SCHE_TIME = TUE.SCHE_TIME
+		JOIN DAYTIMESCHEDULE WED ON MON.SCHE_TIME = WED.SCHE_TIME
+		JOIN DAYTIMESCHEDULE THU ON MON.SCHE_TIME = THU.SCHE_TIME
+		JOIN DAYTIMESCHEDULE FRI ON MON.SCHE_TIME = FRI.SCHE_TIME
+		LEFT JOIN LECTURESCHEDULE MONSCHE ON MON.SCHE_CD = MONSCHE.SCHE_CD AND monsche.clas_cd = #{scheCd}
+		LEFT JOIN LECTURESCHEDULE TUESCHE ON TUE.SCHE_CD = TUESCHE.SCHE_CD AND tuesche.clas_cd = #{scheCd}
+		LEFT JOIN LECTURESCHEDULE WEDSCHE ON WED.SCHE_CD = WEDSCHE.SCHE_CD AND wedsche.clas_cd = #{scheCd}
+		LEFT JOIN LECTURESCHEDULE THUSCHE ON THU.SCHE_CD = THUSCHE.SCHE_CD AND thusche.clas_cd = #{scheCd}
+		LEFT JOIN LECTURESCHEDULE FRISCHE ON FRI.SCHE_CD = FRISCHE.SCHE_CD AND frische.clas_cd = #{scheCd}
+		LEFT JOIN lecture MON_LECT ON MONSCHE.LEC_CD = MON_LECT.lec_cd
+		LEFT JOIN lecture TUE_LECT ON TUESCHE.LEC_CD = TUE_LECT.lec_cd
+		LEFT JOIN lecture WED_LECT ON WEDSCHE.LEC_CD = WED_LECT.lec_cd
+		LEFT JOIN lecture THU_LECT ON THUSCHE.LEC_CD = THU_LECT.lec_cd
+		LEFT JOIN lecture FRI_LECT ON FRISCHE.LEC_CD = FRI_LECT.lec_cd
+		WHERE MON.SCHE_DAY = 'mon'
+		    AND TUE.SCHE_DAY = 'tue'
+		    AND WED.SCHE_DAY = 'wed'
+		    AND THU.SCHE_DAY = 'thu'
+		    AND FRI.SCHE_DAY = 'fri'
+		ORDER BY MON.SCHE_TIME
+
+		
+	</select>
+	
+	<delete id="deleteLectureShcedule" parameterType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO">
+		DELETE
+		FROM LECTURESCHEDULE
+		WHERE LEC_CD = #{lecCd,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="selectLectureScheduleDetail" parameterType="string" resultType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO">
+		SELECT
+		    clas_cd
+		  , sche_cd
+		  , lec_cd
+		FROM
+		LECTURESCHEDULE
+		WHERE lec_cd = #{lecCd}
+	</select>
+
+</mapper>

@@ -1,0 +1,415 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<style>
+.gradInfo {
+	margin-top: 3px;
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 20px;
+	padding-right: 40px;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.gradInfo-header {
+	margin: 20px 0 11px 40px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.gradInfo-body {
+	margin: -13px 11px 20px 40px;
+	font-size: 12px;
+}
+
+.span-title {
+	font-weight: bold;
+	color: #248AFD;
+	margin-right: 12px;
+}
+
+select {
+	padding: 0; /* 위 아래 여백을 없애는 스타일 */
+	display: inline-block; /* 셀렉트 박스를 인라인 블록 요소로 표시하여 텍스트 흐름을 방해하지 않도록 함 */
+	vertical-align: middle; /* 수직 정렬을 가운데로 설정 */
+}
+
+button {
+	margin-left: 10px;
+}
+
+.row {
+	margin: 10px;
+}
+
+th {
+	text-align: center;
+}
+
+td {
+	text-align: center;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div class="custom-card">
+			<div class="card-header" style="border-radius: 20px 20px 0 0; background-color: #154FA9; font-weight: bold; color: white;">과목목록</div>
+			<div class="card-body">
+				<div class="card gradInfo">
+					<div class="gradInfo-header">
+						<i class="mdi mdi-check-circle" style="color: green;"></i> 과목 관리
+						페이지
+						<hr style="border-color: black;">
+					</div>
+					<div class="gradInfo-body">
+						<span class="span-title">검색자</span>
+						|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;단대,학과,이수구분 선택하고 검색버튼을 눌러주세요.
+					</div>
+					<div class="gradInfo-body">
+						<span class="span-title">과목 등록,수정,삭제</span>
+						|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 원하는 강의를 클릭하여 수정, 삭제 진행하세요.(삭제 시
+						리스트에서 확인이 불가능합니다. 신중하게 진행해주세요.)
+					</div>
+					<div class="gradInfo-body" id="gradeStudents"></div>
+					<div
+						style="display: flex; justify-content: flex-end; width: 100%; margin-top: -50px;">
+						<button id="insertRow" class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;" button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">과목등록</button>
+						<button id="modifyRow" class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;" button" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">과목수정</button>
+						<button id="deleteRow" class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;"button">과목삭제</button>
+					</div>
+				</div>
+				<div class="row justify-content-center">
+					<div class="col-2">
+						<select name="college" class="form-select">
+							<option value>단대선택</option>
+							<c:forEach items="${collegeList }" var="college">
+								<option value="${college.colgeCd }">${college.colgeNm }</option>
+							</c:forEach>
+						</select>
+					</div>
+					<div class="col-2">
+						<select name="dtCd" class="form-select">
+							<option value>학과선택</option>
+							<c:forEach items="${departmentList }" var="department">
+								<option value="${department.dtCd }"
+									class="${department.colgeCd }">${department.dtNm }</option>
+							</c:forEach>
+						</select>
+					</div>
+					<div class="col-2">
+						<select name="classfication" class="form-select">
+							<option value>이수구분선택</option>
+							<c:forEach items="${classificationList }" var="classification">
+								<option value="${classification.cfCode }">${classification.cfName }</option>
+							</c:forEach>
+						</select>
+					</div>
+					<div id="searchUI" class="col-1">
+						<form:select path="simpleCondition.searchType" class="form-select">
+							<form:option value="" label="전체" />
+							<form:option value="code" label="과목코드" />
+							<form:option value="name" label="과목명" />
+						</form:select>
+					</div>
+					<div id="searchUI" class="col-2">
+						<form:input path="simpleCondition.searchWord" class="form-control" />
+					</div>
+					<div class="col-1">
+						<input type="button" value="검색" id="searchBtn"
+							class="btn btn-success" />
+					</div>
+					<div class="col-4"></div>
+				</div>
+				<div class="row justify-content-center">
+					<div class="col-7">
+						<table class="table">
+							<thead class="table-light">
+								<tr>
+									<th><input id="toggleCheckBoxes" type="checkbox"
+										name="checkBox"></th>
+									<th>과목코드</th>
+									<th>과목명</th>
+									<th>학과명(학과코드)</th>
+									<th>이수구분</th>
+								</tr>
+							</thead>
+							<tbody>
+								<c:set var="subjectList" value="${paging.dataList }" />
+								<c:choose>
+									<c:when test="${empty subjectList }">
+										<tr>
+											<td colspan="7">조건에 맞는 과목이 없음.</td>
+										</tr>
+									</c:when>
+									<c:otherwise>
+										<c:forEach items="${subjectList }" var="subject">
+											<tr>
+												<td class="col-1"><input type="checkbox"
+													name="checkBox"></td>
+												<td class="col-1 subjCd">${subject.subjCd}</td>
+												<td class="col-2">${subject.subjNm}</td>
+												<td class="col-2">${subject.department.dtNm}(${subject.dtCd})</td>
+												<td class="col-1"><c:choose>
+														<c:when test="${subject.subjComType eq '1'}">
+															<span class="badge badge-primary"> <c:out
+																	value="전공필수" />
+															</span>
+														</c:when>
+														<c:when test="${subject.subjComType eq '2'}">
+															<span class="badge badge-info"> <c:out
+																	value="전공선택" />
+															</span>
+														</c:when>
+														<c:when test="${subject.subjComType eq '3'}">
+															<span class="badge badge-secondary"> <c:out
+																	value="교양필수" />
+															</span>
+														</c:when>
+														<c:when test="${subject.subjComType eq '4'}">
+															<span class="badge badge-light"> <c:out
+																	value="교양선택" />
+															</span>
+														</c:when>
+													</c:choose></td>
+											</tr>
+										</c:forEach>
+									</c:otherwise>
+								</c:choose>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="7">
+										<div class="d-flex justify-content-center mb-3">
+											${paging.pagingHTML }</div>
+									</td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- modal body -->
+<div class="modal" data-url="${viewURL}" id="staticBackdrop"
+	tabindex="-1">
+	<div class="modal-dialog modal-fullscreen-sm-down">
+		<div class="modal-content">
+			<div class="modal-header" style="background-color: #154FA9; font-weight: bold; color: white;">
+				<h5 class="modal-title">과목등록</h5>
+			</div>
+			<div class="modal-body"></div>
+		</div>
+	</div>
+</div>
+
+<!-- modal body -->
+<div class="modal" data-url="${viewURL}" id="staticBackdrop2"
+	tabindex="-1">
+	<div class="modal-dialog modal-fullscreen-sm-down">
+		<div class="modal-content">
+			<div class="modal-header" style="background-color: #154FA9; font-weight: bold; color: white;">
+				<h5 class="modal-title">과목수정</h5>
+			</div>
+			<div class="modal-body"></div>
+		</div>
+	</div>
+</div>
+
+<!-- 검색조건 받기 -->
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="college" id="college"
+		value="${detail.college }" />
+	<input type="hidden" name="dtCd" id="dtCd" value="${detail.dtCd }" />
+	<input type="hidden" name="classfication" id="classfication"
+		value="${detail.classfication }" />
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+
+<!-- 검색조건내에 조건걸기 -->
+<script>
+ 	let $dtCd = $('[name="dtCd"]');
+ 	$('[name="college"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${colgeCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+ 	
+<!-- pagination -->
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+	$(searchBtn).on("click", function(event){
+		$(searchUI).find(":input[name]").each(function(idx, input){
+			let name = input.name;
+			let value = $(input).val();
+			$(searchForm).find(`[name=\${name}]`).val(value);
+			
+			console.log("name : " + name + ", value : " + value);
+		});
+		
+		let college = $("select[name='college']").val();
+		let dtCd = $("select[name='dtCd']").val();
+		let classfication = $("select[name='classfication']").val();
+		
+		$("#searchForm input[name='college']").val(college);
+    	$("#searchForm input[name='dtCd']").val(dtCd);
+		$("#classfication").val(classfication);
+		
+		$(searchForm).submit();
+	});
+ // 과목등록
+ $(staticBackdrop).on('show.bs.modal',function(event){
+        let $modalBody = $(this).find(".modal-body");
+           let setting = {
+             url : `${pageContext.request.contextPath}/subject/subjectInsert.do`,
+             success : function(resp) {
+                $modalBody.html(resp);
+             }
+          };
+          $.ajax(setting);
+ }).on('hidden.bs.modal',function(){
+    let $modalBody = $(this).find(".modal-body");
+    $modalBody.empty();
+ });
+ 
+ <!--과목수정 버튼 -->
+ $(staticBackdrop2).on('show.bs.modal',function(event){
+     
+ 	let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+     
+     if($checkSubjCd.length==1){
+         let $modalBody = $(this).find(".modal-body");
+         let subjCd = $checkSubjCd.text();
+         
+         if(subjCd){
+            let setting = {
+              url : `${pageContext.request.contextPath}/subject/subjectUpdate.do`,
+              dataType : "html",
+              data : {
+             	 subjCd:subjCd
+              },
+              success : function(resp) {
+                 $modalBody.html(resp);
+              }
+           }
+           $.ajax(setting);
+         }
+     
+     }else if(($checkSubjCd.length==0)){
+    	 Swal.fire({
+   		  title: '선택된 과목이 없습니다.',
+   		  icon: 'info',
+  		});
+ 		event.preventDefault(); 
+ 		return;
+     } else{
+		Swal.fire({
+		  title: '과목 수정은 다중선택 불가합니다.',
+		  icon: 'info',
+		});
+		event.preventDefault(); 
+		return;
+     }
+  }).on('hidden.bs.modal',function(){
+     let $modalBody = $(this).find(".modal-body");
+     $modalBody.empty();
+  })
+	
+<!-- 과목삭제 버튼 -->
+$('#deleteRow').on('click',function(){
+	
+	let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+    let subjCd=[];
+    for(let i = 0;i<$checkSubjCd.length;i++){
+    	subjCd.push($checkSubjCd[i].innerText);
+    }
+    if($checkSubjCd.length==0){
+		Swal.fire({
+   		  title: '선택된 과목이 없습니다.',
+   		  icon: 'info',
+   		});
+    	event.preventDefault(); 
+    	return;
+    }else{
+		Swal.fire({
+	        title: '과목를 삭제하시겠습니까?',
+	        text: '다시 되돌릴 수 없습니다. 신중하세요.',
+	        icon: 'info',
+	        showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+	        confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+	        cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+	        confirmButtonText: '삭제', // confirm 버튼 텍스트 지정
+	        cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+	     }).then(result => {
+	        if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+				let setting = {
+					url : "/oryuUniversity/subject/subjectDelete.do",
+					method : "post",
+					dataType : "text",
+					traditional: true,
+					data : {
+					   subjCd : subjCd
+					},
+					success : function(resp) {
+						if(resp=="success"){
+							Swal.fire({
+					      		  title:'과목 삭제 완료',
+					      		  icon: 'success',
+					     	}).then(result => {
+					     		 if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+									window.location.href="<%=request.getContextPath()%>/subject/mngSubjectList.do";
+					     		 }
+					     	})
+						}else{
+							Swal.fire({
+					      		  title:'과목 삭제 실패',
+					      		  icon: 'error',
+					     	});
+						}
+					},
+					error : function(jqXHR, status, error) {
+						console.log(jqXHR)
+						console.log(status)
+						console.log(error)
+					}
+				}
+				$.ajax(setting);
+			}
+	     });
+    }
+ })
+</script>
+<script>
+$(document).ready(function() {
+	// 버튼 클릭 시 해당 열의 체크박스들의 상태를 토글
+	$('#toggleCheckBoxes').click(function() {
+	    var isChecked = $(this).prop('checked');
+	    $(':checkbox[name="checkBox"]').prop('checked', isChecked);
+	});
+	// 삭제 버튼 클릭 시 선택한 체크박스들을 삭제
+	$('#deleteRow').click(function() {
+	    var selectedCheckboxes = $(':checkbox[name="checkBox"]:checked');
+	    if (selectedCheckboxes.length > 0) {
+	        var subjCdList = selectedCheckboxes.closest('tr').find('.subjCd').map(function() {
+	            return $(this).text();
+	        }).get();
+	        // 여기서 subjCdList를 서버로 전송하거나 필요한 동작을 수행하세요.
+	        // 예를 들어 AJAX 요청으로 삭제를 처리할 수 있습니다.
+	        console.log('Selected Subject Codes:', subjCdList);
+	        // 선택한 체크박스들 해제
+	        selectedCheckboxes.prop('checked', false);
+		}
+	});
+});
+</script>

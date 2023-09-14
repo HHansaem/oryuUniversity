@@ -1,0 +1,87 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<table class="table">
+<tr><td><h4><br>과목 관리</h4><td></tr>
+</table>
+<form:form method="post" modelAttribute="subject">
+	<form:hidden path="subjCd"/>
+	<table class="table table-border">
+		<tr>
+			<th>과목코드</th>
+			<c:if test="${empty subject.subjCd }">
+				<td> 과목코드는 자동으로 입력됩니다. </td>
+			</c:if>
+			<td>
+			${subject.subjCd }
+			</td>
+		</tr>
+		<tr>
+			<th>단대</th>
+			<td>
+	            <select name="college"  class="form-select">
+	               <option value>단대선택</option>
+	               <c:forEach items="${collegeList }" var="college">
+	                  <option value="${college.colgeCd }" >${college.colgeNm }</option>
+	               </c:forEach>
+	            </select>
+	            <span class="error">${errors["college"]}</span>
+			</td>
+		</tr>
+		<tr>
+			<th>학과</th>
+			<td>
+				<form:select path="dtCd" class="form-select">
+					<form:option value="" label="학과선택" />
+					<c:forEach items="${departmentList }" var="department">
+					<form:option value="${department.dtCd }" 
+							class="${department.colgeCd }" label="${department.dtNm }" />
+					</c:forEach>
+				</form:select>
+				<form:errors path="dtCd" class="error" />
+			</td>
+		</tr>
+		<tr>
+			<th>과목명</th>
+			<td>
+				<form:input path="subjNm" class="form-control" type="text"  value="${subject.subjNm }" />
+				<form:errors path="subjNm" class="error"/>
+			</td>
+		</tr>
+		<tr>
+			<th>이수구분</th>
+			<td>
+				<form:select path="subjComType" class="form-select">
+					<form:option value="" label="이수구분선택" />
+					<form:options items="${classificationList }" itemLabel="cfName" itemValue="cfCode"/>
+				</form:select>
+				<form:errors path="subjComType" class="error" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<c:if test="${empty subject.subjCd }">
+					<input class="btn btn-success" type="submit" value="등록">
+				</c:if>
+				<c:if test="${not empty subject.subjCd }">
+					<input class="btn btn-success" type="submit" value="수정">
+				</c:if>
+				<input class="btn btn-danger" type="reset" value="취소">
+			</td>
+		</tr>
+	</table>
+</form:form>
+<script>
+ 	let $dtCd = $('[name="dtCd"]');
+ 	$('[name="college"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${colgeCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+</script>

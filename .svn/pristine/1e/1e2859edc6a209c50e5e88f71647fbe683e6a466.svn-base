@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.NoticeDAO">
+	<sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'title'">
+                    INSTR(AN_TITLE, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'content'">
+                    INSTR(AN_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(AN_TITLE, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(AN_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+        </where>
+   </sql>
+   
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM LECTURE_NOTICE
+	</select>
+	
+	<select id="selectNoticeList" resultType="kr.or.ddit.lecture.vo.NoticeVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+			SELECT ROWNUM RNUM, A.*
+			FROM(
+				SELECT
+					LN_NUM
+				    , LEC_CD
+				    , ATCH_FILE_ID
+				    , LN_TITLE
+				    , LN_CONT
+				    , LN_POST_DATE
+				FROM LECTURE_NOTICE
+				<include refid="searchFrag"></include>
+				ORDER BY LN_NUM DESC
+			) A
+		) B
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+
+</mapper>

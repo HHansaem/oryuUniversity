@@ -1,0 +1,45 @@
+package kr.or.ddit.research.vo;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+
+/**
+ * 연구 & 연구일지 VO 클래스
+ */
+@Data
+public class ResearchVO implements Serializable{
+
+	// 연구 코드 (필수 입력)
+	@NotBlank
+	private String reseCd;
+
+	// 학술사업 코드 (필수 입력)
+	@NotBlank
+	private String acBuCd;
+
+	// 첨부 코드 (필수 입력)
+	@NotBlank
+	private String attCd;
+
+	// 연구명
+	private String reseNm;
+
+	// 연구 내용
+	private String reseCont;
+
+	// 연구 게시일자
+	private LocalDate resePostDate;
+
+	// 연구 상태
+	private String reseStat;
+
+	// 연구 삭제 여부
+	private String reseDelete;
+	
+	private long rnum;
+
+}

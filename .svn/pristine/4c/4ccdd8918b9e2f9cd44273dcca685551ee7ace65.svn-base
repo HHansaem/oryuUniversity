@@ -1,0 +1,76 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<script src="${pageContext.request.contextPath}/resources/js/ckeditor/ckeditor.js"></script>
+<form:form method="post" modelAttribute="intern" enctype="multipart/form-data">
+	<table class="table table-border">	
+			<c:if test="${not empty intern.inteCd }">
+			<tr hidden="true">
+				<th>코드</th>
+			<td><input type="hidden" name="inteCd" value="${intern.inteCd}" readonly>
+			${intern.inteCd}</td>
+			</tr>
+			</c:if>
+			
+			<tr>
+				<th>제목</th>
+			<td colspan="6"><input type="text" name="inteTitle" value="${intern.inteTitle}"></td>
+			</tr>
+			<tr>
+				<th>회사명</th>
+			<td colspan="6"><input type="text" name="inteCompNm" value="${intern.inteCompNm}"></td>
+			</tr>
+			<tr>
+			</tr>
+			<tr>
+				<th>기업상세주소</th>
+				<td><input type="text" name="inteCompAddr" value="${intern.inteCompAddr}"></td>
+				<th>담당자</th>
+				<td><input type="text" name="inteContPerson" value="${intern.inteContPerson}"></td>
+				<th>이메일</th>
+				<td><input type="text" name="inteEmail" value="${intern.inteEmail}"></td>
+			</tr>
+			<tr>
+				<th>전화번호</th>
+				<td><input type="text" name="intePh" value="${intern.intePh}"></td>
+				<th>근무지</th>
+				<td colspan="3"><input type="text" name="inteRegion" value="${intern.inteRegion}" ></td>
+			</tr>
+			<tr>
+				<th>인턴십기간(개월)</th>
+				<td><input type="text" name="intePeri" value="${intern.intePeri}" ></td>
+				 <th>인턴십시작일</th>
+				<td><input type="date" name="inteStaDate" value="${intern.inteStaDate}" ></td>
+				<th>인턴십종료일</th>
+				<td><input type="date" name="inteEndDate" value="${intern.inteEndDate}" ></td>
+			</tr>
+			<tr>
+				<th>기업소개</th>
+				<td colspan="6">
+				<form:textarea path="inteIntrd" class="form-control form-control-lg" />
+				<form:errors path="inteIntrd" class="error" />
+				</td>
+			</tr>
+			<tr>
+				<th>첨부파일</th>
+				<td colspan="6">
+					<input type="file" name="inteFiles" multiple/>
+				</td>
+				<td>${fileDetail.orignlFileNm }</td>
+			</tr>
+			
+			<tr>
+			<td colspan="6">
+				<input class="btn btn-success" type="submit" value="확인"> 
+				<input class="btn btn-danger" type="reset"value="취소" onclick="history.back();">
+			</td>
+		</tr>
+		</table>
+</form:form>
+<script>
+       CKEDITOR.replace('inteIntrd',{
+   	      filebrowserImageUploadUrl: '${pageContext.request.contextPath}/internship/uploadImage.do',
+       } );
+   </script>

@@ -1,0 +1,46 @@
+package kr.or.ddit.lectureContents.examSubmission.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.lectureContents.examSubmission.service.ExamSubmitService;
+import kr.or.ddit.lectureContents.vo.ExamSubmitVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+@RequestMapping("/lecture/examSubmitInsert.do")
+public class ExamSubmitInsertController {
+	
+	@Inject
+	ExamSubmitService service;
+	
+	public String examSubmit(@Validated(InsertGroup.class) ExamSubmitVO examSubmit, Errors errors,Model model){
+		String logicalViewName = null;
+		if (!errors.hasErrors()) {
+			ServiceResult result = service.insertExamSubmit(examSubmit);
+			switch(result) {
+				case OK:
+					//logicalViewName = "redirect:/lecture/homeworkDetail.do?assiCd="+assignment.getAssiCd();
+					break;
+				case FAIL:
+					logicalViewName = "lecture/homework/homeworkForm";
+				default:
+					model.addAttribute("message","서버 오류, 잠시 뒤 다시 시도하시오.");
+					logicalViewName = "lecture/homework/homeworkForm";
+					break;
+			}
+		} else {
+			logicalViewName = "lecture/homework/homeworkForm";
+		}
+
+		return logicalViewName;
+	}
+
+}

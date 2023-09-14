@@ -1,0 +1,16 @@
+package kr.or.ddit.graduation.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.graduation.vo.GraduationVO;
+
+@Mapper
+public interface GraduationDAO {
+
+	public List<GraduationVO> selectGraduationStudentList(String stCd);
+	public GraduationVO selectGraduationStudentBelong(String stCd);
+	public List<GraduationVO> selectGraduationCollegeList();
+	
+}

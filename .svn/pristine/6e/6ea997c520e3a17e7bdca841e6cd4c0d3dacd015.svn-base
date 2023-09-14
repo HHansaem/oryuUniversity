@@ -1,0 +1,27 @@
+package kr.or.ddit.lectureSchedule.vo;
+
+import java.io.Serializable;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+
+/**
+ * 강의스케쥴 vo
+ * @author rottw
+ *
+ */
+@Data
+@EqualsAndHashCode(of = {"clasCd","scheCd"} )
+public class LectureScheduleVO implements Serializable {
+	@NotBlank
+	private String clasCd;
+	@NotBlank
+	private String scheCd;
+	@NotBlank
+	private String lecCd;
+	
+
+}

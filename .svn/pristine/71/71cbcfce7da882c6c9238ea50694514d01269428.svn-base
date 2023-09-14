@@ -1,0 +1,24 @@
+package kr.or.ddit.researchJournal.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.researchJournal.vo.ResearchJournalVO;
+
+@Mapper
+public interface ResearchJournalDAO {
+
+	public int insertResearchJournal(ResearchJournalVO researchJournal);
+	
+	public ResearchJournalVO selectResearchJournal(int rjsn);
+	
+	public long selectTotalRecord(PaginationInfo<ResearchJournalVO> paging);
+	
+	public List<ResearchJournalVO> selectResearchJournalList(PaginationInfo<ResearchJournalVO> paging);
+	
+	public int updateResearchJournal(ResearchJournalVO researchJournal);
+	
+	
+}

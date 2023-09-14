@@ -1,0 +1,74 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<form:form method="post" modelAttribute="student" enctype="multipart/form-data">
+	<form:hidden path="stCd"/>
+<table>
+	<tr>
+		<th>학과코드</th>
+		<td> 
+			<form:input path="dtCd"/>
+			<form:errors path="dtCd" class="error" />
+		</td>	
+	</tr>
+	<tr>
+		<th>이름</th>
+		<td>
+			<form:input path="stNm" />
+			<form:errors path="stNm" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주소1</th>
+		<td>
+			<form:input path="stAddr1" />
+			<form:errors path="stAddr1" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주소2</th>
+		<td>
+			<form:input path="stAddr2" />
+			<form:errors path="stAddr2" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>전화번호</th>
+		<td>
+			<form:input path="stPh"/>
+			<form:errors path="stPh" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>이메일</th>
+		<td>
+			<form:input path="stEmail" />
+			<form:errors path="stEmail" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>제한학점</th>
+		<td>
+			<form:input path="stLiCre" />
+			<form:errors path="stLiCre" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>프로필사진</th>
+		<td>
+			<input type="file" name="stImage" accept="image/*"/>
+			<form:errors path="stFic" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="submit" value="수정">
+			<input type="reset" value="취소">
+			<input type="button" value="뒤로가기" 
+				onclick="history.back();">
+			<a href="<c:url value='/student/studentList.do'/>">목록으로</a>
+		</td>
+	</tr>
+</table>
+</form:form>

@@ -1,0 +1,102 @@
+package kr.or.ddit.enrollment.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.college.dao.CollegeDAO;
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.vo.ClassRoomVO;
+import kr.or.ddit.common.vo.DaytimeScheduleVO;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.enrollment.service.EnrollmentService;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.subject.dao.SubjectDAO;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+@RequestMapping("/enrollment/")
+public class EnrollmentManagementController {
+	@Inject
+	private EnrollmentService service;
+	
+	@ModelAttribute("enrollment")
+	public EnrollmentVO enrollment() {
+		return new EnrollmentVO();
+	}
+	
+	@Inject 
+	private DepartmentDAO departmentDAO;
+	@Inject
+	private CollegeDAO collegeDAO;
+	@Inject
+	private SubjectDAO subjectDAO;
+	@Inject
+	private CommonDAO commonDAO;
+	
+	@ModelAttribute("classRoomList")
+	public List<ClassRoomVO> classRoomList(){
+		return commonDAO.selectClassRoomList();
+	}
+	
+	@ModelAttribute("daytimeScheduleList")
+	public List<DaytimeScheduleVO> daytimeScheduleList(){
+		return commonDAO.selectDaytimeScheduleList();
+	}
+
+	@ModelAttribute("subjectList")
+	public List<SubjectVO> subjectList(){
+		return subjectDAO.SubjectList();
+	}
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		return departmentDAO.selectDepartmentList();
+	}
+	@ModelAttribute("collegeList")
+	public List<CollegeVO> collegeList(){
+		return collegeDAO.selectCollegeList();
+	}
+	
+	// 수강 신청(학생)
+	@PostMapping("submitEnrollment.do")
+	@ResponseBody
+	public String submitEnrollment(
+			Authentication authentication
+			,String[] lecCds
+	) {
+//		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//		String stCd = userDetails.getUsername();
+		int cnt = 0;
+		String result = null;
+
+		EnrollmentVO enrollment = new EnrollmentVO();
+		String stCd = "5";
+		enrollment.setStCd(stCd);
+		enrollment.setLecCds(lecCds);
+		try {
+			cnt = service.sendEnrollement(enrollment);
+		} catch (Exception e) {
+			result = e.getMessage();
+		}
+		
+		if(cnt>0) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+		
+
+}

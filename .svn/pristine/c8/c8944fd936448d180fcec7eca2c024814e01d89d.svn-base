@@ -1,0 +1,41 @@
+package kr.or.ddit.job.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+
+
+
+@Controller
+@RequestMapping("/job/")
+public class ChartListRetrieveController {
+
+	@Inject
+	private StudentService service;
+	
+	@GetMapping("chartList.do")
+	public String chartList(
+		Model model
+	) {
+		StudentVO student = new StudentVO();
+        List<StudentVO> studentList = service.retrieveChartList(student);
+        model.addAttribute("chartList",studentList);
+		return "job/chartList";
+	}
+	
+//	@GetMapping("/chartData")
+//    @ResponseBody
+//    public List<StudentVO> studentList() {
+//		StudentVO student = new StudentVO();
+//        List<StudentVO> studentList = service.retrieveChartList(student);
+//        return studentList;
+//    }
+
+}

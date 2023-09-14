@@ -1,0 +1,78 @@
+package kr.or.ddit.lecture.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+@RequestMapping("/lecture/lectureInsert.do")
+public class LectureInsertController {
+	
+	@Inject
+	private LectureService service;
+//	@Inject 
+//	private DepartmentDAO departmentDAO;
+//	@Inject
+//	private CommonDAO commonDAO;
+//	@Inject
+//	private CollegeDAO collegeDAO;
+//	
+//	@ModelAttribute("departmentList")
+//	public List<DepartmentVO> departmentList(){
+//		return departmentDAO.selectDepartmentList();
+//	}
+//	@ModelAttribute("classificationList")
+//	public List<ClassificationVO> classificationList(){
+//		return commonDAO.selectClassificationList();
+//	}
+//	@ModelAttribute("collegeList")
+//	public List<CollegeVO> collegeList(){
+//		return collegeDAO.selectCollegeList();
+//	}
+	@ModelAttribute("lecture")
+	public LectureVO lecture() {
+		return new LectureVO();
+	}
+	
+	@GetMapping
+	public String lectureForm() {
+		return "lecture/lectureForm";
+	}
+	
+	@PostMapping
+	public String lectureInsert(
+		@Validated(InsertGroup.class)@ModelAttribute("lecture") LectureVO lecture
+		, Errors errors
+		, Model model
+	) {
+		String logicalViewName = null;
+
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.createLecture(lecture);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/lectureList.do";
+			}else {
+				model.addAttribute("message", "강의 등록 중 문제 발생");
+				logicalViewName = "lecture/lectureForm";
+			}
+		}else {
+			logicalViewName = "lecture/lectureForm";
+		}
+		
+		return logicalViewName;
+	}
+
+}

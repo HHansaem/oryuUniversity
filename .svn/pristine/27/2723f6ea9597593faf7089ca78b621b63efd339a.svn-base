@@ -1,0 +1,25 @@
+package kr.or.ddit.email.dao;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.email.vo.MailVO;
+
+@Mapper
+public interface MailDAO {
+
+/**
+ * 메일 자동 로그인
+ */
+public MailVO mailAutoLogin(String id);
+
+/**
+ * 메일 아이디 등록
+ */
+public int mailIDInsert(MailVO mail);
+	
+/**
+ * 아이디 체크
+ */
+public int mailCheck(String id);
+
+}

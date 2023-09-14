@@ -1,0 +1,78 @@
+package kr.or.ddit.student.vo;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.validate.groups.InsertGroup;
+import kr.or.ddit.validate.groups.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "stCd")
+public class StudentVO implements Serializable {
+	private long rnum;
+	private String stAddr1;
+	private String stAddr2;
+	@NotBlank(groups = InsertGroup.class)
+	private String stReg1;
+	@NotBlank(groups = InsertGroup.class)
+	private String stReg2;
+	@NotBlank(groups = InsertGroup.class)
+	private String stCd;
+	@NotBlank(groups = InsertGroup.class)
+	private String dtCd;
+	@NotBlank(groups = InsertGroup.class)
+	private String stNm;
+	@NotBlank(groups = InsertGroup.class)
+	private String stPh;
+	private String stEmail;
+	@NotBlank(groups = { InsertGroup.class, UpdateGroup.class })
+	@Size(min = 4, max = 16)
+	private String stPass;
+	private String stFic;
+	private Integer stLiCre;
+	private String stStatus;
+	private String stRole;
+
+	// 취업현황조회용 하단
+	private String empStat;
+	private String empYear;
+	private String empField;
+	private String empLoc;
+
+	private String stGrad;
+	private String dtNm;
+	private String colgeNm;
+	private String employed;
+	private String unEmployed;
+	private String total;
+	private String ratio;
+	private String clubMemClass;
+	
+	// 차트용
+	private String emp;
+	private String unemp;
+	private Map<String,Object> detailCondition;
+	
+
+	private MultipartFile stImage;
+
+	public void setStImage(MultipartFile stImage) {
+		if (!stImage.isEmpty()) {
+			this.stImage = stImage;
+			this.stFic = UUID.randomUUID().toString();
+		}
+
+	}
+	
+
+
+}

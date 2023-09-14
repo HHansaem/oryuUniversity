@@ -1,0 +1,71 @@
+package kr.or.ddit.thesis.controller;
+
+import java.security.Principal;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.thesis.service.ThesisService;
+import kr.or.ddit.thesis.vo.ThesisVO;
+import kr.or.ddit.validate.groups.UpdateGroup;
+
+@RequestMapping("/thesis/thesisUpdate.do")
+@Controller
+public class ThesisUpdateController {
+
+	@Inject
+	private ThesisService service;
+
+	/**
+	 * thesisForm 제공
+	 */
+	@GetMapping
+	public String getHandler(Principal principal, Model model) {
+		ThesisVO thesis = service.retrieveThesis(principal.getName());
+		
+		model.addAttribute("thesis",thesis);
+		return "thesis/thesisForm";
+	}
+
+	@PostMapping
+	public String postHandler(Principal principal	
+			, @Validated(UpdateGroup.class) @ModelAttribute("thesis") ThesisVO thesis
+			, BindingResult errors
+			, Model model
+			){
+		thesis.setThesSn(principal.getName());
+		
+		String logicalViewName = null;
+		
+		if (!errors.hasErrors()) {
+			ServiceResult result = service.modifyThesis(thesis);
+			switch (result) {
+				case INVALIDPASSWORD:
+					model.addAttribute("message", "입력값 오류");
+					logicalViewName = "thesis/thesisForm";
+					break;
+				case OK:
+					logicalViewName = "redirect:/thesisList";
+					break;
+				default:
+					model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하시오.");
+					logicalViewName = "thesis/thesisForm";
+					break;
+			}
+		}else {
+			logicalViewName = "thesis/thesisForm";
+		}
+		return logicalViewName;
+	}
+	
+	
+}

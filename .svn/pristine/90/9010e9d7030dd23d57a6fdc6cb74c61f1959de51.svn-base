@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.academicbusinessmanagement.dao.AcademicBusinessManagementDAO">
+	<sql id="searchFrag">
+		<where>
+			
+			
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'code'">
+						INSTR(AC_BU_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'name'">
+						INSTR(BU_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(AC_BU_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(BU_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.acBuCd.isEmpty">
+			            AND AC_BU_CD = #{detailCondition.acBuCd}
+			        </when>
+			        <otherwise>
+			            <!-- Do nothing when 'acBuCd' key is not present or has a null value -->
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.buNm neq null and not detailCondition.buNm.isEmpty">
+			            AND BU_NM = #{detailCondition.BU_NM}
+			        </when>
+			        <otherwise>
+			            <!-- Do nothing when 'classfication' key is not present or has a null value -->
+			        </otherwise>
+			    </choose>
+			</if>
+
+		</where>
+	</sql>
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM AC_BU_MNG
+		<include refid="searchFrag"></include>
+	</select>
+	
+	
+	
+	<resultMap type="kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessManagementVO" 
+				id="academicBusinessManagementMap">
+		<id property="acBuCd" column="AC_BU_CD"/>
+		<result property="tsCd" column="TS_CD"/>
+		<result property="prCd" column="PR_CD"/>
+		<result property="atchFileId" column="ATCH_FILE_ID"/>
+		<result property="buNm" column="BU_NM"/>
+		<result property="buShortCont" column="BU_SHORT_CONT"/>
+		<result property="buCont" column="BU_CONT"/>
+		<result property="buDate" column="BU_DATE"/>
+		<result property="buEnd" column="BU_END"/>
+		<result property="buStatNm" column="BU_STAT_NM"/>
+		<result property="buAutNm" column="BU_AUT_NM"/>
+		<collection property="thesisList" ofType="kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessManagementVO" autoMapping="true">
+			<id property="acBuCd" column="A_AC_BU_CD"/>
+			<id property="acBuCd" column="B_AC_BU_CD"/>
+		</collection>
+		
+		
+	</resultMap>
+	
+	
+	<select id=""></select>
+
+
+
+</mapper>

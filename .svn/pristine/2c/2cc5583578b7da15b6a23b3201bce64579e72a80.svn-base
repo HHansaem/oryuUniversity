@@ -1,0 +1,36 @@
+package kr.or.ddit.enrollment.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.enrollment.service.EnrollmentService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/enrollment")
+public class EnrollmentGradeController {
+	
+	@Inject
+	private EnrollmentService service;
+	
+	@RequestMapping("gradeList.do")
+	public String gradeList(
+			HttpSession session
+			, String lecCd
+			, Model model
+	) {
+		session.removeAttribute("lecCd");
+		session.setAttribute("lecCd", lecCd);
+		LectureVO gradeRate = service.retrieveGradeRate(lecCd);
+		log.info("강의비율얍"+gradeRate);
+		model.addAttribute("gradeRate", gradeRate);
+		
+		return "lecture/grade/prfLectureGrade";
+	}
+}

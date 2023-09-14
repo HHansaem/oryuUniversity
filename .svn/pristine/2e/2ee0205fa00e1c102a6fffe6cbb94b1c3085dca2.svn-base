@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.acBuDoc.dao.AcBuDocDAO">
+
+<!-- 학술사업관리 대시보드용  -->
+   <sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'buDocNm'">
+                    INSTR(BU_DOC_NM, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'buDocAutNm'">
+                    INSTR(BU_DOC_AUT_NM, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'buDocCont'">
+                    INSTR(BU_DOC_EV_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(BU_DOC_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(BU_DOC_AUT_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(BU_DOC_EV_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+        </where>
+   </sql>
+   
+      <!-- 총 조회수 -->
+    <select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM AC_BU_DOC
+      <include refid="searchFrag"></include>
+   </select>
+   
+      <select id="selectAcBuDocList" resultType="kr.or.ddit.acBuDoc.vo.AcBuDocVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+				BU_DOC_CD
+				, AC_BU_CD
+				, ATCH_FILE_ID
+				, BU_DOC_NM
+				, BU_DOC_SHORT_CONT
+				, BU_DOC_CONT
+				, BU_DOC_AUT_NM
+				, BU_DOC_EV_NM
+				, BU_DOC_EV_CONT
+				, BU_DOC_EV_AUT_NM
+				, BU_DOC_CLASS
+				, BU_DOC_KEYWORD
+				, BU_DOC_POST_DATE
+              FROM AC_BU_DOC
+              <include refid="searchFrag"/>
+              ORDER BY BU_DOC_CD
+          ) A
+      ) B
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+    <select id="selectAcBuDocEvNmList" resultType="kr.or.ddit.acBuDoc.vo.AcBuDocVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+				BU_DOC_CD
+				, AC_BU_CD
+				, ATCH_FILE_ID
+				, BU_DOC_NM
+				, BU_DOC_SHORT_CONT
+				, BU_DOC_CONT
+				, BU_DOC_AUT_NM
+				, BU_DOC_EV_NM
+				, BU_DOC_EV_CONT
+				, BU_DOC_EV_AUT_NM
+				, BU_DOC_CLASS
+				, BU_DOC_KEYWORD
+				, BU_DOC_POST_DATE
+              FROM AC_BU_DOC
+              WHERE BU_DOC_EV_NM = #{buDocEvNm}
+              ORDER BY BU_DOC_CD
+          ) A
+      ) B ;
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+      <resultMap type="kr.or.ddit.acBuDoc.vo.AcBuDocVO" id="acBuDocMap" autoMapping="true">
+      <id property="buDocCd" column="BU_DOC_CD"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+   </resultMap>
+   
+   <select id="selectAcBuDoc" parameterType="string" resultMap="acBuDocMap">
+    
+          WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+          USING(ATCH_FILE_ID)
+      )
+      SELECT
+				BU_DOC_CD
+				, AC_BU_CD
+				, ATCH_FILE_ID
+				, BU_DOC_NM
+				, BU_DOC_SHORT_CONT
+				, BU_DOC_CONT
+				, BU_DOC_AUT_NM
+				, BU_DOC_EV_NM
+				, BU_DOC_EV_CONT
+				, BU_DOC_EV_AUT_NM
+				, BU_DOC_CLASS
+				, BU_DOC_KEYWORD
+				, BU_DOC_POST_DATE
+					
+		          , ATCH_FILE_ID
+		          , FILE_SN
+		          , FILE_STRE_COURS
+		          , STRE_FILE_NM
+		          , ORIGNL_FILE_NM
+		          , FILE_EXTSN
+		          , FILE_SIZE
+		          , FILE_MIME
+		          
+				  , CREAT_DT
+		          , USE_AT
+          
+      FROM AC_BU_DOC 
+      LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+      WHERE BU_DOC_CD = #{buDocCd}
+    </select>
+    
+        <insert id="insertAcBuDoc" parameterType="kr.or.ddit.acBuDoc.vo.AcBuDocVO">
+    	<selectKey order="BEFORE" resultType="string" keyProperty="buDocCd">
+    		SELECT AC_DOC_CD_SEQ.NEXTVAL FROM DUAL	 
+    	</selectKey>
+    	INSERT INTO AC_BU_DOC (
+					BU_DOC_CD
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, BU_DOC_NM
+					, BU_DOC_SHORT_CONT
+					, BU_DOC_CONT
+					, BU_DOC_AUT_NM
+					, BU_DOC_EV_NM
+					, BU_DOC_EV_CONT
+					, BU_DOC_EV_AUT_NM
+					, BU_DOC_CLASS
+					, BU_DOC_KEYWORD
+					, BU_DOC_POST_DATE
+    				) VALUES (
+					#{buDocCd,jdbcType=VARCHAR}
+					, #{acBuCd,jdbcType=VARCHAR}
+					, #{atchFileId,jdbcType=NUMERIC}
+					, #{buDocNm,jdbcType=VARCHAR}
+					, #{buDocShortCont,jdbcType=CLOB}
+					, #{buDocCont,jdbcType=CLOB}
+					, #{buDocAutNm,jdbcType=VARCHAR}
+					, #{buDocEvNm,jdbcType=VARCHAR}
+					, #{buDocEvCont,jdbcType=VARCHAR}
+					, #{buDocEvAutNm,jdbcType=VARCHAR}
+					, #{buDocClass,jdbcType=VARCHAR}
+					, #{buDocKeyword,jdbcType=VARCHAR}
+					, SYSDATE
+    	)
+    	
+    </insert>
+    
+    <update id="updateAcBuDoc" parameterType="kr.or.ddit.acBuDoc.vo.AcBuDocVO">
+    
+				UPDATE AC_BU_DOC
+							SET
+						BU_DOC_CD = #{buDocCd,jdbcType=VARCHAR}
+						, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+						, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+						, BU_DOC_NM = #{buDocNm,jdbcType=VARCHAR}
+						, BU_DOC_SHORT_CONT = #{buDocShortCont,jdbcType=CLOB}
+						, BU_DOC_CONT = #{buDocCont,jdbcType=CLOB}
+						, BU_DOC_AUT_NM = #{buDocAutNm,jdbcType=VARCHAR}
+						, BU_DOC_EV_NM = #{buDocEvNm,jdbcType=VARCHAR}
+						, BU_DOC_EV_CONT = #{buDocEvCont,jdbcType=VARCHAR}
+						, BU_DOC_EV_AUT_NM = #{buDocEvAutNm,jdbcType=VARCHAR}
+						, BU_DOC_CLASS = #{buDocClass,jdbcType=VARCHAR}
+						, BU_DOC_KEYWORD = #{buDocKeyword,jdbcType=VARCHAR}
+				WHERE 
+						BU_DOC_CD = #{buDocCd}
+    </update>
+    
+    <delete id="deleteAcBuDoc" parameterType="kr.or.ddit.acBuDoc.vo.AcBuDocVO">
+    
+    	DELETE FROM AC_BU_DOC
+    	WHERE
+    			BU_DOC_CD = #{buDocCd}
+    
+    </delete>
+    
+<!-- 	<resultMap  type="kr.or.ddit.acBuDoc.vo.AcBuDocVO$YearAndTotalCount" id="YearAndCountResultMap" autoMapping="true"> -->
+<!-- 		<id property="year" column="BU_DOC_CD"/> -->
+<!-- 		<association property="YearAndTotalCount" javaType="kr.or.ddit.acBuDoc.vo.AcBuDocVO$YearAndTotalCount"></association> -->
+<!-- 	    <result property="year" column="post_year" /> -->
+<!-- 	    <result property="totalCount" column="count" /> -->
+<!-- 	</resultMap> -->
+	
+<!-- 	 Define the SQL statement to create the Oracle view  -->
+<!-- 	<select id="selectYearlyCount" resultMap="YearAndCountResultMap"> -->
+<!-- 	    SELECT EXTRACT(YEAR FROM BU_DOC_POST_DATE) AS post_year, -->
+<!-- 	           COUNT(*) AS count -->
+<!-- 	    FROM AC_BU_DOC -->
+<!-- 	    GROUP BY EXTRACT(YEAR FROM BU_DOC_POST_DATE) -->
+<!-- 	</select> -->
+
+    <select id="selectDocumentSummaries" resultType="kr.or.ddit.acBuDoc.vo.DocumentSummaryVO">
+		      SELECT EXTRACT(YEAR FROM BU_DOC_POST_DATE) AS Year,
+		       COUNT(*) AS TotalDocuments
+				FROM AC_BU_DOC
+				GROUP BY EXTRACT(YEAR FROM BU_DOC_POST_DATE)
+		        ORDER BY Year
+   </select>
+    
+	<select id="selectRank" resultType="kr.or.ddit.acBuDoc.vo.DocumentSummaryVO">
+	        SELECT AUTNM, TotalRank
+	        FROM (
+	            SELECT
+	                BU_DOC_AUT_NM AS AUTNM,
+	                COUNT(*) AS TotalRank
+	            FROM AC_BU_DOC
+	            GROUP BY BU_DOC_AUT_NM
+	            ORDER BY COUNT(*) DESC
+	        )
+	           <![CDATA[
+		        WHERE ROWNUM <= 5
+	         	]]>
+	</select>
+   
+   </mapper>

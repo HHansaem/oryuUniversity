@@ -1,0 +1,57 @@
+package kr.or.ddit.schedule.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.schedule.service.AcademicScheduleService;
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+
+@Controller
+@RequestMapping("/schedule")
+public class AcademicScheduleRetrieveController {
+	@Inject
+	private AcademicScheduleService service;
+	
+	@RequestMapping("acaScheduleList.do")
+	public void acaScheduleList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			, Model model
+	) {
+		PaginationInfo<AcademicScheduleVO> paging = new PaginationInfo<>();
+		
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		
+		List<AcademicScheduleVO> acaScheduleList = service.retrieveAcademicScheduleList(paging);
+		paging.setDataList(acaScheduleList);
+		
+		model.addAttribute("paging", paging);
+		
+		// 총 레코드 수 조회
+        long totalRecord = service.getTotalRecordCount(paging);
+        model.addAttribute("totalRecord", totalRecord);
+	}
+	
+	@RequestMapping("acaScheduleView.do")
+	public void acaSchedultView(
+			@RequestParam("what") int asCd
+			, Model model
+	) {
+		AcademicScheduleVO acaSchedule = service.retrieveAcademicSchedule(asCd);
+		model.addAttribute("acaSchedule", acaSchedule);
+	}
+}
+
+
+
+

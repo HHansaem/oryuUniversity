@@ -1,0 +1,174 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %> 
+
+<table class="table">
+	<tr>
+		<td><h4>
+				<br>강의 관리
+			</h4>
+		<td>
+	</tr>
+</table>
+<section>
+<form:form method="post" modelAttribute="lectureSchedule" enctype="multipart/form-data">
+	<table class="table table-border">
+	<form:hidden path="lecCd" />
+	<tr>
+		<th>강의실</th>
+		<td>
+			<form:select  id="classroomSelect" path="clasCd" class="form-select">
+				<form:option value="" label="강의실선택" />
+				<form:options items="${classRoomList }" itemLabel="clasNm" itemValue="clasCd"/>
+			</form:select>
+			<form:errors path="clasCd" class="error" />
+		</td>
+	</tr>
+	<table id="data-table" class="table table-border">
+	    <thead>
+	        <tr>
+	            <th></th>
+	            <th>월</th>
+	            <th>화</th>
+	            <th>수</th>
+	            <th>목</th>
+	            <th>금</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	</table>
+</table>
+</section>
+<table class="table table-border">
+	<tr>
+		<td colspan="2">
+			<input id="submitBtn" class="btn btn-success" type="submit" value="등록">
+			<input class="btn btn-danger" type="reset" value="취소">
+		</td>
+	</tr>
+</table>
+</form:form>
+<script>
+ 
+$(function(){
+    $("#classroomSelect").change(function(){
+        loadTimeTable();
+    });
+    
+    function loadTimeTable() {
+        $.ajax({
+            url: "/oryuUniversity/load-time-table",
+            type: "post",
+            data: {
+                clasCd: $("#classroomSelect").val(),
+            },
+            success: function(data) {
+            	console.log(data);
+                updateTimetable(data);
+            },
+            error: function(error) {
+                console.error("Error loading timetable: ", error);
+            }
+        });
+    }
+   
+    let combinedValues = [];
+    function updateTimetable(data) {
+        const tableBody = document.querySelector('#data-table tbody');
+        tableBody.innerHTML = '';
+
+        for (let i = 0; i < 9; i++) {
+            const rowData = data[i];
+			console.log(rowData)
+            const row = document.createElement('tr');
+			
+            row.innerHTML =
+                `
+                <td>\${rowData.scheTime}</td>
+                <td data-time="\${rowData.scheTime}" data-day="월" data-value="\${rowData.lecMon}">\${rowData.lecMon}</td>
+                <td data-time="\${rowData.scheTime}" data-day="화" data-value="\${rowData.lecTue}">\${rowData.lecTue}</td>
+                <td data-time="\${rowData.scheTime}" data-day="수" data-value="\${rowData.lecWed}">\${rowData.lecWed}</td>
+                <td data-time="\${rowData.scheTime}" data-day="목" data-value="\${rowData.lecThu}">\${rowData.lecThu}</td>
+                <td data-time="\${rowData.scheTime}" data-day="금" data-value="\${rowData.lecFri}">\${rowData.lecFri}</td>
+                `;
+            tableBody.appendChild(row);
+        }
+        //배경색 변경
+        const dataCells = document.querySelectorAll("#data-table td[data-value]");
+
+//         dataCells.forEach(cell => {
+//         	console.log(cell);
+//             const dataValue = cell.getAttribute("data-value");
+//             console.log('data value : '+ dataValue);
+            
+//             if (dataValue === "null") {  // "null" 문자열과 비교
+//                 cell.style.backgroundColor = "green";
+// 		        // 클릭 이벤트 추가
+//             } else {
+//             	cell.style.backgroundColor = "red";
+//             }
+//         });
+        $("#data-table td[data-day]").click(function () {
+            const cellValue = $(this).text();
+            const day = $(this).data("day");
+            const time = $(this).data("time");
+            const combinedValue = `\${day}\${time}`;
+            console.log(`cellValue: \${cellValue}, time: \${time}, Day: \${day}`);
+            if ($(this).css("background-color") !== "rgb(255, 0, 0)") {
+                if ($(this).css("background-color") !== "rgb(0, 0, 255)") {
+                    // Change background color to blue
+                    $(this).css("background-color", "blue");
+                    combinedValues.push(combinedValue);
+                } else {
+                    // Change background color back to green and remove from combinedValues
+                    $(this).css("background-color", "green");
+                    const index = combinedValues.indexOf(combinedValue);
+                    if (index !== -1) {
+                        combinedValues.splice(index, 1);
+                    }
+                }
+                
+                console.log("Combined Values Array:", combinedValues);
+            } else {
+                alert($("#classroomSelect").val() + "강의실 해당 교시는 이미 강의등록이 되어있습니다.");
+                event.preventDefault();
+            }
+        });
+    }
+    $("#submitBtn").click(function() {
+		event.preventDefault();
+        const lecCd = "${lectureSchedule.lecCd}"; // 강의 코드
+        const clasCd = $("#classroomSelect").val(); // 강의실 코드
+        
+        if (combinedValues.length === 0) {
+            alert("강의 시간을 선택해주세요."); // Display an alert if combinedValues is empty
+            return; // Exit the function without making the AJAX request
+        }
+
+        const postData = {
+            lecCd: lecCd,
+            clasCd: clasCd,
+            combinedValues: combinedValues
+        };
+
+        $.ajax({
+            url: "/oryuUniversity/lecture/lectureScheduleInsert.do",
+            type: "post",
+            data: JSON.stringify(postData),
+            contentType: "application/json",
+            success: function(response) {
+            	console.log(response);
+                alert(response);
+                window.location.href="<%=request.getContextPath()%>/lecture/lectureScheduleInsert.do?what="+${lectureSchedule.lecCd};
+                // 여기에서 원하는 동작 수행
+            },
+            error: function(error) {
+                alert(error);
+            }
+        });
+    });
+});
+
+</script>

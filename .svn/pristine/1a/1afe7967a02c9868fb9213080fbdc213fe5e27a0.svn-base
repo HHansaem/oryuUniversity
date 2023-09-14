@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.subject.dao.SubjectDAO">
+	<sql id="searchFrag">
+		<where>
+			
+			
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'code'">
+						INSTR(SUBJ_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'name'">
+						INSTR(SUBJ_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(SUBJ_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(SUBJ_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			            <!-- Do nothing when 'dtCd' key is not present or has a null value -->
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.classfication neq null and not detailCondition.classfication.isEmpty">
+			            AND SUBJ_COM_TYPE = #{detailCondition.classfication}
+			        </when>
+			        <otherwise>
+			            <!-- Do nothing when 'classfication' key is not present or has a null value -->
+			        </otherwise>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM SUBJECT
+		<include refid="searchFrag"></include>
+	</select>
+	<select id="selectSubList" resultType="kr.or.ddit.subject.vo.SubjectVO">
+		SELECT *
+		FROM SUBJECT
+	</select>
+	
+	<resultMap type="kr.or.ddit.subject.vo.SubjectVO" id="subjectMap" autoMapping="true">
+		
+		<id property="subjCd" column="SUBJ_CD" />
+		
+		<association property="department" javaType="kr.or.ddit.department.vo.DepartmentVO" autoMapping="true">
+			<id property="dtCd" column="DT_CD"/>
+			<result property="dtNm" column="DT_NM"/>
+			<result property="colgeCd" column="COLGE_CD"/>
+			<association property="college" javaType="kr.or.ddit.college.vo.CollegeVO"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectSubjectList" resultMap="subjectMap" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM(
+		    SELECT ROWNUM RNUM, A.*
+		    FROM(
+		    SELECT 
+		        SUBJ_CD, DT_CD, SUBJ_NM, SUBJ_COM_TYPE, SUBJ_STAT
+		        , COLGE_CD, DT_NM
+		    FROM SUBJECT S
+		    LEFT OUTER JOIN DEPARTMENT D USING ( DT_CD)
+		    <include refid="searchFrag"/>
+		    ORDER BY SUBJ_CD
+		    ) A       
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<insert id="insertSubject" parameterType="kr.or.ddit.subject.vo.SubjectVO" >
+		<selectKey order="BEFORE" resultType="String" keyProperty="subjCd">
+			SELECT SUBJECT_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO SUBJECT (
+			    SUBJ_CD,
+			    DT_CD,
+			    SUBJ_NM,
+			    SUBJ_COM_TYPE,
+			    SUBJ_STAT
+			) VALUES (
+			    #{subjCd,jdbcType=NUMERIC}
+				, #{dtCd,jdbcType=VARCHAR}
+				, #{subjNm,jdbcType=VARCHAR}
+				, #{subjComType,jdbcType=VARCHAR}
+				,'ON'
+			)
+	</insert>
+	
+	<select id="selectSubject" resultType="kr.or.ddit.subject.vo.SubjectVO" parameterType="String">
+		SELECT *
+		FROM SUBJECT
+		WHERE SUBJ_CD = #{SUBJ_CD}
+	</select>
+	
+	<update id="updateSubject" parameterType="kr.or.ddit.subject.vo.SubjectVO">
+		UPDATE subject
+		SET
+			DT_CD = #{dtCd,jdbcType=VARCHAR}
+			, SUBJ_NM = #{subjNm,jdbcType=VARCHAR}
+			, SUBJ_COM_TYPE = #{subjComType,jdbcType=VARCHAR}
+		WHERE SUBJ_CD = #{subjCd}
+		    
+	</update>
+	
+	<update id="deleteSubject" parameterType="kr.or.ddit.subject.vo.SubjectVO">
+		UPDATE subject
+		SET
+		<if test="subjStat eq 'ON'">
+			SUBJ_STAT = 'OFF'
+		</if>
+		<if test="subjStat eq 'OFF'">
+			SUBJ_STAT = 'ON'
+		</if>	
+		WHERE SUBJ_CD = #{subjCd}
+	</update>
+	
+	<select id="SubjectList" resultType="kr.or.ddit.subject.vo.SubjectVO">
+		SELECT *
+		FROM SUBJECT
+	</select>
+
+
+
+</mapper>

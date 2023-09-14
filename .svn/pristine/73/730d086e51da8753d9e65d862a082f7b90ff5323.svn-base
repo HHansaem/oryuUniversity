@@ -1,0 +1,110 @@
+package kr.or.ddit.job.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.job.service.JobService;
+import kr.or.ddit.job.vo.JobVO;
+import kr.or.ddit.job.vo.AdVO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/job")
+public class jobAdRetrieveController {
+	@Inject
+	private JobService service;
+	
+
+	@RequestMapping("jobAdList.do")
+	public void jobAdList(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+		, Model model
+	)throws IOException {
+		
+		// 웹 크롤링할 url 지정
+		String url = "https://www.saramin.co.kr/zf_user/";
+		
+		//doc에 페이지 소스 저장
+		Document doc = Jsoup.connect(url).get();
+		
+		// box_product 클래스에 있는 값들 elements에 담기
+		Elements elements = doc.select(".box_product");
+		// for문으로 각각의 박스프로덕트 클래스에서의 값을 적출
+		List<AdVO> adList = new ArrayList<AdVO>();
+		for(Element element : elements) {
+			 AdVO adVO = new AdVO();
+			// 상세페이지
+			Elements aTag = element.select("a");
+			String urlDetail = String.format("https://www.saramin.co.kr%s", aTag.attr("href").replace("https://www.saramin.co.kr", ""));
+			System.out.println("urlDetail.........................."+urlDetail);
+			adVO.setDetail(urlDetail);
+			
+			// 이미지url
+			Elements img = element.select("img");
+			String imgUrl = img.attr("src");
+			System.out.println("imgUrl.........................."+imgUrl);
+			adVO.setImg(imgUrl);
+			
+			// 회사명
+			String title = img.attr("alt");
+			System.out.println("title.........................."+title);
+			adVO.setTitle(title);
+			
+			// 채용정보
+			Elements emElement = element.select("em.product_desc");
+		    String jobDescription = emElement.text();
+		    System.out.println("Job Description: " + jobDescription);
+		    adVO.setDesc(jobDescription);
+		    adList.add(adVO);
+		}
+		
+		PaginationInfo<AdVO> paging = new PaginationInfo<>();
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		
+		paging.setDataList(adList);
+		log.info("jobList : " + adList+"=================================================================================================");
+		model.addAttribute("paging", paging);
+	}
+	
+	@RequestMapping("jobAdList2.do")
+	public void mngLectureList(
+			@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			, @RequestParam Map<String,Object> detailCondition
+			, Model model
+	) {
+		PaginationInfo<JobVO> paging = new PaginationInfo<>();
+		paging.setCurrentPage(currentPage);
+		paging.setSimpleCondition(simpleCondition);
+		
+		log.info("mngLectureList->paging : " + paging);
+		
+		List<JobVO> jobList = service.retriveJobList(paging);
+		paging.setDataList(jobList);
+		
+		model.addAttribute("paging", paging);
+		
+	}
+	
+	
+}

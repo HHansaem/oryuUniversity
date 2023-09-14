@@ -1,0 +1,61 @@
+package kr.or.ddit.clubMember.controller;
+
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.academicChange.vo.AcademicChangeVO;
+import kr.or.ddit.clubMember.service.ClubMemberService;
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+
+@Controller
+public class ClubMemberRetrieve {
+	@Inject
+	private ClubMemberService service;
+	
+	
+	/**
+	 * 신청 받은 동아리 부원 신청서 목록(교수) 
+	 */
+	@RequestMapping("/clubMember/prfClubMemberList.do")
+	public String prfClubMemberList(
+			@RequestParam(name = "page", required = false, defaultValue = "1") long currentPage
+			, @RequestParam(name="what") String clubCd
+			, Model model
+			) {
+			PaginationInfo<ClubMemberVO> paging = new PaginationInfo<>();
+			paging.setCurrentPage(currentPage);
+			
+			List<ClubMemberVO> clubMemInsertList = service.clubMemInsertList(paging,clubCd);
+			
+			paging.setDataList(clubMemInsertList);
+			model.addAttribute("paging", paging);
+			
+		return "clubMember/ajax/prfClubMemberList";
+	}
+	
+	
+	/**
+	 * 신청 받은 동아리 부원 신청서 세부내용
+	 */
+	@RequestMapping("/clubMember/prfClubMemberView.do")
+	public String prfClubMemberView(
+			@RequestParam(name="what")String stCd
+			,Model model
+			) {
+			ClubMemberVO clubMemberView = service.clubMemInsertView(stCd);
+		
+			model.addAttribute("clubMemberView", clubMemberView);
+			return "clubMember/prfClubMemberView";
+	}
+	
+}

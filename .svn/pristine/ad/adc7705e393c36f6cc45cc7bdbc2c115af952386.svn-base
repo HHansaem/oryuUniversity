@@ -1,0 +1,41 @@
+package kr.or.ddit.lectureContents.assignmentSub.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.lectureContents.assignmentSub.service.AssignmentSubService;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+public class AssignmentSubUpdateController {
+
+   @Inject
+   private AssignmentSubService service;
+   
+   @PostMapping("/lecture/assignSubUpdate.do")
+   @ResponseBody
+   public Object assignSubDetail(
+         AssignmentSubVO assignSub
+         , Model model
+   ) {
+      
+      boolean result = service.modifyAssignmentScore(assignSub);
+      if(result) {
+         return assignSub;
+      }else {
+         Map<String, String> response = new HashMap<>();
+         response.put("message", "점수 업데이트에 실패했습니다.");
+         return response;
+      }
+   }
+}

@@ -1,0 +1,99 @@
+package kr.or.ddit.clubMember.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.student.vo.StudentVO;
+
+@Mapper
+public interface ClubMemberDAO {
+	/**
+	 * 동아리에 소속된 부원
+	 * @param clubCd
+	 * @return
+	 */
+	public List<StudentVO> stuClubList(String prCd);
+	
+	/**
+	 * 동아리 가입 신청
+	 */
+	public int clubMemInsert(ClubMemberVO clubMem);
+	
+	/**
+	 * 동아리 가입 신청 세부사항
+	 */
+	public ClubMemberVO clubMemInsertView(String stCd);
+	
+	/**
+	 * (교수) 동아리 신청서 목록
+	 */
+	public List<ClubMemberVO> clubMemInsertList(@Param("paging")PaginationInfo paging, @Param("clubCd")String clubCd);
+	
+	/**
+	 * 동아리 신청 가입 승인
+	 */
+	public int clubMemPass(String stCd);
+	
+	/**
+	 * 동아리 신청 가입 거절
+	 */
+	public int clubMemNoPass(String stCd);
+	
+	/**
+	 * 본인이 신청한 동아리 신청서 확인
+	 */
+	public List<ClubMemberVO> stuClubMemInsertList(String stCd);
+	
+	
+	/**
+	 * 동아리 신청서 목록 갯수(교수)
+	 */
+	public long prfselectTotalRecord(PaginationInfo paging);
+	
+	/**
+	 * 학생 본인이 신청한 동아리 목록
+	 * @param stCd
+	 * @return
+	 */
+	public List<ClubMemberVO> stuReqClubList(String stCd);
+	
+	/**
+	 * 부장인 학생 확인문
+	 */
+	public ClubMemberVO stuClassCheck(String stCd);
+	
+	/**
+	 * 입부학생 승인
+	 */
+	public int clubMemberInsertPass(String stCd);
+	
+	/**
+	 * 입부학생 거절
+	 */
+	public int clubMemberInsertNoPass(String stCd);
+	
+	/**
+	 * 동아리 퇴부
+	 */
+	public int clubMemberWthdrClub(String stCd);
+	
+	/**
+	 * 동아리 퇴부 리스트 확인(교수)
+	 */
+	public List<StudentVO> clubMemberWthdrClubList(String clubCd);
+	
+	/**
+	 * 교수가 동아리 부장 변경 (강등)
+	 */
+	public int clubHeadDownUpdate(String stCd);
+	
+	/**
+	 * 교수가 동아리 부장 변경 (승급)
+	 */
+	public int clubHeadUpUpdate(String stCd);
+	
+}

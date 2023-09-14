@@ -1,0 +1,32 @@
+package kr.or.ddit.thesis.vo;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.validate.groups.DeleteGroup;
+import kr.or.ddit.validate.groups.InsertGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * @author PC-22 논문 VO입니다.
+ */
+@Data
+@EqualsAndHashCode(of = "thesCd")
+public class ThesisVO implements Serializable {
+
+	@NotBlank(groups = {InsertGroup.class, DeleteGroup.class})
+	private String thesCd;
+	@NotBlank
+	private String acBuCd;
+	@NotBlank
+	private String attCd;
+	private String thesNm;
+	private String thesCont;
+	private LocalDate thesPostDate;
+	private LocalDate thesModDate;
+	private String thesClNm;
+
+}

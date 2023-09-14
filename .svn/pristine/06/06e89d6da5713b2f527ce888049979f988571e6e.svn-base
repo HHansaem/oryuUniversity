@@ -1,0 +1,85 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>    
+<style>
+	.card-body{
+		box-shadow: 0 0 6px #4872f4 inset;
+    	border-radius: 10px;
+	}
+	.custom-div{
+		background:aliceblue;
+	}
+	.col-md-5{
+		padding:0;
+	}
+	.custom-border{
+	    border-radius: 10px;
+    	border: 3px solid aliceblue;
+    	padding-bottom: 30px;
+    }
+    .custom-font{
+        font-size: large;
+    	font-weight: bolder;
+    }
+</style>
+
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div class="card">
+			<div class="car-body">
+				<div class="d-flex justify-content-center align-items-center mt-4">
+					<div class="col-md-5 custom-border">
+						<div class="text-center custom-div">
+							<span class="card-title">출석그래프</span>
+						</div>
+                  		<canvas id="myChart"></canvas>
+					</div>
+					<div class="col-md-5 custom-border">
+						<div class="text-center custom-div">
+							<span class="card-title">출석현황</span>
+						</div>
+						<div class="d-flex text-center flex-column">
+							<p class="custom-font mt-2">자료구조</p>
+							<p class="custom-font">수업횟수: 0회</p>
+							<p class="custom-font">출석횟수: 0회</p>
+							<p class="custom-font">결석횟수: 0회</p>
+							<p class="custom-font">지각횟수: 0회</p>
+						</div>
+					</div>
+				</div>
+				<div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+const ctx = document.getElementById('myChart').getContext('2d');
+var myChart = new Chart(ctx, {
+	  type: 'doughnut',
+	    data: {
+	      labels: ['출석','지각','결석'],
+	      datasets: [{
+	        data: [80,10,10],
+	        borderColor: 'white',
+	        borderWidth: 5,
+	        backgroundColor: [
+	          '#9DCEFF',
+	          '#F2FE8A',
+	          '#ffc0cb'
+	        ],
+	        scaleBeginAtZero: true,
+	      }
+	    ]
+	  },
+	  options: {
+	        plugins: {
+	            labels: {
+	                position: 'right', // 'top', 'bottom', 'left' 등으로 위치 설정
+	            }
+	        }
+	    }
+	});
+</script>

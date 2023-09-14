@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.thesis.dao.ThesisDAO">
+
+
+<select id="selectThesisList" resultType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	SELECT 
+		THES_CD
+		, AC_BU_CD
+		, ATT_CD
+		, THES_NM
+		, THES_CONT
+		, THES_POST_DATE
+		, THES_MOD_DATE
+		, THES_CL_NM
+	FROM THESIS
+
+</select>
+
+<insert id="insertThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+	
+	INSERT INTO 
+	THESIS(
+		THES_CD
+		, AC_BU_CD
+		, ATT_CD
+		, THES_NM
+		, THES_CONT
+		, THES_POST_DATE
+		, THES_MOD_DATE
+		, THES_CL_NM
+	)VALUES (
+	#{thesCd,jdbcType=VARCHAR}
+		, #{buCd,jdbcType=VARCHAR}
+		, #{attCd,jdbcType=VARCHAR}
+		, #{thesNm,jdbcType=VARCHAR}
+		, #{thesCont,jdbcType=CLOB}
+		, #{thesPostDate,jdbcType=DATE}
+	    , #{thesModDate,jdbcType=DATE}
+	    , #{thesClNm,jdbcType=VARCHAR}
+    )
+	
+</insert>
+
+<update id="updateThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	UPDATE THESIS
+	SET
+		 THES_CD = #{thesCd,jdbcType=VARCHAR}
+		, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+		, ATT_CD = #{attCd,jdbcType=VARCHAR}
+		, THES_NM = #{thesNm,jdbcType=VARCHAR}
+		, THES_CONT = #{thesCont,jdbcType=CLOB}
+		, THES_POST_DATE = #{thesPostDate,jdbcType=DATE}
+		, THES_MOD_DATE = #{thesModDate,jdbcType=DATE}
+		, THES_CL_NM = #{thesClNm,jdbcType=VARCHAR}
+	WHERE THES_CD = #{thesCd} 
+
+</update>
+
+<delete id="deleteThesis" parameterType="kr.or.ddit.thesis.vo.ThesisVO">
+
+	DELETE FROM THESIS
+	WHERE
+		 THES_CD = #{thesCd,jdbcType=VARCHAR}
+		, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+		, ATT_CD = #{attCd,jdbcType=VARCHAR}
+		, THES_NM = #{thesNm,jdbcType=VARCHAR}
+		, THES_CONT = #{thesCont,jdbcType=CLOB}
+		, THES_POST_DATE = #{thesPostDate,jdbcType=DATE}
+		, THES_MOD_DATE = #{thesModDate,jdbcType=DATE}
+		, THES_CL_NM = #{thesClNm,jdbcType=VARCHAR}
+
+</delete>
+
+
+</mapper>

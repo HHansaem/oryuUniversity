@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.enrollment.dao.EnrollmentDAO">
+	
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'lCode'">
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'lName'">
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sCode'">
+						INSTR(E.ST_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'pCode'">
+						INSTR(L.PR_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(E.ST_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(L.PR_CD, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND SB.DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.classfication neq null and not detailCondition.classfication.isEmpty">
+			            AND SB.SUBJ_COM_TYPE = #{detailCondition.classfication}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.grade neq null and not detailCondition.grade.isEmpty">
+			            AND L.LEC_GRA_CD = #{detailCondition.grade}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.semester neq null and not detailCondition.semester.isEmpty">
+			            AND L.LEC_SEME_CD = #{detailCondition.semester}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	
+	<resultMap type="kr.or.ddit.enrollment.vo.EnrollmentVO" id="enrollmentMap" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		<id property="stCd" column="ST_CD"/>
+		
+		<association property="lecture" javaType="kr.or.ddit.lecture.vo.LectureVO" autoMapping="true">
+			<id property="lecCd" column="LEC_CD"/>
+			<result property="lecLectTitle" column="LEC_LECT_TITLE"/>
+			<result property="lecGraCd" column="LEC_GRA_CD"/>
+			<result property="lecSemeCd" column="LEC_SEME_CD"/>
+			<result property="lecLectCred" column="LEC_LECT_CRED"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectEnrollmentList" resultMap="enrollmentMap" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT B.*
+		FROM (
+		    SELECT ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            E.LEC_CD,
+		            E.ST_CD,
+		            S.ST_NM,
+		            E.ENRO_APPL_STAT,
+		            E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE,
+		            E.GRA_ATTEND_SCORE,
+		            E.GRA_MID_SCORE,
+		            E.GRA_FINAL_SCORE,
+		            E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD,
+		            L.PR_CD,
+		            P.PR_NM,
+		            SB.DT_CD,
+		            SB.SUBJ_NM,
+		            SB.SUBJ_COM_TYPE,
+		            L.LEC_LECT_TITLE,
+		            L.LEC_GRA_CD,
+		            L.LEC_SEME_CD,
+		            L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT,
+		            L.LEC_LECT_DIVISION,
+		            L.LEC_STAT,
+		            L.GR_MID,
+		            L.GR_FINAL,
+		            L.GR_ATTEND,
+		            L.GR_ASSI,
+		            L.ATCH_FILE_ID,
+		            C.CLAS_CD,
+		            C.CLAS_NM,
+		            LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS
+		        FROM
+		            ENROLLMENT E
+		        INNER JOIN
+		            LECTURE L ON E.LEC_CD = L.LEC_CD
+		        INNER JOIN
+		            LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+		        INNER JOIN
+		            STUDENT S ON S.ST_CD = E.ST_CD
+		        INNER JOIN
+		            PROFESSOR P ON P.PR_CD = L.PR_CD
+		        LEFT OUTER JOIN  
+		            SUBJECT SB ON SB.SUBJ_CD = L.SUBJ_CD
+		        INNER JOIN
+            		CLASSROOM C ON LS.CLAS_CD = C.CLAS_CD    
+		        <include refid="searchFrag"/>    
+		        GROUP BY
+		            E.LEC_CD, E.ST_CD, E.ENRO_APPL_STAT, E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE, E.GRA_ATTEND_SCORE, E.GRA_MID_SCORE, E.GRA_FINAL_SCORE, E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD, L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT, L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI,
+		            L.ATCH_FILE_ID, P.PR_NM, S.ST_NM, SB.DT_CD, SB.SUBJ_COM_TYPE, SB.SUBJ_NM, C.CLAS_CD, C.CLAS_NM
+		        ) A
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+	
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            E.LEC_CD,
+		            E.ST_CD,
+		            S.ST_NM,
+		            E.ENRO_APPL_STAT,
+		            E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE,
+		            E.GRA_ATTEND_SCORE,
+		            E.GRA_MID_SCORE,
+		            E.GRA_FINAL_SCORE,
+		            E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD,
+		            L.PR_CD,
+		            P.PR_NM,
+		            SB.DT_CD,
+		            SB.SUBJ_NM,
+		            SB.SUBJ_COM_TYPE,
+		            L.LEC_LECT_TITLE,
+		            L.LEC_GRA_CD,
+		            L.LEC_SEME_CD,
+		            L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT,
+		            L.LEC_LECT_DIVISION,
+		            L.LEC_STAT,
+		            L.GR_MID,
+		            L.GR_FINAL,
+		            L.GR_ATTEND,
+		            L.GR_ASSI,
+		            L.ATCH_FILE_ID,
+		            C.CLAS_CD,
+		            C.CLAS_NM,
+		            LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS
+		        FROM
+		            ENROLLMENT E
+		        INNER JOIN
+		            LECTURE L ON E.LEC_CD = L.LEC_CD
+		        INNER JOIN
+		            LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+		        INNER JOIN
+		            STUDENT S ON S.ST_CD = E.ST_CD
+		        INNER JOIN
+		            PROFESSOR P ON P.PR_CD = L.PR_CD
+		        LEFT OUTER JOIN  
+		            SUBJECT SB ON SB.SUBJ_CD = L.SUBJ_CD
+				INNER JOIN
+					CLASSROOM C ON LS.CLAS_CD = C.CLAS_CD        
+		        <include refid="searchFrag"/>    
+		        GROUP BY
+		            E.LEC_CD, E.ST_CD, E.ENRO_APPL_STAT, E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE, E.GRA_ATTEND_SCORE, E.GRA_MID_SCORE, E.GRA_FINAL_SCORE, E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD, L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT, L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI,
+		            L.ATCH_FILE_ID, P.PR_NM, S.ST_NM, SB.DT_CD, SB.SUBJ_COM_TYPE, SB.SUBJ_NM, C.CLAS_CD, C.CLAS_NM
+		        ) A
+		) B
+	</select>
+	
+	<update id="commitEnrollment">
+		UPDATE ENROLLMENT
+		SET
+		    ENRO_APPL_STAT = 'FIN'
+		WHERE
+		    LEC_CD = #{lecCd, jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd, jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="refuseEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		UPDATE ENROLLMENT
+		SET
+		    ENRO_APPL_STAT = 'REF'
+		WHERE
+		    LEC_CD = #{lecCd, jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd, jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="selectMyEnrollmentList" resultMap="enrollmentMap" parameterType="String">
+		SELECT B.*
+		FROM (
+		    SELECT ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT
+		            E.LEC_CD,
+		            E.ST_CD,
+		            S.ST_NM,
+		            E.ENRO_APPL_STAT,
+		            E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE,
+		            E.GRA_ATTEND_SCORE,
+		            E.GRA_MID_SCORE,
+		            E.GRA_FINAL_SCORE,
+		            E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD,
+		            L.PR_CD,
+		            P.PR_NM,
+		            SB.DT_CD,
+		            SB.SUBJ_NM,
+		            SB.SUBJ_COM_TYPE,
+		            L.LEC_LECT_TITLE,
+		            L.LEC_GRA_CD,
+		            L.LEC_SEME_CD,
+		            L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT,
+		            L.LEC_LECT_DIVISION,
+		            L.LEC_STAT,
+		            L.GR_MID,
+		            L.GR_FINAL,
+		            L.GR_ATTEND,
+		            L.GR_ASSI,
+		            L.ATCH_FILE_ID,
+		            C.CLAS_CD,
+		            C.CLAS_NM,
+		            LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS
+		        FROM
+		            ENROLLMENT E
+		        INNER JOIN
+		            LECTURE L ON E.LEC_CD = L.LEC_CD
+		        INNER JOIN
+		            LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+		        INNER JOIN
+		            STUDENT S ON S.ST_CD = E.ST_CD
+		        INNER JOIN
+		            PROFESSOR P ON P.PR_CD = L.PR_CD
+		        LEFT OUTER JOIN  
+		            SUBJECT SB ON SB.SUBJ_CD = L.SUBJ_CD
+				INNER JOIN
+            		CLASSROOM C ON LS.CLAS_CD = C.CLAS_CD        
+		        WHERE S.ST_CD = #{stCd,jdbcType=VARCHAR}
+		        GROUP BY
+		            E.LEC_CD, E.ST_CD, E.ENRO_APPL_STAT, E.ENRO_APPL_DATE,
+		            E.GRA_ASSI_SCORE, E.GRA_ATTEND_SCORE, E.GRA_MID_SCORE, E.GRA_FINAL_SCORE, E.GRA_FINAL_TOTAL,
+		            L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD, L.LEC_LECT_CRED,
+		            L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT, L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI,
+		            L.ATCH_FILE_ID, P.PR_NM, S.ST_NM, SB.DT_CD, SB.SUBJ_COM_TYPE, SB.SUBJ_NM, C.CLAS_CD, C.CLAS_NM
+		        ) A
+		) B
+	</select>
+
+	<insert id="submitEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		INSERT INTO enrollment (
+		    LEC_CD
+		    , ST_CD
+		    , ENRO_APPL_STAT
+		    , ENRO_APPL_DATE
+		) VALUES (
+			  #{lecCd,jdbcType=VARCHAR}
+			, #{stCd,jdbcType=VARCHAR}
+			, 'REQ'
+			, SYSDATE
+		)
+	</insert>
+	
+	<delete id="cancelEnrollment" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		DELETE FROM ENROLLMENT
+		WHERE
+			LEC_CD = #{lecCd,jdbcType=VARCHAR}
+		    AND ST_CD = #{stCd,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="checkCred" resultType="int" parameterType="String">
+		
+		SELECT COALESCE(SUM(L.LEC_LECT_CRED), 0) AS TOTAL_LECT_CRED
+		FROM ENROLLMENT E
+		LEFT JOIN LECTURE L ON E.LEC_CD = L.LEC_CD
+		WHERE E.ST_CD = #{stCd}
+		
+	</select>
+	
+	<select id="countStudent" resultType="int" parameterType="String">
+		SELECT COUNT(*) AS row_count
+		FROM ENROLLMENT
+		WHERE LEC_CD = #{lecCd}
+	</select>
+	
+	<select id="duplicateCheck" resultType="int" parameterType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    COUNT(*) AS SAME_SCHE_COUNT
+		FROM
+		    LECTURESCHEDULE PST
+		INNER JOIN
+		    LECTURESCHEDULE PRE ON PST.SCHE_CD = PRE.SCHE_CD
+		WHERE
+		    PST.LEC_CD IN (SELECT LEC_CD FROM ENROLLMENT WHERE ST_CD = #{stCd,jdbcType=VARCHAR})
+		    AND PRE.LEC_CD = #{lecCd,jdbcType=VARCHAR}
+	</select>
+	<select id="selectSTEnrollmentList" parameterType="string" resultMap="enrollmentMap">
+		SELECT
+		    LEC_CD
+		  , LEC_LECT_TITLE
+		  , LEC_GRA_CD
+		  , LEC_SEME_CD
+		  , LEC_LECT_CRED
+		  , ENRO_APPL_DATE
+		  , ENRO_APPL_STAT
+		FROM ENROLLMENT
+		    LEFT OUTER JOIN LECTURE USING(LEC_CD)
+		WHERE ST_CD = #{stCd,jdbcType=VARCHAR} and LEC_SEME_CD = '1'
+	</select>
+	
+	<select id="selectGradeRate" resultType="kr.or.ddit.lecture.vo.LectureVO" parameterType="string">
+		SELECT
+		    LEC_CD
+		    , GR_MID
+		    , GR_FINAL
+		    , GR_ATTEND
+		    , GR_ASSI
+		FROM
+		    LECTURE
+		WHERE LEC_CD = #{lecCd}
+	</select>
+	
+	<select id="selectAllScore" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT B.*
+	      FROM(
+	      SELECT ROWNUM RNUM, A.*
+	      FROM(
+		SELECT
+		    e.lec_cd
+		    , e.st_cd
+		    , e.gra_assi_score
+		    , e.gra_attend_score
+		    , e.gra_mid_score
+		    , e.gra_final_score
+		    , e.gra_final_total
+		    , e.gra_avg_score
+		    , e.gra_rating
+		    , e.gra_status
+		    , s.st_nm
+		    , d.dt_nm
+		    , (SELECT SUM(assi_score)
+		        FROM assignment a
+		        WHERE a.lec_cd = #{lecCd}) as assi_score    
+		    , (select exam_score
+		        from exam exam
+		        where exam.lec_cd = #{lecCd} and exam.exam_type = '중간고사') as mid_score
+		    , (select exam_score
+		        from exam exam
+		        where exam.lec_cd = #{lecCd} and exam.exam_type = '기말고사') as final_score
+		FROM
+		    enrollment e
+		left join student s on e.st_cd = s.st_cd
+		left join department d on s.dt_cd = d.dt_cd
+		WHERE e.lec_cd = #{lecCd}
+		ORDER BY s.st_nm
+		          ) A
+      ) B
+	<![CDATA[
+     	 WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+	]]>
+	</select>
+	
+	<update id="updateTotalScore">
+		UPDATE enrollment e
+		SET e.gra_final_total =
+		    ROUND(
+		    (
+		        (e.gra_assi_score 
+		            / (SELECT SUM(assi_score) FROM assignment a WHERE a.lec_cd = e.lec_cd)) 
+		            * (SELECT GR_ASSI FROM LECTURE WHERE LEC_CD = e.lec_cd)
+		        + (e.gra_attend_score 
+		            / 10)
+		            * (SELECT GR_ATTEND FROM LECTURE WHERE LEC_CD = e.lec_cd) 
+		        + (e.gra_mid_score 
+		            / (select exam_score from exam ex where ex.lec_cd = #{lecCd} and ex.exam_type = '중간고사')) 
+		            * (SELECT GR_MID FROM LECTURE WHERE LEC_CD = e.lec_cd) 
+		        + (e.gra_final_score 
+		            / (select exam_score from exam ex where ex.lec_cd = #{lecCd} and ex.exam_type = '기말고사'))
+		            * (SELECT GR_FINAL FROM LECTURE WHERE LEC_CD = e.lec_cd)
+		        ),
+		        1
+		    )
+		WHERE e.lec_cd = #{lecCd}
+	</update>
+	
+	<update id="updateGrade">
+		UPDATE enrollment
+		SET  gra_rating = #{graRating}, gra_status = '확정'
+		WHERE lec_cd = #{lecCd}
+		    AND st_cd = #{stCd}
+	</update>
+	
+	<update id="updateAvgScore">
+		UPDATE enrollment
+		SET gra_avg_score = 
+		    CASE
+		        WHEN gra_rating = 'A+' THEN '4.5'
+		        WHEN gra_rating = 'A0' THEN '4.3'
+		        WHEN gra_rating = 'A-' THEN '4.0'
+		        WHEN gra_rating = 'B+' THEN '3.5'
+		        WHEN gra_rating = 'B0' THEN '3.3'
+		        WHEN gra_rating = 'B-' THEN '3.0'
+		        WHEN gra_rating = 'C+' THEN '2.5'
+		        WHEN gra_rating = 'C0' THEN '2.3'
+		        WHEN gra_rating = 'C-' THEN '2.0'
+		        WHEN gra_rating = 'D+' THEN '1.5'
+		        WHEN gra_rating = 'D0' THEN '1.3'
+		        WHEN gra_rating = 'D-' THEN '1.0'
+		        WHEN gra_rating = 'F' THEN '0.0'
+		        ELSE '-'
+		    END
+	</update>
+	
+	<select id="selectCurrentLecCred" resultType="string">
+			 SELECT
+			    SUM(TO_NUMBER(l.LEC_LECT_CRED)) AS current_lect_cred
+			FROM
+			    enrollment e
+			    INNER JOIN lecture l ON e.lec_cd = l.lec_cd
+			    INNER JOIN student s ON e.st_cd = s.st_cd
+			WHERE
+			    e.st_cd = #{stCd}
+			    AND TO_CHAR(enro_appl_date, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY')
+			    AND (
+			        (TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 AND TO_NUMBER(TO_CHAR(SYSDATE, 'MM')) BETWEEN 1 AND 6)
+			        OR
+			        (TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 AND TO_NUMBER(TO_CHAR(SYSDATE, 'MM')) BETWEEN 7 AND 12)
+			    )
+	</select>
+	
+	<select id="selectTotalLecCred" resultType="string">
+		     SELECT
+			    SUM(TO_NUMBER(l.LEC_LECT_CRED)) AS total_lect_cred
+			FROM
+			    enrollment e
+			    INNER JOIN lecture l ON e.lec_cd = l.lec_cd
+			    INNER JOIN student s ON e.st_cd = s.st_cd
+			WHERE e.st_cd = #{stCd}
+			GROUP BY
+			    e.st_cd, s.st_nm
+	</select>
+	
+	<select id="selectGradeInfo" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    e.lec_cd,
+		    e.st_cd,
+		    TO_CHAR(enro_appl_date, 'YYYY') AS enrollment_year,
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END AS semester,
+		    e.gra_final_total,
+		    e.gra_avg_score,
+		    e.gra_rating,
+		    e.gra_status,
+		    l.lec_lect_title,
+		    l.lec_lect_cred,
+		    s.st_nm,
+		    s.st_status,
+		    d.dt_nm,
+		    CASE su.SUBJ_COM_TYPE
+		        WHEN '1' THEN '전필'
+		        WHEN '2' THEN '전선'
+		        WHEN '3' THEN '교필'
+		        WHEN '4' THEN '교선'
+		        ELSE '기타'
+		    END AS subj_com_type
+		    , c.colge_nm
+		    , su.subj_cd
+		FROM
+		    enrollment e
+		LEFT JOIN lecture l ON e.lec_cd = l.lec_cd
+		LEFT JOIN student s ON e.st_cd = s.st_cd
+		left join department d on s.dt_cd = d.dt_cd
+		left join subject su on l.subj_cd = su.subj_cd
+		left join college c on d.colge_cd = c.colge_cd
+		WHERE
+		    e.st_cd = #{stCd}
+		    AND TO_CHAR(enro_appl_date, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY')
+		    AND CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END = CASE
+		        WHEN TO_NUMBER(TO_CHAR(SYSDATE, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(SYSDATE, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END
+	</select>
+	
+	<select id="selectAllGradeInfo" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    e.lec_cd,
+		    e.st_cd,
+		    TO_CHAR(enro_appl_date, 'YYYY') AS enrollment_year,
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END AS semester,
+		    e.gra_final_total,
+		    e.gra_avg_score,
+		    e.gra_rating,
+		    e.gra_status,
+		    l.lec_lect_title,
+		    l.lec_lect_cred,
+		    s.st_nm,
+		    s.st_status,
+		    d.dt_nm,
+		    CASE su.SUBJ_COM_TYPE
+		        WHEN '1' THEN '전필'
+		        WHEN '2' THEN '전선'
+		        WHEN '3' THEN '교필'
+		        WHEN '4' THEN '교선'
+		        ELSE '기타'
+		    END AS subj_com_type
+		    , c.colge_nm
+		    , su.subj_cd
+		FROM
+		    enrollment e
+		LEFT JOIN lecture l ON e.lec_cd = l.lec_cd
+		LEFT JOIN student s ON e.st_cd = s.st_cd
+		left join department d on s.dt_cd = d.dt_cd
+		left join subject su on l.subj_cd = su.subj_cd
+		left join college c on d.colge_cd = c.colge_cd
+		WHERE
+		    e.st_cd = #{stCd}
+		ORDER BY enrollment_year DESC, semester DESC
+	</select>
+	
+	<select id="selectAvgGrade" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    TO_CHAR(enro_appl_date, 'YYYY') AS enrollment_year,
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END AS semester,
+		    ROUND(AVG(CASE
+		            WHEN e.gra_avg_score = '-' THEN NULL
+		            ELSE TO_NUMBER(e.gra_avg_score)
+		        END), 2) AS avg_grade
+		FROM
+		    enrollment e
+		WHERE
+		    e.st_cd = #{stCd}
+		GROUP BY
+		    TO_CHAR(enro_appl_date, 'YYYY'),
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END
+		ORDER BY
+		    enrollment_year,
+		    semester
+	</select>
+	
+	<select id="selectMajorAvgGrade" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		SELECT
+		    TO_CHAR(enro_appl_date, 'YYYY') AS enrollment_year,
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END AS semester,
+		    ROUND(AVG(CASE
+		            WHEN e.gra_avg_score = '-' THEN NULL
+		            ELSE TO_NUMBER(e.gra_avg_score)
+		        END), 2) AS major_avg_grade
+		FROM
+		    enrollment e
+		LEFT JOIN
+		    lecture l ON e.lec_cd = l.lec_cd
+		LEFT JOIN
+		    subject subj ON l.subj_cd = subj.subj_cd
+		WHERE
+		    e.st_cd = #{stCd}
+		    AND (subj.subj_com_type = '1' OR subj.subj_com_type = '2')
+		GROUP BY
+		    TO_CHAR(enro_appl_date, 'YYYY'),
+		    CASE
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 1 AND 6 THEN 1
+		        WHEN TO_NUMBER(TO_CHAR(enro_appl_date, 'MM')) BETWEEN 7 AND 12 THEN 2
+		        ELSE NULL
+		    END
+		ORDER BY
+		    enrollment_year,
+		    semester
+	</select>
+	
+</mapper>

@@ -1,0 +1,22 @@
+package kr.or.ddit.academic.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.academic.vo.AcademicNoticeVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+
+@Mapper
+public interface AcademicNoticeDAO {
+	
+	public long selectTotalRecord(PaginationInfo paging);
+	
+	public List<AcademicNoticeVO> selectAcademicNoticeList(PaginationInfo paging);
+	public AcademicNoticeVO selectAcademicNotice(int anNum);
+	
+	public int insertAcademicNotice(AcademicNoticeVO acaNotice);
+	public int updateAcademicNotice(AcademicNoticeVO acaNotice);
+	public int deleteAcademicNotice(AcademicNoticeVO acaNotice);
+	public void increaseViews(int anNum);
+}

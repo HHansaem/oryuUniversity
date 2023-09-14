@@ -1,0 +1,71 @@
+package kr.or.ddit.tuition.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.tuition.vo.TuitionVO;
+
+public interface TuitionService {
+
+	/**
+	 * 전체학생의 등록금정보 조회
+	 * @param paging
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStaffTuitionList(PaginationInfo<TuitionVO> paging);
+	/**
+	 * 학생이 신청한 자신의 장학금정보 조회
+	 * @param tuition
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStudentApplyScholarship(String stCd);
+	/**
+	 * 학생 본인의 등록금 내역 조회
+	 * @param stCd
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStudentTuition(String stCd);
+	/**
+	 * 장학금 신청(등록금 테이블 업데이트)
+	 * @param tuition
+	 * @return
+	 */
+	public boolean applyScholarship(TuitionVO tuition);
+	/**
+	 * 학생이 신청한 장학금리스트 조회
+	 * @return
+	 */
+	public List<TuitionVO> retrieveStaffApplyScholarship(PaginationInfo<TuitionVO> paging);
+	/**
+	 * 학생이 신청한 장학금 상세 조회
+	 * @param semesterCd
+	 * @param stCd
+	 * @return
+	 */
+	public TuitionVO retrieveScholarship(TuitionVO tuition);
+	/**
+	 * 장학 신청 승인
+	 * @param tuition
+	 * @return
+	 */
+	public boolean acceptScholarship(TuitionVO tuition);
+	/**
+	 * 장학 신청 반려
+	 * @param tuition
+	 * @return
+	 */
+	public boolean refuseScholarship(TuitionVO tuition);
+	/**
+	 * 장학금 등록 완료
+	 * @param tuition
+	 * @return
+	 */
+	public boolean acceptTuition(TuitionVO tuition);
+	/**
+	 * 학생의 한학기 등록금 조회
+	 * @param tuition
+	 * @return
+	 */
+	public TuitionVO retrieveTuition(TuitionVO tuition);
+	
+}

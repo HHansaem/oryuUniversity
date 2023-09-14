@@ -1,0 +1,55 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<style>
+	/* 모달 스타일 */
+    #detailModal {
+        margin-top: -150px;
+    }
+    .modal-data {
+        margin-bottom: 10px; /* 아래 여백 추가 */
+        display: block; /* 블록 요소로 표시 */
+    }
+    .modal-data strong {
+        display: inline-block; /* strong 태그를 블록 요소로 설정하여 줄 바꿈 발생 */
+        width: 80px; /* 항목 이름의 폭 설정 */
+        font-weight: bold;
+    }
+</style>
+</div>
+<!-- 과제 제출 상세 MODAL -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">타이틀은 뭐로 하지</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	      <p class="modal-data"><strong>학번</strong> <span id="modal-stCd"></span></p>
+	      <p class="modal-data"><strong>이름</strong> <span id="modal-stNm"></span></p>
+	      <p class="modal-data"><strong>제출일시</strong> <span id="modal-submDate"></span></p>
+<!-- 	      <p class="modal-data"><strong>점수</strong> <span id="modal-assuScore"></span></p> -->
+	  </div>
+
+      <div class="modal-footer">
+  	    <form id="scoreForm">
+          <label for="scoreInput">점수 : </label>
+          <input type="number" id="scoreInput" name="assuScore" min="0" max="100" required
+      			placeholder="점수를 입력해주세요" onfocus="clearInputHint(this)" onblur="restoreInputHint(this)" />
+        </form>	
+        <button type="submit" class="btn btn-primary">저장</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    // 모달 데이터 채우기
+    $("#modal-stCd").text("${assignSub.stCd}");
+    $("#modal-stCd").text("${assignSub.stNm}");
+    $("#modal-lecCd").text("${assignSub.submDate}");
+    $("#modal-assuScore").text("${assignSub.assuScore}");
+</script>
+

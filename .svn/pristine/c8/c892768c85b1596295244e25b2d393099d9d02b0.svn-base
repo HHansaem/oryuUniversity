@@ -1,0 +1,62 @@
+package kr.or.ddit.academicbusinessmanagement.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.professor.vo.ProfessorVO;
+import kr.or.ddit.research.vo.ResearchVO;
+import kr.or.ddit.teachingStaff.vo.TeachingStaffVO;
+import kr.or.ddit.thesis.vo.ThesisVO;
+import lombok.Data;
+
+/**
+ * @author PC-22 학술사업관리 VO
+ * acBuCd -> PK
+ * , tsCd -> 교직원 테이블 FK
+ * , prCd -> 교수 테이블 FK
+ */
+@Data
+public class AcademicBusinessManagementVO {
+
+	@NotBlank //
+	private String acBuCd; //학술사업코드
+	@NotBlank
+	private String tsCd; //교직원번호
+	@NotBlank
+	private String prCd; //교수번호
+	private Integer atchFileId; //첨부파일코드
+	private String buNm; //학술사업명
+	private String buShortCont; //학술사업요약내용
+	private String buCont; //학술사업내용
+	private LocalDate buDate; //학술사업게시일자
+	private String buEnd; //학술사업종료일자
+	private String buStatNm; //학술사업상태명
+	private String buAutNm; //학술사업저자명
+	
+	//논문 VO
+	private List<ThesisVO> thesisList;
+	//연구 VO 및 안에 ResearchJournalVO! (이거 확인해)
+	private List<ResearchVO> researchList;
+	//학술사업계획서
+	private List<AcademicBusinessPlanVO> abpList;
+	//학술사업보고서
+	private List<AcademicBusinessReportVO> abrList;
+	//교직원 교수도 가져와야 하나?
+	//교수 VO
+	private List<ProfessorVO> professorList;
+	//교직원 VO
+	private List<TeachingStaffVO> teachingStaffList;
+	//해당내용들이 주체면 join 주체가 아니면 union
+}
+
+
+
+//VO 쿼리문 has a vo resultmap has many : listVO resultmap
+
+
+
+
+
+

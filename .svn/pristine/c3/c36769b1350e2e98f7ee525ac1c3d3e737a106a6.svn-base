@@ -1,0 +1,211 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div style="overflow-x: auto;">
+		<!-- 잡아줘요.모양 -->
+		
+		    <h1>공과대학교</h1>
+
+    <!-- 대학 버튼들 -->
+    <button class="university-button" data-college="dept1">건축공학과</button>
+    <button class="university-button" data-college="dept2">환경공학과</button>
+    <button class="university-button" data-college="dept3">토목공학과</button>
+    <button class="university-button" data-college="dept4">전기공학과</button>
+    <button class="university-button" data-college="dept5">응용화학공학과</button>
+    <button class="university-button" data-college="dept6">전자공학과</button>
+    <button class="university-button" data-college="dept7">기계공학과</button>
+    <!-- 필요한 만큼 대학 버튼을 추가하세요 -->
+
+    <!-- 학과 탭들 -->
+    <div class="tab" id="dept1">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept1-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept1-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept1-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept1-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept1-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept1-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept1-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept1-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <!-- 필요한 만큼 학과 탭을 추가하세요 -->
+
+    <div class="tab" id="dept2">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept2-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept2-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept2-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept2-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept2-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept2-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept2-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept2-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <div class="tab" id="dept3">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept3-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept3-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept3-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept3-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept3-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept3-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept3-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept3-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <div class="tab" id="dept4">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept4-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept4-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept4-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept4-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept4-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept4-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept4-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept4-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <div class="tab" id="dept5">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept5-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept5-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept5-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept5-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept5-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept5-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept5-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept5-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <div class="tab" id="dept6">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept6-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept6-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept6-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept6-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept6-1-intro">
+            <!-- 학과 소개 내용 표시 -->ㅁㄴㅇ
+        </div>
+        <div class="sub-tab" id="dept6-2-intro">
+            <!-- 학과 소개 내용 표시 -->ㄴㅇㄹ
+        </div>
+        <div class="sub-tab" id="dept6-3-intro">
+            <!-- 학과 소개 내용 표시 -->ㄹ호
+        </div>
+        <div class="sub-tab" id="dept6-4-intro">
+            <!-- 학과 소개 내용 표시 -->ㅗㅓㅏ
+        </div>
+    </div>
+
+    <div class="tab" id="dept7">
+        <!-- 학과 소개 내용 -->
+        <button class="department-button" data-tab="dept7-1-intro">학과소개</button>
+        <button class="department-button" data-tab="dept7-2-intro">교수소개</button>
+        <button class="department-button" data-tab="dept7-3-intro">교육과정</button>
+        <button class="department-button" data-tab="dept7-4-intro">연락처</button>
+        <!-- 필요한 만큼 탭 버튼을 추가하세요 -->
+        <div class="sub-tab" id="dept7-1-intro">
+            <!-- 학과 소개 내용 표시 -->7
+        </div>
+        <div class="sub-tab" id="dept7-2-intro">
+            <!-- 학과 소개 내용 표시 -->7
+        </div>
+        <div class="sub-tab" id="dept7-3-intro">
+            <!-- 학과 소개 내용 표시 -->7
+        </div>
+        <div class="sub-tab" id="dept7-4-intro">
+            <!-- 학과 소개 내용 표시 -->7
+        </div>
+    </div>
+		
+		<!-- 잡아줘요.모양 끝 -->
+		</div>
+	</div>
+</div>
+
+<!-- 스크립트 구간 -->
+    <script>
+        // 탭 전환을 처리하는 JavaScript
+        const universityButtons = document.querySelectorAll('.university-button');
+        const tabs = document.querySelectorAll('.tab');
+        const departmentButtons = document.querySelectorAll('.department-button');
+        const subTabs = document.querySelectorAll('.sub-tab');
+
+        universityButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const college = button.getAttribute('data-college');
+                tabs.forEach(tab => {
+                    if (tab.id === college) {
+                        tab.style.display = 'block';
+                    } else {
+                        tab.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        departmentButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                subTabs.forEach(tab => {
+                    if (tab.id === tabId) {
+                        tab.style.display = 'block';
+                    } else {
+                        tab.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>

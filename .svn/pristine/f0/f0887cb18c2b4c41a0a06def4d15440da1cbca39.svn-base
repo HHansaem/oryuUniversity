@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.graduation.dao.GraduationDAO">
+	
+	<select id="selectGraduationStudentList" resultType="kr.or.ddit.graduation.vo.GraduationVO" parameterType="string">
+		SELECT DISTINCT
+    		G.GE_GRAD_COND_TYPE,
+    		G.GRAD_COND
+		FROM
+		    STUDENT S
+		    JOIN DEPARTMENT D ON S.DT_CD = D.COLGE_CD
+		    JOIN GRADUATION G ON D.COLGE_CD = G.COLGE_CD
+		WHERE
+		    S.ST_CD = #{stCd}
+		ORDER BY
+		    G.GE_GRAD_COND_TYPE
+	</select>
+	
+	<select id="selectGraduationStudentBelong" resultType="kr.or.ddit.graduation.vo.GraduationVO" parameterType="string">
+		SELECT
+		    C.COLGE_NM,
+		    D.DT_NM
+		FROM
+		    STUDENT S
+		    JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD
+		    JOIN COLLEGE C ON D.COLGE_CD = C.COLGE_CD
+		WHERE
+		    S.ST_CD = #{stCd}
+	</select>
+	
+	<select id="selectGraduationTypeList" resultType="kr.or.ddit.graduation.vo.GraduationVO">
+		SELECT DISTINCT GE_GRAD_COND_TYPE FROM GRADUATION ORDER BY GE_GRAD_COND_TYPE
+	</select>
+	
+	<select id="selectCollegeTypeList" resultType="kr.or.ddit.college.vo.CollegeVO">
+		SELECT COLGE_CD, COLGE_NM FROM COLLEGE ORDER BY COLGE_NM
+	</select>
+	
+	<select id="selectGraduationConditionList" resultType="kr.or.ddit.graduation.vo.GraduationVO">
+		SELECT 
+			G.GRAD_COND
+		FROM 
+			GRADUATION G 
+			JOIN COLLEGE C 
+		ON 
+			G.COLGE_CD = C.COLGE_CD 
+		ORDER BY 
+			G.GE_GRAD_COND_TYPE, C.COLGE_NM
+	</select>
+	
+	<insert id="insertGraduation">
+		INSERT INTO GRADUATION (
+			GE_GRAD_COND_TYPE
+			,COLGE_CD
+			,GRAD_COND) 
+		VALUES (
+			#{geGradCondType,jdbcType=VARCHAR}
+			,#{colgeCd,jdbcType=VARCHAR}
+			,#{gradCond,jdbcType=VARCHAR}
+			)
+	</insert>
+	
+	<select id="selectGraduation" parameterType="kr.or.ddit.graduation.vo.GraduationVO" resultType="kr.or.ddit.graduation.vo.GraduationVO">
+		SELECT 
+			GE_GRAD_COND_TYPE, COLGE_CD 
+		FROM 
+			GRADUATION 
+		WHERE 
+			GE_GRAD_COND_TYPE = #{geGradCondType} 
+		and 
+			COLGE_CD = #{colgeCd}
+	</select>
+	
+	<update id="updateGraduation" parameterType="kr.or.ddit.graduation.vo.GraduationVO">
+		UPDATE 
+			GRADUATION
+		SET 
+			GRAD_COND = #{gradCond} 
+		WHERE 
+			GE_GRAD_COND_TYPE = #{geGradCondType}
+		AND 
+			COLGE_CD = #{colgeCd}
+	</update>
+	
+</mapper>

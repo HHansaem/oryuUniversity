@@ -1,0 +1,50 @@
+package kr.or.ddit.schedule.controller;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+	
+import kr.or.ddit.schedule.service.AcademicScheduleService;
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+import kr.or.ddit.schedule.vo.adapter.AcaSchedultWrapper;
+import kr.or.ddit.schedule.vo.adapter.FullCalendarEvent;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Controller
+public class AcademicCalendarRetrieveController {
+	private final AcademicScheduleService service;
+	
+	@RequestMapping("/schedule/acaCalendar.do")
+    public String list(){
+		return "schedule/acaCalendar";
+	}
+	
+	@RequestMapping(value="/schedule/acaCalendarDS.do", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<FullCalendarEvent<AcademicScheduleVO>> listDS(Authentication authentication){
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+		String role = "";
+		for(GrantedAuthority authority : authorities) {
+			role = authority.getAuthority();
+		}
+		
+		List<AcademicScheduleVO> acaCalendar = service.getCalendar(role);
+		return acaCalendar.stream().map(AcaSchedultWrapper::new).collect(Collectors.toList());
+	}
+
+}
+
+
+
+

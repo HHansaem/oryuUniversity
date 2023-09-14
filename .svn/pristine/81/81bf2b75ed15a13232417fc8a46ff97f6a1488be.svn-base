@@ -1,0 +1,70 @@
+package kr.or.ddit.lectureSchedule.service;
+
+import java.text.MessageFormat;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.lecture.dao.LectureDAO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+
+/**
+ * 강의스케쥴 ServiceImpl
+ * @author rottw
+ *
+ */
+@Service
+public class LectureScheduleServiceImpl implements LectureScheduleService {
+
+	@Inject
+	private LectureScheduleDAO lectureScheduleDAO;
+	@Inject
+	private LectureDAO lectureDAO;
+	
+	// 강의 스케쥴 검색
+	@Override
+	public List<LectureScheduleVO> retrievedLectureSchedule(String clasCd) {
+		
+		return lectureScheduleDAO.selectedLectureSchedule(clasCd);
+	}
+	// 강의 스케쥴 등록
+	@Transactional
+	@Override
+	public int saveLectureSchedule(LectureScheduleVO lecture) {
+		int result = 0;
+		String lecCd = lecture.getLecCd();
+	    LectureVO lec = lectureDAO.selectLecture(lecCd);
+	    int cnt = (Integer.parseInt(lec.getLecLectCred()));
+	    String[] combinedValues = lecture.getCombinedValues();
+	    int count = combinedValues.length;
+	    
+	    if(count>cnt) {
+	    	throw new RuntimeException(MessageFormat.format("선택한 교시가 학점을 초과 했습니다.", lecCd));
+	    }
+	    
+	    lectureScheduleDAO.deleteLectureShcedule(lecture);
+	    
+	    for(String scheCd: combinedValues) {
+	    	lecture.setScheCd(scheCd);
+	    	result += lectureScheduleDAO.insertLectureSchedule(lecture);
+	    }
+		return result;
+	}
+	// 강의 스케쥴 삭제
+	@Override
+	public int removeLectureSchedule(LectureScheduleVO lectureSchedule) {
+		return lectureScheduleDAO.deleteLectureShcedule(lectureSchedule);
+	}
+	
+	// 특정강의 교시조회
+	@Override
+	public List<LectureScheduleVO> retrieveLectureScheduleDetail(String lecCd) {
+		return lectureScheduleDAO.selectLectureScheduleDetail(lecCd);
+	}
+
+}

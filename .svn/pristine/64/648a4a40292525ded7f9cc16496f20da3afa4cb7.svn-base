@@ -1,0 +1,153 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<form:form method="post" modelAttribute="professor" enctype="multipart/form-data">
+<table class="table">
+	<tr>
+		<th>교번</th>
+		<td> 
+			<form:input path="prCd"/>
+			<form:errors path="prCd" class="error" />
+		</td>	
+	</tr>
+	<tr>
+		<th>학과</th>
+		<td> 
+			<form:select path="dtCd" id="dtCdSelect" >
+				<form:option value="" label="학과선택" />
+				<form:options items="${departmentList }" itemLabel="dtNm" itemValue="dtCd"/>
+			</form:select>
+			<form:errors path="dtCd" class="error" />
+			<span id="dtCdNotSelect" class="error"></span>
+		</td>	
+	</tr>
+	<tr>
+		<th>이름</th>
+		<td>
+			<form:input path="prNm" />
+			<form:errors path="prNm" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>전화번호</th>
+		<td>
+			<form:input path="prPh" />
+			<form:errors path="prPh" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주민등록번호</th>
+		<td>
+			<form:input path="prReg1" />
+			<form:errors path="prReg1" class="error"/>
+			-
+			<form:input path="prReg2" />
+			<form:errors path="prReg2" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>프로필사진</th>
+		<td>
+			<input type="file" name="prImage" accept="image/*" />
+			<form:errors path="prPic" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>교적상태</th>
+		<td> 
+			<form:select path="prStatus">
+				<form:option value="재직" label="재직" />
+				<form:option value="휴직" label="휴직" />
+				<form:option value="탈퇴" label="탈퇴" />
+			</form:select>
+			<form:errors path="prStatus" class="error" />
+		</td>
+	</tr>
+	<tr>
+		<th>이메일</th>
+		<td>
+			<form:input path="prEmail" type="email"/>
+			<form:errors path="prEmail" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주소</th>
+		<td>
+			<form:input path="prAddr1" id="address"/>
+			<button type="button" id="address_btn">주소 검색</button>
+			<form:errors path="prAddr1" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>상세주소</th>
+		<td>
+			<form:input path="prAddr2" id="address_detail"/>
+			<form:errors path="prAddr2" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>비밀번호</th>
+		<td>
+			<form:input path="prPass" id="prPass" type="password"/>
+			<form:errors path="prPass" class="error"/>
+		</td>
+	</tr>
+	<tr>
+    	<th>비밀번호 확인</th>
+    	<td>
+        	<input id="prPassConfirm" type="password" />
+        	<span id="passwordMatchError" class="error"></span>
+   		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="submit" value="등록" onclick="onSubmitForm(event)">
+			<input type="reset" value="취소">
+			<input type="button" value="뒤로가기" 
+				onclick="history.back();">
+			<a href="<c:url value='/professor/professorList.do'/>">목록으로</a>
+		</td>
+	</tr>
+</table>
+</form:form>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+window.onload = function(){
+    document.getElementById("address_btn").addEventListener("click", function(){
+        new daum.Postcode({
+            oncomplete: function(data) {
+                document.getElementById("address").value = data.address;
+                document.getElementById("address_detail").focus();
+            }
+        }).open();
+    });
+    document.getElementById("prPassConfirm").addEventListener("keyup", function() {
+        var password = document.getElementById("prPass").value;
+        var passwordConfirm = this.value;
+
+        if (password !== passwordConfirm) {
+            document.getElementById("passwordMatchError").innerText = "비밀번호가 일치하지 않습니다.";
+        } else {
+            document.getElementById("passwordMatchError").innerText = "비밀번호가 일치합니다.";
+        }
+    });
+}
+</script>
+<script>
+	function onSubmitForm(event) {
+		var department = document.getElementById("dtCdSelect").value;
+	    var password = document.getElementById("prPass").value;
+	    var passwordConfirm = document.getElementById("prPassConfirm").value;
+	
+		if (!department) {
+			document.getElementById("dtCdNotSelect").innerText = "학과를 선택해주세요."
+       		event.preventDefault();
+    }
+	
+	    if (password !== passwordConfirm) {
+	        alert("비밀번호가 일치하지 않습니다.");
+	        event.preventDefault();
+	    }
+	}
+</script>

@@ -1,0 +1,20 @@
+package kr.or.ddit.email.vo;
+
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of="id")
+public class MailVO {
+	 private String mailId;
+	 private String mailPw;
+	@NotBlank private String id;
+	 private String mailUrl;
+	 private String mailPort;
+	 
+	 
+	 private String subject;
+	 private String from;
+}

@@ -1,0 +1,117 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<div class="row">
+	<div class="stretch-card" style="height: 100%; width: 100%">
+		<div class="card">
+			<div class="card-body col-md-12">
+				<div class="table-responsive">
+					<table class="table" style="width: 100%">
+						<thead>
+							<tr>
+								<th>
+									<h4>${assign.assiNm}</h4>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="custom-flex-item">
+											마감기한: ${assign.assiPeriod}
+										</div>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="custom-flex-item">
+										    <span>등록된 파일:</span>
+											<c:if test="${not empty assign.fileGroup and not empty assign.fileGroup.detailList }">
+												<c:forEach items="${assign.fileGroup.detailList}" var="fileDetail">
+                 									<c:url value="/download.do" var="downloadURL">
+                    									<c:param name="atchFileId"  value="${fileDetail.atchFileId}"/>
+                    									<c:param name="fileSn" value="${fileDetail.fileSn}"/>
+                 									</c:url>
+                 									<a href="${downloadURL}">${fileDetail.orignlFileNm }</a>
+             									</c:forEach>
+             								</c:if>
+										</div>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="d-flex">
+										<div class="custom-flex-item">
+											<textarea class="form-control" readonly rows="16" cols="103">
+												${assign.assiCont}		
+											</textarea>
+										</div>
+									</div>
+								</td>
+							</tr>
+							<sec:authorize access="hasRole('ROLE_PR')">
+							<tr>
+								<td>
+									<div class="d-flex align-items-center justify-content-end">
+										<div>
+											<a class="btn btn-primary">수정</a>
+										</div>
+									</div>
+								</td>
+							</tr>
+							</sec:authorize>
+							<sec:authorize access="hasRole('ROLE_ST')">
+							<tr>
+								<td>
+									<ul class="nav nav-tabs" id="myTab" role="tablist">
+										<li class="nav-item"><a class="nav-link active"
+											id="home-tab" data-toggle="tab" href="#home" role="tab"
+											aria-controls="home" aria-selected="true">파일 제출</a></li>
+										<li class="nav-item"><a class="nav-link" id="profile-tab"
+											data-toggle="tab" href="#profile" role="tab"
+											aria-controls="profile" aria-selected="false">텍스트 제출</a></li>
+									</ul>
+
+									<div class="tab-content" id="myTabContent">
+										<div class="tab-pane fade show active" id="home"
+											role="tabpanel" aria-labelledby="home-tab">
+											<form>
+												<input type="file" class="form-controll" multiple="multiple">
+												<input type="submit" class="btn btn-primary">
+											</form>
+											<!-- Home 탭의 내용 -->
+										</div>
+										<div class="tab-pane fade" id="profile" role="tabpanel"
+											aria-labelledby="profile-tab">
+											<form>
+												<textarea class="form-control" name="assuText" rows="8" cols="100"></textarea>
+												<input type="submit" class="btn btn-primary">
+											</form>
+											<!-- Profile 탭의 내용 -->
+										</div>
+									</div>
+								</td>
+							</tr>
+							</sec:authorize>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+<script>
+	$(function() {
+		$('#myTab a').on('click', function(e) {
+			e.preventDefault();
+			$(this).tab('show');
+		});
+	});
+</script>
+

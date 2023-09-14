@@ -1,0 +1,54 @@
+package kr.or.ddit.professor.vo;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.validate.groups.InsertGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "prCd")
+public class ProfessorVO implements Serializable {
+	private long rnum;
+	private String prAddr1;
+	private String prAddr2;
+	@NotBlank(groups = InsertGroup.class)
+	private String prReg1;
+	@NotBlank(groups = InsertGroup.class)
+	private String prReg2;
+	@NotBlank(groups = InsertGroup.class)
+	private String prCd;
+	@NotBlank(groups = InsertGroup.class)
+	private String dtCd;
+	@NotBlank(groups = InsertGroup.class)
+	private String prNm;
+	@NotBlank(groups = InsertGroup.class)
+	private String prPh;
+	private String prEmail;
+	@NotBlank(groups = InsertGroup.class)
+	@Size(min = 4, max = 16)
+	private String prPass;
+	private String prPic;
+	private String prStatus;
+	private String prRole;
+	
+	private String dtNm;
+	
+	private DepartmentVO department;
+	
+	private MultipartFile prImage;
+	public void setPrImage(MultipartFile prImage) {
+		if(!prImage.isEmpty()) {
+			this.prImage = prImage;
+			this.prPic = UUID.randomUUID().toString();
+		}
+		
+	}
+}

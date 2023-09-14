@@ -1,0 +1,58 @@
+package kr.or.ddit.graduation.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.graduation.dao.GraduationDAO;
+import kr.or.ddit.graduation.vo.GraduationVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Service
+public class GraduationServiceImpl implements GraduationService {
+	
+	@Inject
+	private GraduationDAO graduationDAO;
+
+	@Override
+	public List<GraduationVO> retrieveGraduationStudentList(String stCd) {
+		
+		return graduationDAO.selectGraduationStudentList(stCd);
+	}
+
+	@Override
+	public GraduationVO retrieveGraduationStudentBelong(String stCd) {
+
+		return graduationDAO.selectGraduationStudentBelong(stCd);
+	}
+
+	@Override
+	public List<GraduationVO> retrieveGraduationTypeList() {
+		
+		return graduationDAO.selectGraduationTypeList();
+	}
+
+	@Override
+	public List<CollegeVO> retrieveCollegeTypeList() {
+
+		return graduationDAO.selectCollegeTypeList();
+	}
+
+	@Override
+	public List<GraduationVO> retrieveGraduationConditionList() {
+
+		return graduationDAO.selectGraduationConditionList();
+	}
+
+	@Override
+	public ServiceResult createGraduation(GraduationVO graduation) {
+		ServiceResult result = null;
+		int cnt = graduationDAO.insertGraduation(graduation);
+		result = cnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+}

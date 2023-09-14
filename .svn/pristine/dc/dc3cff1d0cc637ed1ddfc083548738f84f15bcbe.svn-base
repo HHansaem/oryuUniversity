@@ -1,0 +1,82 @@
+package kr.or.ddit.lecture.service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.academic.vo.AcademicNoticeVO;
+import kr.or.ddit.atch.service.AtchFileService;
+import kr.or.ddit.atch.vo.AtchFileDetailVO;
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.dao.LectureDAO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+/**
+ * 강의 serviceImpl
+ * @author rottw
+ *
+ */
+@Service
+public class LectureServiceImpl implements LectureService {
+	
+	@Inject
+	private LectureDAO lectureDAO;
+	
+	@Inject
+	private AtchFileService atchService;
+	@Value("#{appInfo.CommonAtchPath}")
+	private Resource atchPath;
+	
+	private void processAtchFileGroup(LectureVO lecture) {
+		MultipartFile[] lectureFiles = lecture.getLectureFiles();
+		if(lectureFiles==null) return;
+		List<AtchFileDetailVO> detailList = new ArrayList<>();
+		for(MultipartFile lectureFile : lectureFiles) {
+			if(lectureFile.isEmpty()) continue;
+			detailList.add( new AtchFileDetailVO(lectureFile));
+		}
+		if(detailList.size()>0) {
+			AtchFileVO fileGroup = new AtchFileVO();
+			fileGroup.setDetailList(detailList);
+			try {
+				int atchFileId = atchService.createAtchFileGroup(fileGroup, atchPath);
+				lecture.setAtchFileId(atchFileId);
+			}catch(IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	// 전체 강의 조회
+	@Override
+	public List<LectureVO> retrieveLectureList(PaginationInfo paging) {
+		// 토탈자료 개수
+		long totalRecord = lectureDAO.selectTotalRecord(paging);
+		// 페이징 객체에 토탈레코드 저장
+		paging.setTotalRecord(totalRecord);
+		// 페이징 객체를 이용하여 전체 강의 조회 후 리턴
+		return lectureDAO.selectLectureList(paging);
+	}
+
+	// 강의 등록
+	@Override
+	public ServiceResult createLecture(LectureVO lecture) {
+		processAtchFileGroup(lecture);
+		return lectureDAO.insertLecture(lecture)> 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+	@Override
+	public LectureVO retrieveLecture(String lecCd) {
+		return lectureDAO.selectLecture(lecCd);
+	}
+
+}

@@ -1,0 +1,177 @@
+package kr.or.ddit.tuition.controller;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfGState;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+
+import kr.or.ddit.tuition.service.TuitionService;
+import kr.or.ddit.tuition.vo.TuitionVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class TuitionPrintController {
+	
+	@Inject
+	private TuitionService service;
+
+	@PostMapping("/tuition/tuitionPrint/do")
+	public void postHandler(
+			@ModelAttribute("tuition") TuitionVO tuition
+	){
+		Document document = new Document();    
+        File file = new File("등록금명세서.PDF");
+        
+        TuitionVO tuitionVO = service.retrieveTuition(tuition);
+        log.info("가져온 tuition 정보 : "+ tuitionVO);
+        
+        String semesterCd1 = tuitionVO.getSemesterCd().substring(0, 4); //년도
+        String semesterCd2 = tuitionVO.getSemesterCd().substring(4); //학기
+        String stCd = tuitionVO.getStCd(); //학번
+        String stNm = tuitionVO.getStNm(); //이름
+        String stPh = tuitionVO.getStPh(); //전화번호
+        String tuAmount = tuitionVO.getTuAmount(); //수업료
+        String tuSchAmo = tuitionVO.getTuSchAmo(); //장학금
+        String tuPay = tuitionVO.getTuPay(); //납부금액
+        LocalDate tuStart = tuitionVO.getTuStart(); //납부시작일
+        LocalDate tuEnd = tuitionVO.getTuEnd(); //납부마감일
+        String tuAccNum = tuitionVO.getTuAccNum(); //계좌번호
+        LocalDate tuAppDate = tuitionVO.getTuAppDate(); //납부승인일
+        
+        String tuWhether =tuitionVO.getTuWhether(); //납부여부
+        
+        String tuAppDateFormatted;
+        if (tuAppDate != null) {
+            tuAppDateFormatted = tuAppDate.format(DateTimeFormatter.ofPattern("yyyy년 M월 d일"));
+        } else {
+            tuAppDateFormatted = "년      월      일";
+        }
+        
+        try {
+        	PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+            
+            // 이미지 워터마크 추가
+            String watermarkImagePath = "오류대학교.png";
+            Image watermarkImage = Image.getInstance(watermarkImagePath);
+            watermarkImage.setAbsolutePosition(53, 270); // 워터마크 위치 조절
+            
+            // 투명도 설정
+            PdfGState gs = new PdfGState();
+            gs.setFillOpacity(0.1f); // 투명도 값 설정 (0에서 1 사이의 값)
+
+            PdfContentByte cb = writer.getDirectContentUnder();
+            cb.setGState(gs);
+            cb.addImage(watermarkImage);
+            
+            // tuWhether 값에 따라 도장 이미지 추가
+            if ("Y".equals(tuWhether)) {
+                String stampImagePath = "도장.png"; // 도장 이미지 경로
+                Image stampImage = Image.getInstance(stampImagePath);
+                
+                // 이미지 크기 조절
+                float scaleFactor = 0.4f; // 이미지 크기 조절 비율 (0.5는 원래 크기의 50%)
+                stampImage.scaleAbsolute(stampImage.getWidth() * scaleFactor, stampImage.getHeight() * scaleFactor);
+                
+                stampImage.setAbsolutePosition(405, 430); // 원하는 위치로 조절
+
+                PdfContentByte stampContent = writer.getDirectContent();
+                stampContent.addImage(stampImage);
+            }
+
+            // 한글 폰트 생성
+            BaseFont bfKorean = BaseFont.createFont("C:/Windows/Fonts/malgun.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            Font font1 = new Font(bfKorean, 20);
+            Font font2 = new Font(bfKorean, 12);
+
+            // 문서 내용 추가
+            Paragraph title = new Paragraph("등록금 명세서", font1);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+
+            // 테이블 생성 및 설정
+            PdfPTable table = new PdfPTable(4); // 4개의 열을 가진 테이블
+            table.setWidthPercentage(80); // 테이블 폭을 설정(%)
+            table.setSpacingBefore(30); // 테이블 위쪽 간격 설정 (30 포인트)
+            
+            PdfPTable table2 = new PdfPTable(2); // 2개의 열을 가진 테이블
+            table2.setWidthPercentage(80); // 테이블 폭을 설정(%)
+            float[] columnWidths2 = { 1, 3 }; // 각 열의 넓이 비율 (첫 번째 열 1, 두 번째 열 3)
+            table2.setWidths(columnWidths2); // 열의 넓이 설정
+            
+            // 정보 배열 정리
+            String[][] infoArray = {
+            		{"년도", semesterCd1, "수업료", tuAmount},
+            	    {"학기", semesterCd2, "장학금", tuSchAmo},
+            	    {"학번", stCd, "납부금액", tuPay},
+            	    {"이름", stNm, "", ""},
+            	    {"전화번호", stPh, "", ""},
+            	    {" ", " ", " ", " "},
+            	    {"납부시작일", tuStart.toString(), "납부마감일", tuEnd.toString()},
+            };
+            
+            String[][] infoArray2 = {
+            		{"가상계좌", tuAccNum},
+            		{"납부승인일", tuAppDateFormatted + "                        수납인"}
+            };
+
+            // 정보 배열을 통해 테이블에 정보 추가
+            for (String[] infoRow : infoArray) {
+                for (String info : infoRow) {
+                    PdfPCell cell = new PdfPCell(new Phrase(info, font2));
+                    cell.setPadding(10); // 각 셀의 내용 패딩 설정 (10 포인트)
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER); // 가운데 정렬 설정
+                    table.addCell(cell);
+                }
+            }
+            
+            for (String[] infoRow : infoArray2) {
+            	for (String info : infoRow) {
+            		PdfPCell cell = new PdfPCell(new Phrase(info, font2));
+            		cell.setPadding(10); // 각 셀의 내용 패딩 설정 (10 포인트)
+            		cell.setHorizontalAlignment(Element.ALIGN_CENTER); // 가운데 정렬 설정
+            		table2.addCell(cell);
+            	}
+            }
+
+            // 테이블을 문서에 추가
+            document.add(table);
+            document.add(table2);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            document.close();
+        }
+        
+        // 크롬으로 실행
+        String chrome = "C:/Program Files/Google/Chrome/Application/chrome.exe";
+        try {
+            new ProcessBuilder(chrome, file.getAbsolutePath()).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	
+}

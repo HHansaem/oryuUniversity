@@ -1,0 +1,49 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+
+<div class="card">
+	<div class="card-body">
+		<form:form modelAttribute="homework" method="post"
+			enctype="multipart/form-data" class="form">
+
+			<form:hidden path="lecCd" class="form-control" />
+			<tr>
+				<th>제목</th>
+				<td><form:input path="assiNm" class="form-control" type="text" />
+					<form:errors path="assiNm" class="error" /></td>
+			</tr>
+			<tr>
+				<th>내용</th>
+				<td><form:textarea path="assiCont"
+						class="form-control form-control-lg" rows="15" /> <form:errors
+						path="assiCont" class="error" /></td>
+			</tr>
+			<tr>
+				<th>마감기한</th>
+				<td><form:input path="assiPeriod" class="form-control col-sm-3"
+						type="datetime-local" /> <form:errors path="assiPeriod"
+						class="error" /></td>
+			</tr>
+			<tr>
+				<th>파일</th>
+				<td><form:input path="asFiles" class="form-control col-sm-3"
+						type="file" multiple="multiple" /> <form:errors
+						path="asFiles" class="error" /></td>
+			</tr>
+			<tr>
+				<th>배점</th>
+				<td><form:input path="assiScore" class="form-control"
+						type="number" /> <form:errors path="assiScore" class="error" /></td>
+			</tr>
+			<tr>
+				<div class="d-flex justify-content-end">
+					<td colspan="2">
+						<input type="submit" class="btn btn-primary mr-2"></input>
+						<a class="btn btn-secondary" href="${pageContext.request.contextPath}/lecture/homeworkList.do?lecCd=${homework.lecCd}">취소</a>
+					</td>
+				</div>
+			</tr>
+		</form:form>
+	</div>
+</div>

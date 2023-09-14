@@ -1,0 +1,191 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+.paging-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+.paging-info p {
+        margin: 0;
+    }
+.table-padding {
+	padding: 0 50px 0 50px;
+}
+.header-label{
+	font-weight: bold;
+    margin: 17px 0 -23px 2px;
+    font-size: 16px;
+}
+.header-span{
+	font-weight: normal;
+	font-size: 13px;
+}
+#searchUI{
+	    float: right;
+    margin-top: -23px;
+    margin-bottom: 15px;
+}
+.gradInfo {
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 20px -10px;
+	margin-bottom: 28px;
+	padding-right: 40px;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+.gradInfo-header {
+	margin: 20px 0 11px 40px;
+	font-size: 14px;
+	font-weight: bold;
+}
+.gradInfo-list {
+	margin-top: 26px;
+    width: 100%;
+    padding-right: 40px;
+    background-color: white;
+}
+.gradInfo-body {
+	margin: -13px 11px 20px 40px;
+	font-size: 12px;
+}
+#noticeImg{
+    width: 3%;
+    margin-right: 6px;
+}
+.span-title {
+	font-weight: bold;
+	color: #248AFD;
+	margin-right: 12px;
+}
+.span-title {
+	font-weight: bold;
+	color: #248AFD;
+	margin-right: 12px;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+	<div class="card-header"
+			style="border-radius: 20px 20px 0 0; background-color: #154FA9; font-weight: bold; color: white;">
+			공지사항 홈</div>
+			
+	<div class="table-padding">
+	<div class="card gradInfo">
+	<div class="gradInfo-header">
+				<i class="mdi mdi-check-circle" style="color: green;"></i> ${lecLectTitle} 과목 정보
+				<hr style="border-color: black;">
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">강의계획서 성적 반영 비율</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;본 과목의 성적 반영 비율은 출석 ${gradeRate.grAttend }%, 과제
+				${gradeRate.grAssi }%, 중간고사 ${gradeRate.grMid }%, 기말고사
+				${gradeRate.grFinal }% 입니다.
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">담당 교수 정보</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;이름 : ${professorInfo.prNm},&nbsp;&nbsp;전화번호 :
+				${professorInfo.prPh },&nbsp;&nbsp;이메일 : ${professorInfo.prEmail }
+			</div>
+			</div>
+<div>
+	<div class="header-label"><img id="noticeImg" alt="notice" src="<%=request.getContextPath()%>/resources/images/file-icons/noticeImg.png">NOTICE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+			<span class="header-span">'${lecLectTitle}' 과목의 새소식을 알립니다.</span>
+		</div>
+		<div id="searchUI" class="row justify-content-center">
+			<div  class="col-auto">
+				<form:select path="simpleCondition.searchType" class="form-select">
+					<form:option value="" label="전체" />
+					<form:option value="title" label="제목" />
+					<form:option value="content" label="내용" />
+				</form:select>
+			</div>
+			<div  class="col-auto">
+				<form:input path="simpleCondition.searchWord" class="form-control"/>
+			</div>
+			<div  class="col-auto">
+				<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+				<c:if test="${paging.detailCondition.role == 'ROLE_PR'}">
+					<a href="<c:url value='/lecture/noticeInsert.do'/>" class="btn btn-outline-info">새공지사항</a>
+				</c:if>
+			</div>
+		</div>
+</div>
+<table class="table" style="width: 93%; margin-left: 53px;">
+	<thead class="table-light">
+		<tr>
+			<th style="padding-left: 70px;">번호</th>
+			<th>제목</th>
+			<th>작성자</th>
+			<th>첨부파일</th>
+			<th>게시일</th>
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="noticeList" value="${paging.dataList }" />
+		<c:choose>
+			<c:when test="${empty noticeList }">
+				<tr>
+					<td colspan="5">조건에 맞는 게시글 없음.</td>
+				</tr>
+			</c:when>
+			<c:otherwise>
+				<c:forEach items="${noticeList }" var="notice">
+					<tr>
+						<c:url value="/lecture/noticeView.do" var="viewURL">
+							<c:param name="what" value="${notice.lnNum }"></c:param>
+							
+						</c:url>
+						<td style="padding-left: 70px;">${notice.rnum }</td>
+						<td><a href="${viewURL }">${notice.lnTitle }</a></td>
+						<td>${professorInfo.prNm}</td>
+						<td style="padding-left: 42px;">
+							<c:choose>
+								<c:when test="${not empty notice.atchFileId }">
+									<i class="mdi mdi-paperclip" style="color: slategray; transform: rotate(140deg);  display: inline-block;"></i>
+								</c:when>
+								<c:otherwise>
+<!-- 									첨부파일 없을 때  -->
+								</c:otherwise>
+							</c:choose>
+						</td>
+						<td style="padding-left: 7px;">${notice.lnPostDate }</td>
+					</tr>
+				</c:forEach>
+			</c:otherwise>
+		</c:choose>
+	</tbody>
+	
+</table>
+	<div class="d-flex justify-content-center mb-3 mt-4">
+				${paging.pagingHTML }</div>
+</div>
+</div>
+</div>
+
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<script>
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+
+	$(searchBtn).on("click", function(event){
+	      $(searchUI).find(":input[name]").each(function(idx, input){
+	         let name = input.name;
+	         let value = $(input).val();
+	         $(searchForm).find(`[name=\${name}]`).val(value);
+	      });
+	      $(searchForm).submit();
+	   });
+</script>
+
+
+
+

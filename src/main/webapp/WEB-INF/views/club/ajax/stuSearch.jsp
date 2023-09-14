@@ -1,0 +1,182 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<style>
+.paging-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.paging-info p {
+    margin: 0;
+}
+</style>
+
+<div id="body">
+<table class="table">
+<tr><td><h4><br>동아리 부장 변경</h4></td></tr>
+</table>
+<table class="table">
+<tr>
+<td>
+<!-- 검색조건 -->
+<div id="searchUI" class="row justify-content-center">
+    <div  class="col-auto">
+        <select id="searchType" class="form-select">
+            <option value="" label="전체" />
+            <option value="stNm" label="이름" />
+            <option value="stCd" label="학생코드" />
+            <option value="dtNm" label="학과" />
+        </select>
+    </div>
+     <div  class="col-auto">
+        <input path="searchWord" id="searchWord" class="form-control"/>
+    </div>
+    <div  class="col-auto">
+        <input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+    </div> 
+</div>
+</td>
+</tr>
+<tr>
+<td>
+    <div class="paging-info">
+        <p>총 ${totalRecord}건의 게시물이 있습니다.</p>
+    </div>
+</td>
+</tr>
+</table>        
+<!-- 학생 정보 표시 영역 -->
+<div class="selected-clubMember">
+    <table class="table table-border">
+        <tr>
+       		<th>선택된 학생</th>
+			<th>부원이름</th>
+			<td>
+                <span id="clubMemberDisplay">${ClubMemberVO.stNm}</span>
+            </td>
+			<th>소속학과</th>
+			<td>
+                <span id="departmentDisplay">${ClubMemberVO.dtNm}</span>
+            </td>
+			<th>전화번호</th>
+			<td>
+                <span id="phoneDisplay">${ClubMemberVO.stPh}</span>
+            </td>
+            <th>부원분류</th>
+            <td>
+            	<span id="classDisplay">${ClubMemberVO.clubMemClass}</span>
+            </td>
+          </tr>
+    </table>
+</div>
+<table class="table">
+    <thead class="table-light">
+        <tr>
+            <th>학생이름</th>
+            <th>학과</th>
+            <th>전화번호</th>
+            <th>분류</th>
+            <th>선택</th>
+        </tr>
+    </thead>
+    <tbody>
+    <c:set var="clubStuList" value="${paging.dataList}" />
+    <c:choose>
+        <c:when test="${empty clubStuList}">
+            <tr>
+                <td colspan="4">조건에 맞는 게시글 없음.</td>
+            </tr>
+        </c:when>
+        <c:otherwise>
+            <c:forEach items="${clubStuList}" var="stu">
+                <tr class="clubMember-row" data-stNm="${stu.stNm}" data-dtNm="${stu.dtNm}" data-stPh="${stu.stPh}" data-clubMemClass="${stu.clubMemClass }">
+                    <td>${stu.stNm }</td>
+                    <td>${stu.dtNm }</td>
+                    <td>${stu.stPh }</td>
+                    <td>${stu.clubMemClass }</td>
+                    <td><button class="select-stu-btn">선택</button></td>
+                </tr>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+</tbody>
+<tfoot>
+    <tr>
+        <td colspan="4">
+            <div class="d-flex justify-content-center mb-3">
+            ${paging.pagingHTML }
+            </div>
+        </td>
+    </tr>
+</tfoot>
+</table>
+</div>
+<script>
+function updatePage(page) {
+    var searchType = $("#searchType").val();
+    var searchWord = $("#searchWord").val();
+    console.log("searchType : " + searchType + "searchWord : " + searchWord);
+    $.ajax({
+        type: "GET",
+        url: "${pageContext.request.contextPath}/club/stuSearch.do",
+        data: {
+            searchType: searchType,
+            searchWord: searchWord,
+            page: page // 페이지 번호 전달
+        },
+        success: function(response) {
+            $("#body").html(response);
+        },
+        error: function() {
+            alert("검색 도중 오류가 발생했습니다.");
+        }
+    });
+}
+
+$(document).ready(function() {
+    // 페이지 변경 버튼 클릭 시 AJAX 요청 보내기
+    $(document).on("click", ".page-link", function() {
+        var page = $(this).data("page");
+        updatePage(page);
+    });
+
+    // 검색 버튼 클릭 시 페이지 초기화하고 AJAX 요청 보내기
+    $("#searchBtn").on("click", function() {
+        updatePage(1); // 첫 페이지로 초기화하여 업데이트
+    });
+
+    //  행을 클릭할 때 선택된 정보를 입력란에 표시
+    $(document).on("click", ".clubMember-row", function() {
+        var stNm = $(this).data("stNm");
+        var dtNm = $(this).data("dtNm");
+        var stPh = $(this).data("stPh");
+        var clubMemClass = $(this).data("clubMemClass");
+        $("#clubMemberDisplay").text(stNm);
+        $("#departmentDisplay").text(dtNm);
+        $("#phoneDisplay").text(stPh);
+        $("#classDisplay").text(clubMemClass)
+
+        // 모달 닫기 (옵션이 있을 경우 추가)
+        // $("#exampleModal").modal("hide");
+    });
+
+    // 선택 버튼을 클릭할 때 선택한 학생의 이름을 표시하는 부분에 값 입력
+   $(document).on("click", ".select-stu-btn", function() {
+    	var selectedClubMemberNm = $(this).closest("tr").find("td:nth-child(1)").text();
+        var selectedDepartment = $(this).closest("tr").find("td:nth-child(2)").text();
+        var selectedPhone = $(this).closest("tr").find("td:nth-child(3)").text();
+        var selectedClass = $(this).closest("tr").find("td:nth-child(4)").text();
+        
+        $("#clubMemberDisplay").text(selectedClubMemberNm);
+        $("#departmentDisplay").text(selectedDepartment);
+        $("#phoneDisplay").text(selectedPhone);
+        $("#classDisplay").text(selectedClass);
+        
+    });
+});
+</script>

@@ -1,0 +1,80 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+      <nav class="sidebar sidebar-offcanvas" id="sidebar2" style="border-left: 3px solid #f6f6f6;">
+          <div class="text-white d-flex align-items-center" style="background-color: #154FA9; height: 50px;">
+            <i class="mdi mdi-lead-pencil font-weight-bold" style="margin-left: 20px;">강의</i>
+          </div>
+          <ul class="nav">
+            <li class="d-flex justify-content-center border-bottom">
+              <a class="nav-link" href="#">
+                <span class="menu-title">강의명</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/lecture/noticeList.do?lecCd=${lecCd}">
+                <i class="icon-layout menu-icon"></i>
+                <span class="menu-title">공지</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/lecture/videoLectureList.do?lecCd=${lecCd}">
+                <i class="icon-head menu-icon"></i>
+                <span class="menu-title">화상/동영상강의</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/lecture/homeworkList.do?lecCd=${lecCd}">
+                <i class="icon-bar-graph menu-icon"></i>
+                <span class="menu-title">과제</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/lecture/examList.do?lecCd=${lecCd}">
+                <i class="icon-grid-2 menu-icon"></i>
+                <span class="menu-title">시험</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/lecture/AttendanceView.do?lecCd=${lecCd}">
+                <i class="icon-contract menu-icon"></i>
+                <span class="menu-title">출석</span>
+              </a>
+            </li>
+<!--             <li class="nav-item"> -->
+<!--               <a class="nav-link" aria-expanded="false"> -->
+<!--                 <i class="icon-head menu-icon"></i> -->
+<!--                 <span class="menu-title">화상강의</span> -->
+<!--               </a> -->
+<!--             </li> -->
+            <li class="nav-item">
+              <a class="nav-link" aria-expanded="false" href="<%=request.getContextPath()%>/enrollment/gradeList.do?lecCd=${lecCd}">
+                <i class="icon-ban menu-icon"></i>
+                <span class="menu-title">성적</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

@@ -1,0 +1,124 @@
+package kr.or.ddit.internship.service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.service.AtchFileService;
+import kr.or.ddit.atch.vo.AtchFileDetailVO;
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.internship.dao.InternshipDAO;
+import kr.or.ddit.internship.vo.InternshipVO;
+
+@Service
+public class InternshipServiceImpl implements InternshipService {
+	
+	@Inject
+	private InternshipDAO internDAO;
+	
+	@Inject
+	private AtchFileService atchService;
+	
+	@Value("#{appInfo.CommonAtchPath}")
+	private Resource atchPath;
+	
+	
+	private void processAtchFileGroup(InternshipVO intern) {
+		MultipartFile[] inteFiles = intern.getInteFiles();
+		if(inteFiles==null) return;
+		List<AtchFileDetailVO> detailList = new ArrayList<>();
+		for(MultipartFile inteFile : inteFiles) {
+			if(inteFile.isEmpty()) continue;
+			detailList.add( new AtchFileDetailVO(inteFile));
+		}
+		if(detailList.size()>0) {
+			AtchFileVO fileGroup = new AtchFileVO();
+			fileGroup.setDetailList(detailList);
+			try {
+				int atchFileId = atchService.createAtchFileGroup(fileGroup, atchPath);
+				intern.setAtchFileId(atchFileId);
+			}catch(IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	
+	@Override
+	public boolean internshipInsert(InternshipVO intern) {
+		processAtchFileGroup(intern);
+		boolean result = false;
+		int cnt = internDAO.internshipInsert(intern);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+	@Override
+	public List<InternshipVO> internshipList(PaginationInfo paging) {
+		// 레코드 수를 조회 후 페이지 반환
+		long totalRecord = internDAO.selectTotalRecord(paging);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return internDAO.internshipList(paging);
+	}
+
+	@Override
+	public InternshipVO internshipView(String inteCd) {
+		 // DAO를 통해 데이터 조회
+	    InternshipVO result = internDAO.internshipView(inteCd);
+
+	    // 조회수 증가
+	    int updatedRows = internDAO.internshipViewCount(inteCd);
+	    if (updatedRows > 0) {
+	        // 조회수가 증가했을 경우에만 VO에 조회수를 반영
+	        result.setInteViews(result.getInteViews() + 1);
+	    }
+
+	    return result;
+	}
+
+	@Override
+	public boolean internshipUpdate(InternshipVO intern) {
+		processAtchFileGroup(intern);
+		boolean result;
+		int cnt = internDAO.internshipUpdate(intern);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+	@Override
+	public boolean internshipDelete(String inteCd) {
+		boolean result;
+		int cnt = internDAO.internshipDelete(inteCd);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+	
+	@Override
+	public long getTotalRecordCount(PaginationInfo paging) {
+		return internDAO.selectTotalRecord(paging);
+	}
+	
+}

@@ -1,0 +1,102 @@
+package kr.or.ddit.student.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.college.dao.CollegeDAO;
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/student")
+public class JobManagementController {
+	
+	@Inject
+	private StudentService service;
+	@Inject
+	private CollegeDAO collegeDAO;
+	@Inject
+	private DepartmentDAO departmentDAO;
+	
+	@ModelAttribute("collegeList")
+	public List<CollegeVO> collegeList(){
+		return collegeDAO.selectCollegeList();
+	}
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		List<DepartmentVO> dList = departmentDAO.selectDepartmentList();
+		return dList;
+	}
+	
+	// 취업현황목록 껍데기 페이지를 로딩
+		@RequestMapping("studentJobList.do")
+		public void enrollmentList(
+			@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+			, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+			, @RequestParam Map<String,Object> detailCondition
+			, Model model
+		) {
+		}
+	
+	// 학생 취업 관리 현황
+	@RequestMapping("studentManagementList.do")
+	public String studentJoblist(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+		, @RequestParam Map<String,Object> detailCondition
+		, Model model
+	){
+		PaginationInfo<StudentVO> paging = new PaginationInfo<>();
+		paging.setScreenSize(10);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		detailCondition.put("grad", "졸업");
+		paging.setDetailCondition(detailCondition);
+		
+		List<StudentVO> studentList = service.retrieveStudentList(paging);
+		paging.setDataList(studentList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "student/ajax/studentList";
+	}
+	
+	// 단과별 취업 관리 현황
+	@RequestMapping("departmentList.do")
+	public String departmentlist(
+		@RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, @ModelAttribute("simpleCondition") SimpleCondition simpleCondition
+		, @RequestParam Map<String,Object> detailCondition
+		, Model model
+	){
+		PaginationInfo<StudentVO> paging2 = new PaginationInfo<>();
+		paging2.setScreenSize(5);
+		paging2.setSimpleCondition(simpleCondition);
+		paging2.setCurrentPage(currentPage);
+		paging2.setDetailCondition(detailCondition);
+		log.info("detailcondition!!!!!!!!!!!!!!!!!!!!!!!!!!"+detailCondition);
+		
+		List<StudentVO> departmentList = service.retrieveRatioList(paging2);
+		paging2.setDataList(departmentList);
+		
+		model.addAttribute("paging2", paging2);
+	
+		return "student/ajax/departmentList";
+	}
+
+}

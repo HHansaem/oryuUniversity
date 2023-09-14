@@ -1,0 +1,37 @@
+package kr.or.ddit.academicChange.vo;
+
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.validate.UpdateGroup;
+import kr.or.ddit.student.vo.StudentVO;
+import kr.or.ddit.validate.groups.InsertGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of="acChCd")
+public class AcademicChangeVO {
+	@NotBlank (groups = {UpdateGroup.class})
+	private String acChCd;
+	@NotBlank (groups = {InsertGroup.class})
+	private String stCd;
+	private String acChRe;
+	private LocalDate acChAppDate;
+	private LocalDate acChCerDate;
+	private String acChDiv;
+	private String acChSta;
+	private String acChReFi;
+
+	private MultipartFile[] acaChFiles;
+
+	private Integer atchFileId;
+
+	private AtchFileVO fileGroup;
+	
+	private StudentVO studentVO;
+}

@@ -1,0 +1,26 @@
+package kr.or.ddit.lecture.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.lecture.service.AssignmentService;
+import kr.or.ddit.lecture.vo.AssignmentVO;
+
+@Controller
+@RequestMapping("/lecture/homeworkDetail.do")
+public class HomeworkDetailController {
+	@Inject
+	AssignmentService service;
+	
+	@GetMapping
+	public String assignment(String assignCd, Model model){
+		AssignmentVO assign = service.retrieveAssignmentDetail(assignCd);
+		model.addAttribute("assign",assign);
+		return "lecture/homeworkView";
+	}
+	
+}

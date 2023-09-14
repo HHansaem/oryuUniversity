@@ -1,0 +1,18 @@
+package kr.or.ddit.lecture.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/lecture/homeworkList.do")
+public class HomeworkListController {
+	
+	@GetMapping
+	public String homeworkList(String lecCd, Model model) {
+		model.addAttribute("lecCd", lecCd);
+		return "lecture/homeworkList";
+	}
+	
+}

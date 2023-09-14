@@ -1,0 +1,17 @@
+package kr.or.ddit.lecture.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.vo.NoticeVO;
+
+public interface NoticeService {
+	
+	public List<NoticeVO> retrieveNoticeList(PaginationInfo paging);
+	public NoticeVO retrieveNotice(String lnNum);
+	
+	public boolean createNotice(NoticeVO lecNotice);
+	public boolean modifyNotice(NoticeVO lecNotice);
+	public boolean removeNotice(NoticeVO lecNotice);
+	
+}

@@ -1,0 +1,51 @@
+package kr.or.ddit.professor.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.common.vo.SimpleCondition;
+import kr.or.ddit.professor.service.ProfessorService;
+import kr.or.ddit.professor.vo.ProfessorVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+public class ProfessorDeleteController {
+	@Inject
+	private ProfessorService service;
+	
+	@PostMapping("/professor/professorDelete.do")
+	public String postHandler(
+		@RequestParam("who") String prCd
+		, @RequestParam(name="page", required = false, defaultValue = "1") long currentPage
+		, SimpleCondition simpleCondition
+		, HttpSession session
+		, Model model
+	){
+		String logicalViewName = null;
+		ServiceResult result = service.removeProfessor(prCd);
+		if(ServiceResult.OK == result) {
+			PaginationInfo<ProfessorVO> paging = new PaginationInfo<>(10, 5);
+			paging.setSimpleCondition(simpleCondition);
+			paging.setCurrentPage(currentPage);
+			
+			List<ProfessorVO> professorList = service.retrieveProfessorList(paging);
+			paging.setDataList(professorList);
+			
+			model.addAttribute("paging", paging);
+			session.setAttribute("message", "삭제가 완료되었습니다.");
+			logicalViewName = "redirect:/professor/professorList.do";
+		}else {
+			session.setAttribute("message", "오류, 삭제 실패");
+			logicalViewName = "redirect:/professor/professorView.do?who="+prCd;
+		}
+		return logicalViewName;
+	}
+}

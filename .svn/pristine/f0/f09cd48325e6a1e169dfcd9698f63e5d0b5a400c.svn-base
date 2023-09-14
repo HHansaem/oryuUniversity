@@ -1,0 +1,63 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+	<table>
+		<tr>
+			<th>동아리 대표 성명</th>
+			<td>${club.studentVO.stNm}</td>
+		</tr>
+		<tr>
+			<th>동아리 대표 학번</th>
+			<td>${club.stCd }</td>
+		</tr>
+		<tr>
+			<th>동아리명</th>
+			<td>${club.clubNm }</td>
+		</tr>
+		<tr>
+			<th>동아리 지도 교수</th>
+			<td>${club.professorVO.prNm }</td>
+		</tr>
+		<tr>
+			<th>동아리 계획서</th>
+			<td>${club.clubPlan }</td>
+		</tr>
+		<tr>
+			<th>동아리 상태</th>
+			<td>${club.clubStatus }</td>
+		</tr>
+		<c:if test="${not empty club.clubRefuse}">
+		<th>동아리 거절 사유</th>
+		<td>${club.clubRefuse }</td>
+		</c:if>
+		<tr>
+			<td colspan="2">
+				<input class="btn btn-success" type="submit" value="확인"> 
+			<c:if test="${sessionScope.userId.length() == 7}"> <!-- 교수 -->
+				<input class="btn btn-danger" type="button" value="요청승인" onclick="approvalRequest()">
+				<input class="btn btn-danger" type="button" value="요청거절" onclick="refuseRequest()">
+			</c:if>
+			<input class="btn btn-secondary" type=button value="뒤로가기" onclick="history.back();"></td>
+		
+		</tr>
+	</table>
+	
+<script>
+	function approvalRequest() {
+	  // 여기에 요청 처리를 위한 작업을 추가합니다.
+	  // 예를 들어, 페이지 이동을 수행하거나 AJAX 요청을 보내는 등의 작업을 수행할 수 있습니다.
+	
+	  // 페이지 이동 예시:
+	  window.location.href = "${pageContext.request.contextPath}/club/clubInsertApproval.do?who=${club.clubCd}&what=요청승인";
+	}
+	
+	function refuseRequest() {
+		  // 여기에 요청 처리를 위한 작업을 추가합니다.
+		  // 예를 들어, 페이지 이동을 수행하거나 AJAX 요청을 보내는 등의 작업을 수행할 수 있습니다.
+		
+		  // 페이지 이동 예시:
+		  window.location.href = "${pageContext.request.contextPath}/club/clubUpdate.do?who=${club.clubCd} what='요청거절'";
+		}
+</script>

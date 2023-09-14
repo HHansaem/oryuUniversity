@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lectureContents.attendance.dao.AttendanceDAO">
+	
+	<resultMap type="kr.or.ddit.lectureContents.vo.AttendanceVO" id="attendanceMap" autoMapping="true">
+		<id property="attCd" column="ATT_CD"/>
+		<collection property="attendanceStateList" ofType="kr.or.ddit.lectureContents.vo.AttendanceStateVO" autoMapping="true">
+			<id property="attsCd" column="ATTS_CD"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectAttendanceList" parameterType="kr.or.ddit.lectureContents.vo.AttendanceVO" resultMap="attendanceMap">
+		WITH STUDENTVIEW AS (
+		SELECT
+		dt_nm,st_nm,st_cd 
+		from student s inner join department d on (s.dt_cd = d.dt_cd)
+		), ATTENDANCEVIEW AS (
+		        SELECT
+		        at.att_cd
+		      , lec_cd
+		      , at.st_cd
+		      , atte_lec_days
+		      , atte_days
+		      , atte_abse_days
+		      , atte_tard_days
+		      , atte_score
+		      , atts_sche
+		      , atts_state
+		      , atts_week
+		      , atts_cd    
+		      FROM
+		    attendance at left outer join attendancestate ats on (at.att_cd = ats.att_cd)
+		    WHERE atts_sche = #{attsSche} and atts_week = #{attsWeek}
+		) select 
+		        av.att_cd
+		      , en.lec_cd
+		      , en.st_cd
+		      , atte_lec_days
+		      , atte_days
+		      , atte_abse_days
+		      , atte_tard_days
+		      , atte_score
+		      , atts_sche
+		      , atts_state
+		      , atts_week
+		      , atts_cd 
+		      , dt_nm
+		      , st_nm
+		      from enrollment en left outer join STUDENTVIEW sv on en.st_cd = sv.st_cd
+		                         left outer join ATTENDANCEVIEW av on en.lec_cd = av.lec_cd
+		      where en.lec_cd = #{lecCd} 
+	</select>
+	
+	<insert id="insertAttendance" parameterType="kr.or.ddit.lectureContents.vo.AttendanceVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="attCd">
+		SELECT ATTENDANCE_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+		INSERT INTO attendance (
+	    att_cd,
+	    lec_cd,
+	    st_cd,
+	    atte_lec_days,
+	    atte_days,
+	    atte_abse_days,
+	    atte_tard_days,
+	    atte_score
+		) VALUES (
+		    #{attCd,jdbcType=VARCHAR}
+		    , #{lecCd,jdbcType=VARCHAR}
+		    , #{stCd,jdbcType=VARCHAR}
+		    , #{atteLecDays,jdbcType=NUMERIC}
+		    , #{atteDays,jdbcType=NUMERIC}
+		    , #{atteAbseDays,jdbcType=NUMERIC}
+		    , #{atteTardDays,jdbcType=NUMERIC}
+		    , #{atteScore,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	<insert id="insertAttendanceState" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="attsCd">
+		SELECT ATTSTATE_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+		INSERT INTO attendancestate (
+		    atts_cd,
+		    atts_sche,
+		    atts_state,
+		    att_cd,
+		    atts_week
+		) VALUES (
+		    #{attsCd,jdbcType=VARCHAR}
+		    , #{attsSche,jdbcType=VARCHAR}
+		    , #{attsState,jdbcType=VARCHAR}
+		    , #{attCd,jdbcType=VARCHAR}
+		    , #{attsWeek,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="updateAttendance" parameterType="kr.or.ddit.lectureContents.vo.AttendanceVO">
+		UPDATE attendance
+		SET
+		, ATTE_LEC_DAYS = #{atteLecDays,jdbcType=NUMERIC}
+		, ATTE_DAYS = #{atteDays,jdbcType=NUMERIC}
+		, ATTE_ABSE_DAYS = #{atteAbseDays,jdbcType=NUMERIC}
+		, ATTE_TARD_DAYS = #{atteTardDays,jdbcType=NUMERIC}
+		WHERE
+   		lec_cd = #{lecCd}
+    	AND st_cd = #{stCd}
+	</update> 
+	
+	<update id="updateAttendanceState" parameterType="kr.or.ddit.lectureContents.vo.AttendanceStateVO">
+		UPDATE attendancestate
+		SET
+    	ATTS_STATE = #{attsState,jdbcType=VARCHAR}
+		WHERE
+    	atts_cd = #{attsCd}
+	</update>
+	
+</mapper>

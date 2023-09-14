@@ -1,0 +1,120 @@
+package kr.or.ddit.tuition.service;
+
+
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.service.AtchFileService;
+import kr.or.ddit.atch.vo.AtchFileDetailVO;
+import kr.or.ddit.atch.vo.AtchFileVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.tuition.dao.TuitionDAO;
+import kr.or.ddit.tuition.vo.TuitionVO;
+
+@Service
+public class TuitionServiceImpl implements TuitionService {
+	
+	@Inject
+	private TuitionDAO tuitionDAO;
+	
+	@Inject
+	private AtchFileService atchService;
+	@Value("#{appInfo.CommonAtchPath}")
+	private Resource atchPath;
+
+	
+	private void processAtchFileGroup(TuitionVO tuition) {
+		MultipartFile[] tuFiles = tuition.getTuFiles();
+		if(tuFiles==null) return;
+		List<AtchFileDetailVO> detailList = new ArrayList<>();
+		for(MultipartFile tuFile : tuFiles) {
+			if(tuFile.isEmpty()) continue;
+			detailList.add( new AtchFileDetailVO(tuFile) );
+		}
+		if(detailList.size()>0) {
+			AtchFileVO fileGroup = new AtchFileVO();
+			fileGroup.setDetailList(detailList);
+			try {
+				//		1. 첨부파일의 메타 데이터 저장
+				//		2. 첨부파일의 2진 데이터 저장
+				int atchFileId = atchService.createAtchFileGroup(fileGroup, atchPath);
+				tuition.setAtchFileId(atchFileId);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	
+	@Override
+	public List<TuitionVO> retrieveStaffTuitionList(PaginationInfo<TuitionVO> paging) {
+		long totalRecord = tuitionDAO.selectTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		return tuitionDAO.selectStaffTuitionList(paging);
+	}
+
+	@Override
+	public List<TuitionVO> retrieveStudentApplyScholarship(String stCd) {
+		List<TuitionVO> tuitionList = tuitionDAO.selectStudentApplyScholarship(stCd);
+		Iterator<TuitionVO> iterator = tuitionList.iterator();
+	    
+	    while (iterator.hasNext()) {
+	        TuitionVO tuition = iterator.next();
+	        if (tuition.getTuSchDate() == null) {
+	            iterator.remove(); // 조건을 만족하지 않는 항목 제거
+	        }
+	    }
+		return tuitionList;
+	}
+
+	@Override
+	public boolean applyScholarship(TuitionVO tuition) {
+		String se = tuition.getSemesterCd().replaceAll(",", "");
+		tuition.setSemesterCd(se);
+		processAtchFileGroup(tuition);
+		return tuitionDAO.submitScholarship(tuition) > 0;
+	}
+
+
+	@Override
+	public List<TuitionVO> retrieveStaffApplyScholarship(PaginationInfo<TuitionVO> paging) {
+		long totalRecord = tuitionDAO.selectScholarshipTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		return tuitionDAO.selectStaffApplyScholarship(paging);
+	}
+
+
+	@Override
+	public TuitionVO retrieveScholarship(TuitionVO tuition) {
+		return tuitionDAO.selectScholarship(tuition);
+	}
+
+
+	@Override
+	public boolean acceptScholarship(TuitionVO tuition) {
+		return tuitionDAO.approveScholarship(tuition) > 0;
+	}
+
+
+	@Override
+	public boolean refuseScholarship(TuitionVO tuition) {
+		return tuitionDAO.rejectScholarship(tuition) > 0;
+	}
+
+
+	@Override
+	public boolean acceptTuition(TuitionVO tuition) {
+		return tuitionDAO.approveTuition(tuition) > 0;
+	}
+
+}

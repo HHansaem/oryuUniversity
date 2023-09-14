@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.LectureDAO">
+
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'lCode'">
+						INSTR(LI.LEC_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'lName'">
+						INSTR(LI.LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sCode'">
+						INSTR(LI.SUBJ_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sName'">
+						INSTR(LI.SUBJ_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'pName'">
+						INSTR(LI.PR_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(LI.LEC_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LI.LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LI.SUBJ_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LI.SUBJ_NM, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LI.PR_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+				<choose>
+			        <when test="detailCondition.STAND neq null and not detailCondition.STAND.isEmpty">
+			            AND LI.LEC_STAT != '4' AND LI.LEC_STAT != '5'
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.REQ neq null and not detailCondition.REQ.isEmpty">
+			            AND LI.LEC_STAT != '3' AND LI.LEC_STAT != '2' AND LI.LEC_STAT != '1'
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+				<choose>
+			        <when test="detailCondition.prCd neq null and not detailCondition.prCd.isEmpty">
+			            AND  LI.PR_CD= #{detailCondition.prCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+				<choose>
+			        <when test="detailCondition.lecStat neq null and not detailCondition.lecStat.isEmpty">
+			            AND LI.LEC_STAT = #{detailCondition.lecStat} AND LI.LEC_SEME_CD = '2'
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.lecSeme neq null and not detailCondition.lecSeme.isEmpty">
+			            AND LI.LEC_SEME_CD = '2'
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.college neq null and not detailCondition.college.isEmpty">
+			            AND LI.COLGE_CD = #{detailCondition.college}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND LI.DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.classfication neq null and not detailCondition.classfication.isEmpty">
+			            AND LI.SUBJ_COM_TYPE = #{detailCondition.classfication}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.grade neq null and not detailCondition.grade.isEmpty">
+			            AND LI.LEC_GRA_CD = #{detailCondition.grade}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.semester neq null and not detailCondition.semester.isEmpty">
+			            AND LI.LEC_SEME_CD = #{detailCondition.semester}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="frag">
+		<where>
+			<if test="detailCondition neq null">
+			    <choose>
+			        <when test="detailCondition.college neq null and not detailCondition.college.isEmpty">
+			            AND D.COLGE_CD = #{detailCondition.college}
+			        </when>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	
+	<resultMap type="kr.or.ddit.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		
+		<association property="professor" javaType="kr.or.ddit.professor.vo.ProfessorVO" autoMapping="true">
+			<id property="prCd" column="PR_CD"/>
+			<result property="prNm" column="PR_NM"/>
+		</association>
+		
+		<association property="subject" javaType="kr.or.ddit.subject.vo.SubjectVO" autoMapping="true">
+			<id property="subjCd" column="SUBJ_CD"/>
+			<result property="subjNm" column="SUBJ_NM"/>
+		</association>
+		
+		<association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+		   <id property="atchFileId" column="ATCH_FILE_ID"/>
+		   <result property="creatDt" column="CREAT_DT"/>
+		   <result property="useAt" column="USE_AT"/>
+		   <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+		      <id property="atchFileId" column="ATCH_FILE_ID"/>
+		      <id property="fileSn" column="FILE_SN"/>
+		   </collection>
+		</association>
+		
+	</resultMap>
+
+	<select id="selectLectureList" resultMap="lectureMap" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ATCH_FILE_VIEW AS (
+		    SELECT *
+		    FROM ATCH_FILE
+		    INNER JOIN ATCH_FILE_DETAIL USING (ATCH_FILE_ID)
+		),
+		LECTURE_INFO AS (
+		    SELECT 
+		        L.LEC_CD,
+		        L.SUBJ_CD,
+		        L.PR_CD,
+		        L.LEC_LECT_TITLE,
+		        L.LEC_GRA_CD,
+		        L.LEC_SEME_CD,
+		        L.LEC_LECT_CRED,
+		        L.LEC_ENRO_LIMIT,
+		        L.LEC_LECT_DIVISION,
+		        L.LEC_STAT,
+		        L.GR_MID,
+		        L.GR_FINAL,
+		        L.GR_ATTEND,
+		        L.GR_ASSI,
+		        P.PR_NM,
+		        S.SUBJ_NM,
+		        S.DT_CD,
+		        S.SUBJ_COM_TYPE,
+		        AF.ATCH_FILE_ID,
+		        AF.FILE_SN,
+		        AF.FILE_STRE_COURS,
+		        AF.STRE_FILE_NM,
+		        AF.ORIGNL_FILE_NM,
+		        AF.FILE_EXTSN,
+		        AF.FILE_SIZE,
+		        AF.FILE_MIME,
+                D.COLGE_CD,
+                D.DT_NM
+                
+		    FROM LECTURE L
+		    LEFT JOIN PROFESSOR P ON L.PR_CD = P.PR_CD
+		    LEFT JOIN ATCH_FILE_VIEW AF ON L.ATCH_FILE_ID = AF.ATCH_FILE_ID
+		    LEFT JOIN SUBJECT S ON L.SUBJ_CD = S.SUBJ_CD
+            LEFT JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD
+		),
+		ENROLLMENT_INFO AS (
+		    SELECT LEC_CD, COUNT(*) AS ENROLL
+		    FROM ENROLLMENT
+		    GROUP BY LEC_CD
+		),
+		LECTURE_SCHEDULES AS (
+		    SELECT LS.LEC_CD, LS.SCHE_CD, LS.CLAS_CD, C.CLAS_NM
+		    FROM LECTURESCHEDULE LS
+		    LEFT JOIN CLASSROOM C ON LS.CLAS_CD = C.CLAS_CD
+		),
+		COMBINED AS (
+		    SELECT
+		        LI.LEC_CD,
+		        LI.SUBJ_CD,
+		        LI.PR_CD,
+		        LI.LEC_LECT_TITLE,
+		        LI.LEC_GRA_CD,
+		        LI.LEC_SEME_CD,
+		        LI.LEC_LECT_CRED,
+		        LI.LEC_ENRO_LIMIT,
+		        LI.LEC_LECT_DIVISION,
+		        LI.LEC_STAT,
+		        LI.GR_MID,
+		        LI.GR_FINAL,
+		        LI.GR_ATTEND,
+		        LI.GR_ASSI,
+		        LI.PR_NM,
+		        LI.SUBJ_NM,
+		        LI.DT_CD,
+		        LI.SUBJ_COM_TYPE,
+		        LI.ATCH_FILE_ID,
+		        LI.FILE_SN,
+		        LI.FILE_STRE_COURS,
+		        LI.STRE_FILE_NM,
+		        LI.ORIGNL_FILE_NM,
+		        LI.FILE_EXTSN,
+		        LI.FILE_SIZE,
+		        LI.FILE_MIME,
+                LI.COLGE_CD,
+                LI.DT_NM,
+		        COALESCE(EI.ENROLL, 0) AS ENROLL,
+		        LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS,
+		        LS.CLAS_CD,
+		        LS.CLAS_NM
+		    FROM LECTURE_INFO LI
+		    LEFT JOIN ENROLLMENT_INFO EI ON LI.LEC_CD = EI.LEC_CD
+		    LEFT JOIN LECTURE_SCHEDULES LS ON LI.LEC_CD = LS.LEC_CD
+		    <include refid="searchFrag"/>
+		    GROUP BY
+		        LI.LEC_CD,
+		        LI.SUBJ_CD,
+		        LI.PR_CD,
+		        LI.LEC_LECT_TITLE,
+		        LI.LEC_GRA_CD,
+		        LI.LEC_SEME_CD,
+		        LI.LEC_LECT_CRED,
+		        LI.LEC_ENRO_LIMIT,
+		        LI.LEC_LECT_DIVISION,
+		        LI.LEC_STAT,
+		        LI.GR_MID,
+		        LI.GR_FINAL,
+		        LI.GR_ATTEND,
+		        LI.GR_ASSI,
+		        LI.PR_NM,
+		        LI.SUBJ_NM,
+		        LI.DT_CD,
+		        LI.SUBJ_COM_TYPE,
+		        LI.ATCH_FILE_ID,
+		        LI.FILE_SN,
+		        LI.FILE_STRE_COURS,
+		        LI.STRE_FILE_NM,
+		        LI.ORIGNL_FILE_NM,
+		        LI.FILE_EXTSN,
+		        LI.FILE_SIZE,
+		        LI.FILE_MIME,
+                LI.COLGE_CD,
+                LI.DT_NM,
+		        EI.ENROLL,
+		        LS.CLAS_CD,
+		        LS.CLAS_NM
+		)
+		SELECT A.*
+		FROM (
+		    SELECT C.*, ROWNUM RNUM 
+		    FROM (
+		        SELECT *
+		        FROM COMBINED
+		    ) C
+		) A
+        <![CDATA[
+        WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+        ]]>
+        ORDER BY DT_NM, LEC_STAT , LEC_CD DESC 
+	</select>
+
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+    	WITH ATCH_FILE_VIEW AS (
+		    SELECT *
+		    FROM ATCH_FILE
+		    INNER JOIN ATCH_FILE_DETAIL USING (ATCH_FILE_ID)
+		),
+		LECTURE_INFO AS (
+		    SELECT 
+		        L.LEC_CD,
+		        L.SUBJ_CD,
+		        L.PR_CD,
+		        L.LEC_LECT_TITLE,
+		        L.LEC_GRA_CD,
+		        L.LEC_SEME_CD,
+		        L.LEC_LECT_CRED,
+		        L.LEC_ENRO_LIMIT,
+		        L.LEC_LECT_DIVISION,
+		        L.LEC_STAT,
+		        L.GR_MID,
+		        L.GR_FINAL,
+		        L.GR_ATTEND,
+		        L.GR_ASSI,
+		        P.PR_NM,
+		        S.SUBJ_NM,
+		        S.DT_CD,
+		        S.SUBJ_COM_TYPE,
+		        AF.ATCH_FILE_ID,
+		        AF.FILE_SN,
+		        AF.FILE_STRE_COURS,
+		        AF.STRE_FILE_NM,
+		        AF.ORIGNL_FILE_NM,
+		        AF.FILE_EXTSN,
+		        AF.FILE_SIZE,
+		        AF.FILE_MIME,
+                D.COLGE_CD,
+                D.DT_NM
+                
+		    FROM LECTURE L
+		    LEFT JOIN PROFESSOR P ON L.PR_CD = P.PR_CD
+		    LEFT JOIN ATCH_FILE_VIEW AF ON L.ATCH_FILE_ID = AF.ATCH_FILE_ID
+		    LEFT JOIN SUBJECT S ON L.SUBJ_CD = S.SUBJ_CD
+            LEFT JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD
+		),
+		ENROLLMENT_INFO AS (
+		    SELECT LEC_CD, COUNT(*) AS ENROLL
+		    FROM ENROLLMENT
+		    GROUP BY LEC_CD
+		),
+		LECTURE_SCHEDULES AS (
+		    SELECT LS.LEC_CD, LS.SCHE_CD, LS.CLAS_CD, C.CLAS_NM
+		    FROM LECTURESCHEDULE LS
+		    LEFT JOIN CLASSROOM C ON LS.CLAS_CD = C.CLAS_CD
+		),
+		COMBINED AS (
+		    SELECT
+		        LI.LEC_CD,
+		        LI.SUBJ_CD,
+		        LI.PR_CD,
+		        LI.LEC_LECT_TITLE,
+		        LI.LEC_GRA_CD,
+		        LI.LEC_SEME_CD,
+		        LI.LEC_LECT_CRED,
+		        LI.LEC_ENRO_LIMIT,
+		        LI.LEC_LECT_DIVISION,
+		        LI.LEC_STAT,
+		        LI.GR_MID,
+		        LI.GR_FINAL,
+		        LI.GR_ATTEND,
+		        LI.GR_ASSI,
+		        LI.PR_NM,
+		        LI.SUBJ_NM,
+		        LI.DT_CD,
+		        LI.SUBJ_COM_TYPE,
+		        LI.ATCH_FILE_ID,
+		        LI.FILE_SN,
+		        LI.FILE_STRE_COURS,
+		        LI.STRE_FILE_NM,
+		        LI.ORIGNL_FILE_NM,
+		        LI.FILE_EXTSN,
+		        LI.FILE_SIZE,
+		        LI.FILE_MIME,
+                LI.COLGE_CD,
+                LI.DT_NM,
+		        COALESCE(EI.ENROLL, 0) AS ENROLL,
+		        LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS,
+		        LS.CLAS_CD,
+		        LS.CLAS_NM
+		    FROM LECTURE_INFO LI
+		    LEFT JOIN ENROLLMENT_INFO EI ON LI.LEC_CD = EI.LEC_CD
+		    LEFT JOIN LECTURE_SCHEDULES LS ON LI.LEC_CD = LS.LEC_CD
+		    <include refid="searchFrag"/>
+		    GROUP BY
+		        LI.LEC_CD,
+		        LI.SUBJ_CD,
+		        LI.PR_CD,
+		        LI.LEC_LECT_TITLE,
+		        LI.LEC_GRA_CD,
+		        LI.LEC_SEME_CD,
+		        LI.LEC_LECT_CRED,
+		        LI.LEC_ENRO_LIMIT,
+		        LI.LEC_LECT_DIVISION,
+		        LI.LEC_STAT,
+		        LI.GR_MID,
+		        LI.GR_FINAL,
+		        LI.GR_ATTEND,
+		        LI.GR_ASSI,
+		        LI.PR_NM,
+		        LI.SUBJ_NM,
+		        LI.DT_CD,
+		        LI.SUBJ_COM_TYPE,
+		        LI.ATCH_FILE_ID,
+		        LI.FILE_SN,
+		        LI.FILE_STRE_COURS,
+		        LI.STRE_FILE_NM,
+		        LI.ORIGNL_FILE_NM,
+		        LI.FILE_EXTSN,
+		        LI.FILE_SIZE,
+		        LI.FILE_MIME,
+                LI.COLGE_CD,
+                LI.DT_NM,
+		        EI.ENROLL,
+		        LS.CLAS_CD,
+		        LS.CLAS_NM
+		)
+		SELECT COUNT(*) AS CNT
+		FROM (
+		    SELECT C.*, ROWNUM RNUM 
+		    FROM (
+		        SELECT *
+		        FROM COMBINED
+		    ) C
+		) A
+		ORDER BY DT_NM, LEC_STAT , LEC_CD DESC 
+	</select>
+	
+	<select id="selectLecture" resultType="kr.or.ddit.lecture.vo.LectureVO" parameterType="String">
+		SELECT *
+		FROM LECTURE
+		WHERE LEC_CD = #{lecCd}
+	</select>
+
+	
+	<select id="selectLectureSchedule" resultType="kr.or.ddit.lecture.vo.LectureVO" parameterType="String">
+		SELECT
+		    L.*,
+		    LS.CLAS_CD,
+		    LISTAGG(LS.SCHE_CD, ', ') WITHIN GROUP (ORDER BY LS.SCHE_CD) AS SCHE_CDS,
+		    CR.CLAS_NM
+		FROM LECTURE L
+		INNER JOIN LECTURESCHEDULE LS ON L.LEC_CD = LS.LEC_CD
+		INNER JOIN CLASSROOM CR ON LS.CLAS_CD = CR.CLAS_CD
+		WHERE L.LEC_CD = #{lecCd}
+		GROUP BY
+		    L.LEC_CD,
+		    L.SUBJ_CD,
+		    L.PR_CD,
+		    L.LEC_LECT_TITLE,
+		    L.LEC_GRA_CD,
+		    L.LEC_SEME_CD,
+		    L.LEC_LECT_CRED,
+		    L.LEC_ENRO_LIMIT,
+		    L.LEC_LECT_DIVISION,
+		    L.LEC_STAT,
+		    L.GR_MID,
+		    L.GR_FINAL,
+		    L.GR_ATTEND,
+		    L.GR_ASSI,
+		    L.ATCH_FILE_ID,
+		    LS.CLAS_CD,
+		    CR.CLAS_NM
+	</select>
+	
+	<insert id="insertLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="lecCd">
+			SELECT LECTURE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO lecture (
+			    LEC_CD,
+			    SUBJ_CD,
+			    PR_CD,
+			    LEC_LECT_TITLE,
+			    LEC_GRA_CD,
+			    LEC_SEME_CD,
+			    LEC_LECT_CRED,
+			    LEC_ENRO_LIMIT,
+			    LEC_LECT_DIVISION,
+			    LEC_STAT,
+			    GR_MID,
+			    GR_FINAL,
+			    GR_ATTEND,
+			    GR_ASSI,
+			    ATCH_FILE_ID
+			) VALUES (
+			    #{lecCd,jdbcType=VARCHAR}
+				, #{subjCd,jdbcType=VARCHAR}
+				, #{prCd,jdbcType=VARCHAR}
+				, #{lecLectTitle,jdbcType=VARCHAR}
+				, #{lecGraCd,jdbcType=VARCHAR}
+				, #{lecSemeCd,jdbcType=VARCHAR}
+				, #{lecLectCred,jdbcType=VARCHAR}
+				, #{lecEnroLimit,jdbcType=VARCHAR}
+				, #{lecLectDivision,jdbcType=VARCHAR}
+				, '3'
+				, #{grMid,jdbcType=NUMERIC}
+				, #{grFinal,jdbcType=NUMERIC}
+				, #{grAttend,jdbcType=NUMERIC}
+				, #{grAssi,jdbcType=NUMERIC}
+				, #{atchFileId,jdbcType=NUMERIC}
+			)
+	</insert>
+	
+	<update id="updateLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		UPDATE LECTURE
+		SET
+			SUBJ_CD = #{subjCd, jdbcType=VARCHAR}
+			, PR_CD = #{prCd, jdbcType=VARCHAR}
+			, LEC_LECT_TITLE = #{lecLectTitle, jdbcType=VARCHAR}
+			, LEC_GRA_CD = #{lecGraCd, jdbcType=VARCHAR}
+			, LEC_SEME_CD = #{lecSemeCd, jdbcType=VARCHAR}
+			, LEC_LECT_CRED = #{lecLectCred, jdbcType=VARCHAR}
+			, LEC_ENRO_LIMIT = #{lecEnroLimit, jdbcType=VARCHAR}
+			, LEC_LECT_DIVISION = #{lecLectDivision, jdbcType=VARCHAR}
+			, ATCH_FILE_ID = #{atchFileId, jdbcType=NUMERIC}
+			, GR_MID = #{grMid, jdbcType=NUMERIC}
+			, GR_FINAL = #{grFinal, jdbcType=NUMERIC}
+			, GR_ATTEND = #{grAttend, jdbcType=NUMERIC}
+			, GR_ASSI = #{grAssi, jdbcType=NUMERIC}
+		WHERE
+		    LEC_CD = #{lecCd, jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="requestLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="lecCd">
+			SELECT LECTURE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO lecture (
+			    LEC_CD,
+			    SUBJ_CD,
+			    PR_CD,
+			    LEC_LECT_TITLE,
+			    LEC_GRA_CD,
+			    LEC_SEME_CD,
+			    LEC_LECT_CRED,
+			    LEC_ENRO_LIMIT,
+			    LEC_LECT_DIVISION,
+			    LEC_STAT,
+			    GR_MID,
+			    GR_FINAL,
+			    GR_ATTEND,
+			    GR_ASSI,
+			    ATCH_FILE_ID
+			) VALUES (
+			    #{lecCd,jdbcType=VARCHAR}
+				, #{subjCd,jdbcType=VARCHAR}
+				, #{prCd,jdbcType=VARCHAR}
+				, #{lecLectTitle,jdbcType=VARCHAR}
+				, #{lecGraCd,jdbcType=VARCHAR}
+				, #{lecSemeCd,jdbcType=VARCHAR}
+				, #{lecLectCred,jdbcType=VARCHAR}
+				, #{lecEnroLimit,jdbcType=VARCHAR}
+				, #{lecLectDivision,jdbcType=VARCHAR}
+				, '4'
+				, #{grMid,jdbcType=NUMERIC}
+				, #{grFinal,jdbcType=NUMERIC}
+				, #{grAttend,jdbcType=NUMERIC}
+				, #{grAssi,jdbcType=NUMERIC}
+				, #{atchFileId,jdbcType=NUMERIC}
+			)
+	
+	</insert>
+	
+	<update id="responseLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		UPDATE LECTURE
+		SET
+			LEC_STAT = '3'
+		WHERE LEC_CD = #{lecCd}
+	</update>
+	
+	<update id="refuseLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		UPDATE LECTURE
+		SET
+			LEC_STAT = '5'
+		WHERE LEC_CD = #{lecCd}
+	</update>
+	
+	<update id="commitEnrollment" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		UPDATE LECTURE
+		SET
+			LEC_STAT = '1'
+		WHERE LEC_CD = #{lecCd}
+	</update>
+	
+	<update id="standEnrollment" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		UPDATE LECTURE
+		SET
+			LEC_STAT = '2'
+		WHERE LEC_CD = #{lecCd}
+	</update>
+	
+	<select id="selectCurrentLectureList" parameterType="string" resultType="kr.or.ddit.lecture.vo.LectureVO">
+		SELECT
+		    lec_cd,subj_cd,pr_cd,
+		    lec_lect_title,lec_gra_cd,lec_seme_cd,
+		    lec_lect_cred,lec_enro_limit,lec_lect_division,
+		    lec_stat,gr_mid,gr_final,
+		    gr_attend,gr_assi,atch_file_id
+		FROM lecture WHERE pr_cd = #{prCd} and LEC_SEME_CD = '1'
+	</select>
+	
+	<resultMap type="kr.or.ddit.lecture.vo.LectureVO" id="lectureMapDetail" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		<association property="professor" javaType="kr.or.ddit.professor.vo.ProfessorVO" autoMapping="true">
+			<association property="department" javaType="kr.or.ddit.department.vo.DepartmentVO" autoMapping="true">
+				<association property="college" javaType="kr.or.ddit.college.vo.CollegeVO" autoMapping="true"/>
+			</association>
+		</association>
+		<association property="fileGroup"
+			javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID" />
+			<result property="creatDt" column="CREAT_DT" />
+			<result property="useAt" column="USE_AT" />
+			<collection property="detailList"
+				ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+				<id property="atchFileId" column="ATCH_FILE_ID" />
+				<id property="fileSn" column="FILE_SN" />
+			</collection>
+		</association>
+		<collection property="lectureScheduleList" ofType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" autoMapping="true">
+			<id property="clasCd" column="CLAS_CD"/>
+			<id property="scheCd" column="SCHE_CD"/>
+			<association property="classroom" autoMapping="true" javaType="kr.or.ddit.common.vo.ClassRoomVO"/>
+			<association property="dayTimeSchedule" autoMapping="true" javaType="kr.or.ddit.common.vo.DaytimeScheduleVO"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectLectureDetail" parameterType="string" resultMap="lectureMapDetail">
+
+		with DEPARTMENTVIEW AS (
+		SELECT
+		    dt_cd, d.colge_cd
+		    , colge_nm, dt_nm
+		FROM
+		    department d INNER JOIN COLLEGE c on (d.COLGE_CD = c.COLGE_CD)
+		), LECTUREVIEW AS(
+		 SELECT
+		    lec_cd, subj_cd, l.pr_cd, dt_cd, pr_nm
+		  , lec_lect_title, lec_gra_cd, lec_seme_cd
+		  , lec_lect_cred, lec_enro_limit, lec_lect_division
+		  , lec_stat, gr_mid, gr_final
+		  , gr_attend, gr_assi, atch_file_id, pr_ph
+		FROM
+		    lecture l INNER JOIN PROFESSOR p on (l.pr_cd = p.pr_cd)
+		), LECTURESCHEDULEVIEW AS(
+		SELECT
+		    CLAS_NM, SCHE_DAY,SCHE_TIME, LEC_CD, ls.SCHE_CD
+		    FROM LECTURESCHEDULE ls INNER JOIN DAYTIMESCHEDULE ds ON (ls.SCHE_CD = ds.SCHE_CD)
+		                            INNER JOIN CLASSROOM c ON (ls.CLAS_CD = c.CLAS_CD)
+		), ATCH_FILE_VIEW AS(
+			SELECT *
+			FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL USING (atch_file_id)
+		)
+		SELECT dv.*, lv.*, lvs.*, afv.*
+		FROM LECTUREVIEW lv INNER JOIN DEPARTMENTVIEW dv ON (dv.dt_cd = lv.dt_cd)
+		                    LEFT OUTER JOIN LECTURESCHEDULEVIEW lvs ON (lv.lec_cd = lvs.lec_cd)
+		                    LEFT OUTER JOIN ATCH_FILE_VIEW afv ON (afv.atch_file_id = lv.atch_file_id)
+		WHERE lv.lec_cd = #{lecCd}
+	</select>
+	
+	<!-- 	현재학기 시간표조회 -->
+	<select id="selectTimeTable" parameterType="string" resultType="kr.or.ddit.enrollment.vo.EnrollmentVO">
+		WITH SCHEDULEVIEW AS (
+		    SELECT
+		    lec_cd
+		  , les.clas_cd
+		  , sche_cd
+		  , clas_nm
+		FROM
+		    lectureschedule les inner join classroom cr on les.clas_cd = cr.clas_cd           
+		), LECTUREVIEW AS (
+		    SELECT
+		    sv.lec_cd
+		    , lec_lect_title
+		    , lec_lect_cred
+		    , clas_cd
+		    , sche_cd
+		    , clas_nm
+		    , pr_nm
+		    , subj_com_type
+		    FROM LECTURE le inner join SCHEDULEVIEW sv on le.lec_cd = sv.lec_cd
+		    				inner join PROFESSOR pr on le.pr_cd = pr.pr_cd
+		    				inner join SUBJECT sj on le.subj_cd = sj.subj_cd 
+		    WHERE LEC_SEME_CD = '1'
+		)   SELECT
+		    en.lec_cd
+		    , st_cd
+		    , lec_lect_title
+		    , lec_lect_cred
+		    , clas_cd
+		    , sche_cd
+		    , clas_nm
+		    , pr_nm
+		    , CASE SUBSTR(sche_cd,1,1)
+	           WHEN '월' THEN TO_NUMBER(1 || SUBSTR(sche_cd,2,1))
+	           WHEN '화' THEN TO_NUMBER(2 || SUBSTR(sche_cd,2,1))
+	           WHEN '수' THEN TO_NUMBER(3 || SUBSTR(sche_cd,2,1))
+	           WHEN '목' THEN TO_NUMBER(4 || SUBSTR(sche_cd,2,1))
+	           WHEN '금' THEN TO_NUMBER(5 || SUBSTR(sche_cd,2,1))
+	        END AS week
+		FROM
+		    enrollment en inner join LECTUREVIEW lv on en.lec_cd = lv.lec_cd
+		    where st_cd = #{stCd} and enro_appl_stat = 'FIN'
+		    order by week
+	</select>
+	<!-- 학생	 현재학기 시간표조회 -->
+	<resultMap type="kr.or.ddit.enrollment.vo.EnrollmentVO" id="currentLec" autoMapping="true">
+		<id property="stCd" column="ST_CD" />
+		<id property="lecCd" column="LEC_CD" />
+		<collection property="lectureScheduleList" ofType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" autoMapping="true"/>
+	</resultMap>
+	<select id="selectCurrentLecList" parameterType="string" resultMap="currentLec">
+		WITH SCHEDULEVIEW AS (
+		    SELECT
+		    lec_cd
+		  , les.clas_cd
+		  , sche_cd
+		  , clas_nm
+		FROM
+		    lectureschedule les inner join classroom cr on les.clas_cd = cr.clas_cd           
+		), LECTUREVIEW AS (
+		    SELECT
+		    sv.lec_cd
+		    , lec_lect_title
+		    , lec_lect_cred
+		    , clas_cd
+		    , sche_cd
+		    , clas_nm
+		    , pr_nm
+		    , subj_com_type
+		    FROM LECTURE le inner join SCHEDULEVIEW sv on le.lec_cd = sv.lec_cd
+		    				inner join PROFESSOR pr on le.pr_cd = pr.pr_cd
+		    				inner join SUBJECT sj on le.subj_cd = sj.subj_cd 
+		    WHERE LEC_SEME_CD = '1'
+		)   SELECT
+		    en.lec_cd
+		    , st_cd
+		    , lec_lect_title
+		    , lec_lect_cred
+		    , clas_cd
+		    , sche_cd
+		    , clas_nm
+		    , pr_nm
+		    , CASE SUBSTR(sche_cd,1,1)
+	           WHEN '월' THEN TO_NUMBER(1 || SUBSTR(sche_cd,2,1))
+	           WHEN '화' THEN TO_NUMBER(2 || SUBSTR(sche_cd,2,1))
+	           WHEN '수' THEN TO_NUMBER(3 || SUBSTR(sche_cd,2,1))
+	           WHEN '목' THEN TO_NUMBER(4 || SUBSTR(sche_cd,2,1))
+	           WHEN '금' THEN TO_NUMBER(5 || SUBSTR(sche_cd,2,1))
+	        END AS week
+		FROM
+		    enrollment en inner join LECTUREVIEW lv on en.lec_cd = lv.lec_cd
+		    where st_cd = #{stCd} and enro_appl_stat = 'FIN'
+		    order by week
+	</select>
+	
+	<resultMap type="kr.or.ddit.lecture.vo.LectureVO" id="currentPRLec" autoMapping="true">
+		<id property="lecCd" column="LEC_CD" />
+		<collection property="lectureScheduleList" ofType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" autoMapping="true"/>
+	</resultMap>
+	
+	<select id="selectPRTimeTable" parameterType="string" resultMap="currentPRLec">
+		WITH SCHEDULEVIEW AS (
+		    SELECT
+		    lec_cd
+		  , les.clas_cd
+		  , sche_cd
+		  , clas_nm
+		FROM
+		    lectureschedule les inner join classroom cr on les.clas_cd = cr.clas_cd           
+		) SELECT
+		    sv.lec_cd
+            , le.pr_cd
+		    , lec_lect_title
+		    , lec_lect_cred
+            , lec_lect_division
+		    , clas_cd
+		    , sche_cd
+		    , clas_nm
+		    , pr_nm
+		    , subj_com_type
+            , lec_enro_limit
+            , CASE SUBSTR(sche_cd,1,1)
+	           WHEN '월' THEN TO_NUMBER(1 || SUBSTR(sche_cd,2,1))
+	           WHEN '화' THEN TO_NUMBER(2 || SUBSTR(sche_cd,2,1))
+	           WHEN '수' THEN TO_NUMBER(3 || SUBSTR(sche_cd,2,1))
+	           WHEN '목' THEN TO_NUMBER(4 || SUBSTR(sche_cd,2,1))
+	           WHEN '금' THEN TO_NUMBER(5 || SUBSTR(sche_cd,2,1))
+	        END AS week
+		    FROM LECTURE le inner join SCHEDULEVIEW sv on le.lec_cd = sv.lec_cd
+		    				inner join PROFESSOR pr on le.pr_cd = pr.pr_cd
+		    				inner join SUBJECT sj on le.subj_cd = sj.subj_cd 
+		    WHERE LEC_SEME_CD = '1' and le.pr_cd = #{prCd}
+            order by week
+	
+	</select>
+	
+</mapper>

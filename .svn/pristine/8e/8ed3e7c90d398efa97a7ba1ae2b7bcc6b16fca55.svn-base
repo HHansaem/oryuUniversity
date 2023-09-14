@@ -1,0 +1,27 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+
+<form:form modelAttribute="examSubmit" method="post" action="/lecture/examSubmitInsert.do">
+	<form:hidden path="exam_cd"/>
+	<form:hidden path="lec_cd"/>
+	<form:hidden path="st_cd"/>
+	<c:forEach items="examQueList" var="examQue" varStatus="cnt">
+	<c:choose>
+	<c:when test="examQue.eqType eq '객관식'">
+	<div>
+        <p>${examQue.eqNum}. ${examQue.eqQt}</p>
+        <label><input type="radio" name="examSubmit.examQueSubmitList[${cnt.index}].esAnswer" value="1">${examQue.eqView1}</label><br>
+        <label><input type="radio" name="examSubmit.examQueSubmitList[${cnt.index}].esAnswer" value="2">${examQue.eqView2}</label><br>
+        <label><input type="radio" name="examSubmit.examQueSubmitList[${cnt.index}].esAnswer" value="3">${examQue.eqView3}</label><br>
+        <label><input type="radio" name="examSubmit.examQueSubmitList[${cnt.index}].esAnswer" value="4">${examQue.eqView4}</label><br>
+    </div>
+    </c:when>
+    <c:when test="examQue.eqType eq '주관식'">
+    	<p>${examQue.eqNum}. ${examQue.eqQt}</p>
+    	<textarea class="form-control" rows="8" cols="100" name="examSubmit.examQueSubmitList[${cnt.index}].esAnswer"></textarea>
+    </c:when>
+    </c:choose>
+    </c:forEach>
+</form:form>

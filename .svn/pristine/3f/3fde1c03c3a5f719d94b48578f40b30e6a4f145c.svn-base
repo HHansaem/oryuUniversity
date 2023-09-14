@@ -1,0 +1,29 @@
+package kr.or.ddit.academicbusinessmanagement.vo;
+
+import javax.validation.constraints.NotBlank;
+
+import org.apache.ibatis.type.Alias;
+
+import lombok.Data;
+
+/**
+ * @author PC-22 학술사업보고서 VO
+ */
+@Data
+@Alias("abp")
+public class AcademicBusinessPlanVO extends AcademicBusinessManagementVO {
+
+	@NotBlank
+	private String buPlSn;
+	@NotBlank
+	private String acBuCd;
+	private Integer atchFileId;
+	private String buPlNm;
+	private String buPlShortCont;
+	private String buPlCont;
+	private String buPlAutNm;
+	private String buPlEvNm;
+	private String buPlEvCont;
+	private String buPlEvAutNm;
+
+}

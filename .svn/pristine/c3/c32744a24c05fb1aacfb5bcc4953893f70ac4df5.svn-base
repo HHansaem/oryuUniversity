@@ -1,0 +1,43 @@
+package kr.or.ddit.lecture.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lecture.dao.LectureDAO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+/**
+ * 강의 serviceImpl
+ * @author rottw
+ *
+ */
+@Service
+public class LectureServiceImpl implements LectureService {
+	
+	@Inject
+	private LectureDAO lectureDAO;
+	
+	// 전체 강의 조회
+	@Override
+	public List<LectureVO> retrieveLectureList(PaginationInfo paging) {
+		// 토탈자료 개수
+		long totalRecord = lectureDAO.selectTotalRecord(paging);
+		// 페이징 객체에 토탈레코드 저장
+		paging.setTotalRecord(totalRecord);
+		// 페이징 객체를 이용하여 전체 강의 조회 후 리턴
+		return lectureDAO.selectLectureList(paging);
+	}
+
+	// 강의 등록
+	@Override
+	public ServiceResult createLecture(LectureVO lecture) {
+		// TODO Auto-generated method stub
+		return lectureDAO.insertLecture(lecture)> 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+
+}

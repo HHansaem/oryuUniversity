@@ -1,0 +1,36 @@
+package kr.or.ddit.enrollment.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.vo.LectureVO;
+
+/**
+ * 수강신청 관련 DAO
+ * @author rottw
+ *
+ */
+@Mapper
+public interface EnrollmentDAO {
+	
+	// 수강 조회(학생)
+	public List<LectureVO> enrollmentList(PaginationInfo paging);
+	
+	// 수강 신청(학생)
+	public int submitEnrollment(EnrollmentVO enrollment);
+	
+	// 수강 학점 조회(학생)
+	public int checkCred(String stCd);
+	
+	// 강의 등록한 인원 체크(학생)
+	public int countStudent(String lecCd);
+	
+	// 강의시간 중복 체크(학생)
+	public int duplicateCheck(EnrollmentVO enrollment);
+	
+	
+	
+}

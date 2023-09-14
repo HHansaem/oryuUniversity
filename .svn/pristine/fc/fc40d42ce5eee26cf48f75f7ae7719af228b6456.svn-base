@@ -1,0 +1,115 @@
+package kr.or.ddit.club.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.club.dao.ClubDAO;
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.professor.vo.ProfessorVO;
+
+@Service
+public class ClubServiceImpl implements ClubService {
+	
+	@Inject
+	private ClubDAO clubDao; 
+	
+	/**
+	 * 동아리 개설 신청
+	 * @param Club 개설 요청
+	 * @return 1
+	 */
+	@Override
+	public boolean createInsertRequest(ClubVO club) {
+		return clubDao.insertClub(club);
+	}
+	
+	@Override
+	public ClubVO InsertViewClub(String clubCd) {
+		return clubDao.insertViewClub(clubCd);
+	}
+
+	@Override
+	public int insertApproval(String clubCd,String clubStatus) {
+		
+		return clubDao.insertApproval(clubCd,clubStatus);
+	}
+
+	@Override
+	public int insertRefuse(ClubVO club) {
+		return clubDao.insertRefuse(club);
+	}
+
+	@Override
+	public List<ClubVO> RequestListClub() {
+		return clubDao.RequestListClub();
+	}
+
+	@Override
+	public List<ClubVO> insertSListClub(int Cd) {
+		return clubDao.insertSListClub(Cd);
+	}
+
+	@Override
+	public List<ClubVO> insertPListClub(int Cd) {
+		return clubDao.insertPListClub(Cd);
+	}
+
+	@Override
+	public ClubVO checkClub(int Cd) {
+		return clubDao.checkClub(Cd);
+	}
+
+	@Override
+	public ClubVO myClub(int Cd) {
+		return clubDao.myClub(Cd);
+	}
+
+	@Override
+	public List<ClubVO> ClubListView(PaginationInfo paging) {
+		long totalRecord =clubDao.profTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		return clubDao.clubListView(paging);
+	}
+
+	@Override
+	public ClubVO clubDetail(String clubCd) {
+		return clubDao.clubDetail(clubCd);
+	}
+
+	@Override
+	public int clubUpdate(ClubVO club) {
+		return clubDao.clubUpdate(club);
+	}
+
+	@Override
+	public List<ProfessorVO> proChoice(PaginationInfo paging) {
+		long totalRecord = clubDao.profTotalRecord(paging);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubDao.proChoice(paging);
+	}
+
+	/**
+	 * 총 동아리 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long clubTotalRecord(PaginationInfo paging) {
+		return clubDao.clubTotalRecord(paging);
+	}
+	
+	
+	/**
+	 * 총 교수 수 조회
+	 * @param paging
+	 * @return
+	 */
+	public long profTotalRecord(PaginationInfo paging) {
+		return clubDao.profTotalRecord(paging);
+	}
+}

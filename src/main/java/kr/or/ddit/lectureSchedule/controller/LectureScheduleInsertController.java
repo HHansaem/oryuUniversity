@@ -1,0 +1,117 @@
+
+package kr.or.ddit.lectureSchedule.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.vo.BuildingVO;
+import kr.or.ddit.common.vo.ClassRoomVO;
+import kr.or.ddit.common.vo.DaytimeScheduleVO;
+import kr.or.ddit.enrollment.service.EnrollmentService;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lectureSchedule.service.LectureScheduleService;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
+@Controller
+@RequestMapping("/lectureSchedule/")
+public class LectureScheduleInsertController {
+	
+	@Inject
+	private LectureScheduleService service;
+	@Inject
+	private LectureService lectureService;
+	
+	@Inject
+	private CommonDAO commonDAO;
+	
+	@ModelAttribute("classRoomList")
+	public List<ClassRoomVO> classRoomList(){
+		return commonDAO.selectClassRoomList();
+	}
+	
+	@ModelAttribute("daytimeScheduleList")
+	public List<DaytimeScheduleVO> daytimeScheduleList(){
+		return commonDAO.selectDaytimeScheduleList();
+	}
+	@ModelAttribute("buildingList")
+	public List<BuildingVO> buildingList(){
+		return commonDAO.selectBuildingList();
+	}
+	
+	@ModelAttribute("lectureSchedule")
+	public LectureScheduleVO lecture(String what) {
+		LectureScheduleVO lecture = new LectureScheduleVO();
+		lecture.setLecCd(what);
+		return lecture;
+	}
+	
+	@GetMapping("lectureScheduleInsert.do")
+	public String lectureScheduleForm(
+			@RequestParam String lecCd,
+			Model model
+	) {
+		LectureVO lecture = lectureService.retrieveLectureSchedule(lecCd);
+		if(lecture==null) {
+			lecture = lectureService.retrieveLecture(lecCd);
+		}
+		model.addAttribute("lecture",lecture);
+		return "lectureSchedule/ajax/lectureScheduleForm";
+	}
+	@GetMapping("lectureScheduleInsert2.do")
+	public String lectureScheduleForm2(
+			@RequestParam String lecCd,
+			Model model
+	) {
+		LectureVO lecture = lectureService.retrieveLectureSchedule(lecCd);
+		if(lecture==null) {
+			lecture = lectureService.retrieveLecture(lecCd);
+		}
+		model.addAttribute("lecture",lecture);
+		return "lectureSchedule/ajax/lectureScheduleForm2";
+	}
+	
+	@PostMapping(value = "lectureScheduleInsert.do", produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String lectureScheduleInsert(
+			@ModelAttribute("lectureSchedule")LectureScheduleVO schedule
+			,@RequestBody LectureScheduleVO lecture
+			,Errors errors
+			,Model model
+	) {
+		log.info("lecture"+lecture);
+	    int count = 0;
+	    String result = null;
+	    try {
+	    	count = service.saveLectureSchedule(lecture);
+		} catch (Exception e) {
+			return e.getMessage();
+		}
+	    log.info("count"+count);
+	    if(count>0) {
+			result="강의실,강의시간 등록 완료";
+		}else {
+			result="강의실,강의시간 등록 실패";
+		}  
+	    return result;
+	}
+
+}

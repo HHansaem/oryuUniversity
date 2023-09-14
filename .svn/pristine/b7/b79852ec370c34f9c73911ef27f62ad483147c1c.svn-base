@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.common.dao.CommonDAO">
+	
+	<select id="selectClassificationList" resultType="kr.or.ddit.common.vo.ClassificationVO">
+		SELECT *
+		FROM CLASSIFICATION
+	</select>
+	
+	<select id="selectClassRoomList" resultType="kr.or.ddit.common.vo.ClassRoomVO">
+		SELECT *
+		FROM CLASSROOM
+	</select>
+	
+	<select id="selectDaytimeScheduleList" resultType="kr.or.ddit.common.vo.DaytimeScheduleVO">
+		SELECT *
+		FROM DAYTIMESCHEDULE
+	</select>
+	
+	<select id="selectBuildingList" resultType="kr.or.ddit.common.vo.BuildingVO">
+		SELECT *
+		FROM BUILDING
+	</select>
+	
+	<select id="selectStudentList">
+		SELECT *
+		FROM STUDENT
+	</select>
+	
+	<select id="selectProfessorList">
+		SELECT *
+		FROM PROFESSOR
+	</select>
+	
+	<select id="selectStaffList">
+		SELECT *
+		FROM TEACHING_STAFF
+	</select>
+</mapper>

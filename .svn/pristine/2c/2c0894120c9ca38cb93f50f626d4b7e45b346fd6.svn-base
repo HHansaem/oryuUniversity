@@ -1,0 +1,20 @@
+package kr.or.ddit.academicbusinessmanagement.vo;
+
+import javax.validation.constraints.NotBlank;
+
+/**
+ * @author PC-22 학술사업평가 VO
+ */
+public class AcademicBusinessEvaluationVO {
+
+	@NotBlank
+	private String acBuEvNo;
+	@NotBlank
+	private String acBuReNo;
+	@NotBlank
+	private String attCd;
+	private String acBuEvNm;
+	private String acBuEvCon;
+	private String buEvNm;
+
+}

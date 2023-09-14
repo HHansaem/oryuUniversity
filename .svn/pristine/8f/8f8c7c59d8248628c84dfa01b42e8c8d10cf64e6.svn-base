@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.LectureDAO">
+
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+				<choose>
+					<when test="simpleCondition.searchType eq 'lCode'">
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'lName'">
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sCode'">
+						INSTR(S.SUBJ_CD, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'sName'">
+						INSTR(S.SUBJ_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'pName'">
+						INSTR(P.PR_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(LEC_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(LEC_LECT_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(S.SUBJ_CD, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(S.SUBJ_NM, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(P.PR_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+			<if test="detailCondition neq null">
+				<choose>
+			        <when test="detailCondition.prCd neq null and not detailCondition.prCd.isEmpty">
+			            AND  L.PR_CD= #{detailCondition.prCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+				<choose>
+			        <when test="detailCondition.state neq null and not detailCondition.state.isEmpty">
+			            AND L.LEC_STAT = #{detailCondition.state}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND S.DT_CD = #{detailCondition.dtCd}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			    <choose>
+			        <when test="detailCondition.classfication neq null and not detailCondition.classfication.isEmpty">
+			            AND S.SUBJ_COM_TYPE = #{detailCondition.classfication}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.grade neq null and not detailCondition.grade.isEmpty">
+			            AND L.LEC_GRA_CD = #{detailCondition.grade}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			     <choose>
+			        <when test="detailCondition.semester neq null and not detailCondition.semester.isEmpty">
+			            AND L.LEC_SEME_CD = #{detailCondition.semester}
+			        </when>
+			        <otherwise>
+			        </otherwise>
+			    </choose>
+			</if>
+		</where>
+	</sql>
+	
+	<resultMap type="kr.or.ddit.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		
+		<association property="professor" javaType="kr.or.ddit.professor.vo.ProfessorVO" autoMapping="true">
+			<id property="prCd" column="PR_CD"/>
+			<result property="prNm" column="PR_NM"/>
+		</association>
+		
+		<association property="subject" javaType="kr.or.ddit.subject.vo.SubjectVO" autoMapping="true">
+			<id property="subjCd" column="SUBJ_CD"/>
+			<result property="subjNm" column="SUBJ_NM"/>
+		</association>
+		
+		<association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+		   <id property="atchFileId" column="ATCH_FILE_ID"/>
+		   <result property="creatDt" column="CREAT_DT"/>
+		   <result property="useAt" column="USE_AT"/>
+		   <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+		      <id property="atchFileId" column="ATCH_FILE_ID"/>
+		      <id property="fileSn" column="FILE_SN"/>
+		   </collection>
+		</association>
+	</resultMap>
+
+	<select id="selectLectureList" resultMap="lectureMap" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ATCH_FILE_VIEW AS (
+		    SELECT *
+		    FROM ATCH_FILE
+		    INNER JOIN ATCH_FILE_DETAIL USING (ATCH_FILE_ID)
+		)
+		SELECT B.*
+		FROM (
+		    SELECT ROWNUM RNUM, A.*
+		    FROM (
+		        SELECT 
+		            L.LEC_CD, L.SUBJ_CD, L.PR_CD, L.LEC_LECT_TITLE, L.LEC_GRA_CD, L.LEC_SEME_CD,
+		            L.LEC_LECT_CRED, L.LEC_ENRO_LIMIT, L.LEC_LECT_DIVISION, L.LEC_STAT,
+		            L.GR_MID, L.GR_FINAL, L.GR_ATTEND, L.GR_ASSI, P.PR_NM,
+		            S.SUBJ_NM, S.DT_CD, S.SUBJ_COM_TYPE,
+		            AF.ATCH_FILE_ID, AF.FILE_SN, AF.FILE_STRE_COURS,
+		            AF.STRE_FILE_NM, AF.ORIGNL_FILE_NM, AF.FILE_EXTSN,
+		            AF.FILE_SIZE, AF.FILE_MIME
+		        FROM LECTURE L
+		        LEFT JOIN PROFESSOR P ON L.PR_CD = P.PR_CD
+		        LEFT JOIN ATCH_FILE_VIEW AF ON L.ATCH_FILE_ID = AF.ATCH_FILE_ID
+		        LEFT JOIN SUBJECT S ON L.SUBJ_CD = S.SUBJ_CD
+		         <include refid="searchFrag"/>
+		        ORDER BY L.LEC_CD DESC
+		    ) A
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+		]]>
+	</select>
+
+	<select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM LECTURE
+	</select>
+	
+	<select id="selectLecture" resultType="kr.or.ddit.lecture.vo.LectureVO" parameterType="String">
+		SELECT *
+		FROM LECTURE
+		WHERE LEC_CD = #{lecCd}
+	</select>
+	
+	<insert id="insertLecture" parameterType="kr.or.ddit.lecture.vo.LectureVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="lecCd">
+			SELECT LECTURE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO lecture (
+			    LEC_CD,
+			    SUBJ_CD,
+			    PR_CD,
+			    LEC_LECT_TITLE,
+			    LEC_GRA_CD,
+			    LEC_SEME_CD,
+			    LEC_LECT_CRED,
+			    LEC_ENRO_LIMIT,
+			    LEC_LECT_DIVISION,
+			    LEC_STAT,
+			    GR_MID,
+			    GR_FINAL,
+			    GR_ATTEND,
+			    GR_ASSI,
+			    ATCH_FILE_ID
+			) VALUES (
+			    #{lecCd,jdbcType=VARCHAR}
+				, #{subjCd,jdbcType=VARCHAR}
+				, #{prCd,jdbcType=VARCHAR}
+				, #{lecLectTitle,jdbcType=VARCHAR}
+				, #{lecGraCd,jdbcType=VARCHAR}
+				, #{lecSemeCd,jdbcType=VARCHAR}
+				, #{lecLectCred,jdbcType=VARCHAR}
+				, #{lecEnroLimit,jdbcType=VARCHAR}
+				, #{lecLectDivision,jdbcType=VARCHAR}
+				, 'ON'
+				, #{grMid,jdbcType=NUMERIC}
+				, #{grFinal,jdbcType=NUMERIC}
+				, #{grAttend,jdbcType=NUMERIC}
+				, #{grAssi,jdbcType=NUMERIC}
+				, #{atchFileId,jdbcType=NUMERIC}
+			)
+	</insert>
+	
+	<select id="selectCurrentLectureList" parameterType="string" resultType="kr.or.ddit.lecture.vo.LectureVO">
+		SELECT
+		    lec_cd,subj_cd,pr_cd,
+		    lec_lect_title,lec_gra_cd,lec_seme_cd,
+		    lec_lect_cred,lec_enro_limit,lec_lect_division,
+		    lec_stat,gr_mid,gr_final,
+		    gr_attend,gr_assi,atch_file_id
+		FROM lecture WHERE pr_cd = #{prCd} and LEC_SEME_CD = '1'
+	</select>
+	
+
+	<resultMap type="kr.or.ddit.lecture.vo.LectureVO" id="lectureMapDetail" autoMapping="true">
+		<id property="lecCd" column="LEC_CD"/>
+		<association property="professor" javaType="kr.or.ddit.professor.vo.ProfessorVO" autoMapping="true">
+			<association property="department" javaType="kr.or.ddit.department.vo.DepartmentVO" autoMapping="true">
+				<association property="college" javaType="kr.or.ddit.college.vo.CollegeVO" autoMapping="true"/>
+			</association>
+		</association>
+		<association property="fileGroup"
+			javaType="kr.or.ddit.atch.vo.AtchFileVO">
+			<id property="atchFileId" column="ATCH_FILE_ID" />
+			<result property="creatDt" column="CREAT_DT" />
+			<result property="useAt" column="USE_AT" />
+			<collection property="detailList"
+				ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+				<id property="atchFileId" column="ATCH_FILE_ID" />
+				<id property="fileSn" column="FILE_SN" />
+			</collection>
+		</association>
+		<collection property="lectureScheduleList" ofType="kr.or.ddit.lectureSchedule.vo.LectureScheduleVO" autoMapping="true">
+			<id property="clasCd" column="CLAS_CD"/>
+			<id property="scheCd" column="SCHE_CD"/>
+			<association property="classroom" autoMapping="true" javaType="kr.or.ddit.common.vo.ClassRoomVO"/>
+			<association property="dayTimeSchedule" autoMapping="true" javaType="kr.or.ddit.common.vo.DaytimeScheduleVO"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectLectureDetail" parameterType="string" resultMap="lectureMapDetail">
+
+		with DEPARTMENTVIEW AS (
+		SELECT
+		    dt_cd, d.colge_cd
+		    , colge_nm, dt_nm
+		FROM
+		    department d INNER JOIN COLLEGE c on (d.COLGE_CD = c.COLGE_CD)
+		), LECTUREVIEW AS(
+		 SELECT
+		    lec_cd, subj_cd, l.pr_cd, dt_cd, pr_nm
+		  , lec_lect_title, lec_gra_cd, lec_seme_cd
+		  , lec_lect_cred, lec_enro_limit, lec_lect_division
+		  , lec_stat, gr_mid, gr_final
+		  , gr_attend, gr_assi, atch_file_id, pr_ph
+		FROM
+		    lecture l INNER JOIN PROFESSOR p on (l.pr_cd = p.pr_cd)
+		), LECTURESCHEDULEVIEW AS(
+		SELECT
+		    CLAS_NM, SCHE_DAY,SCHE_TIME, LEC_CD, ls.SCHE_CD
+		    FROM LECTURESCHEDULE ls INNER JOIN DAYTIMESCHEDULE ds ON (ls.SCHE_CD = ds.SCHE_CD)
+		                            INNER JOIN CLASSROOM c ON (ls.CLAS_CD = c.CLAS_CD)
+		), ATCH_FILE_VIEW AS(
+			SELECT *
+			FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL USING (atch_file_id)
+		)
+		SELECT dv.*, lv.*, lvs.*, afv.*
+		FROM LECTUREVIEW lv INNER JOIN DEPARTMENTVIEW dv ON (dv.dt_cd = lv.dt_cd)
+		                    LEFT OUTER JOIN LECTURESCHEDULEVIEW lvs ON (lv.lec_cd = lvs.lec_cd)
+		                    LEFT OUTER JOIN ATCH_FILE_VIEW afv ON (afv.atch_file_id = lv.atch_file_id)
+		WHERE lv.lec_cd = #{lecCd}
+	</select>
+	
+	
+</mapper>

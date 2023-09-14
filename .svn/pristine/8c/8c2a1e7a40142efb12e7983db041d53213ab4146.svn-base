@@ -1,0 +1,20 @@
+package kr.or.ddit.lectureContents.videoLecture.service;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.VideoLectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface VideoLectureService {
+	// 비디오강의 등록
+	public ServiceResult registerVideoLecture(VideoLectureVO videoLec);
+	// 비디오강의 상세조회
+	public VideoLectureVO retreiveVideoLectureDetail(String vlsCd);
+	// 비디오강의 목록조회
+	public List<VideoLectureVO> retreiveVideoLectureList(String lecCd);
+	// 비디오강의 수정
+	public ServiceResult modifyVideoLecture(VideoLectureVO videoLec);
+	// 비디오강의 삭제
+	public ServiceResult removeVideoLecture(String vlsCd);
+	
+}

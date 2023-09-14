@@ -1,0 +1,69 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<div id="studentListWrapper">
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<td>선택</td>
+			<th>학번</th>
+			<th>학과</th>
+			<th>이름</th>
+			<th>주소</th>
+			<th>전화번호</th>
+			<th>이메일</th>
+		</tr>
+	</thead>
+	<form>
+	<tbody>
+		<c:set var="studentList" value="${paging.dataList }" />
+		<c:if test="${empty studentList }">
+			<tr>
+				<td colspan="7">검색결과 없음.</td>
+			</tr>
+		</c:if>
+		<c:if test="${not empty studentList }">
+			<c:forEach items="${studentList }" var="student">
+				<c:url value="/student/studentView.do" var="studentURL">
+					<c:param name="who" value="${student.stCd }" />
+				</c:url>
+				<tr>
+					<td><input type="checkbox" name="chkParam" value=${student.stCd }></td>
+					<td><a href="${studentURL }">${student.stCd }</a></td>
+					<td>${student.dtNm }</td>
+					<td>${student.stNm }</td>
+					<td>${student.stAddr1 }</td>
+					<td>${student.stPh }</td>
+					<td>${student.stEmail }</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+	</tbody>
+	</form>
+	<tfoot>
+		<tr>
+			<td colspan="7">
+				${paging.pagingHTML }
+				<div id="searchUI">
+					<form:select path="simpleCondition.searchType">
+						<form:option value="" label="전체" />
+						<form:option value="name" label="이름" />
+						<form:option value="department" label="학과" />
+					</form:select>
+					<form:input path="simpleCondition.searchWord" />
+					<input type="button" value="검색" id="searchBtn"/>
+					<input type="button" value="등록" id="regBtn" />
+				</div>
+			</td>
+		</tr>
+	</tfoot>
+</table>
+</div>
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+
+<script src="<c:url value='/resources/js/app/member/memberList.js' />"></script>

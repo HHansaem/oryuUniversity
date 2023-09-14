@@ -1,0 +1,45 @@
+package kr.or.ddit.thesis.service;
+
+import java.util.List;
+
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.thesis.vo.ThesisVO;
+
+public interface ThesisService {
+
+	/**
+	 * 논문 등록
+	 * @param thesis
+	 * @return ok, fail
+	 */
+	public ServiceResult createThesis(ThesisVO thesis);
+	
+	/**
+	 * 논문 상세 조회
+	 * @param thesCd
+	 * @return 해당 거래처가 없는 경우 PKNotFoundException해당 논문이 없는경우
+	 */
+	public ThesisVO retrieveThesis(String thesCd);
+	
+	/**
+	 * 논문 목록 조회
+	 * @return
+	 */
+	public List<ThesisVO> retrieveThesisList();
+	
+	/**
+	 * 논문 수정
+	 * @param thesis
+	 * @return ok, fail
+	 */
+	public ServiceResult modifyThesis(ThesisVO thesis);
+	
+	/**
+	 * 논문 삭제
+	 * @param thesCd
+	 * @return
+	 */
+	public ServiceResult removeThesis(String thesCd);
+	
+	
+}

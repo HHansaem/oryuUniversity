@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.lecture.dao.AssignmentDAO">
+
+	<select id="selectAssignmentList" parameterType="string" resultType="kr.or.ddit.lecture.vo.AssignmentVO">
+	SELECT
+    	assi_cd, lec_cd, atch_file_id,
+    	assi_nm, assi_cont, assi_period,
+    	assi_score, assi_state
+	FROM
+    assignment
+    where lec_cd= #{lecCd} and assiState != '삭제'
+	</select>
+	
+	<select id="selectAssignmentDetail" parameterType="string" resultType="kr.or.ddit.lecture.vo.AssignmentVO">
+	SELECT
+    	assi_cd, lec_cd, atch_file_id,
+    	assi_nm, assi_cont, assi_period,
+    	assi_score, assi_state
+	FROM
+    assignment
+    where assi_cd= #{assiCd} and assiState != '삭제' 
+	</select>
+	
+	<insert id="insertAssignment" parameterType="kr.or.ddit.lecture.vo.AssignmentVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="assiCd">
+		SELECT ASSIGNMENT_SEQ.NEXTVAL FROM DUAL		
+	</selectKey>
+	INSERT INTO assignment (
+    	assi_cd, lec_cd, atch_file_id,
+   		assi_nm, assi_cont, assi_period,
+   		assi_score, assi_state
+	) VALUES (
+	 #{assiCd,jdbcType=VARCHAR}
+	,#{lecCd,jdbcType=VARCHAR}
+	,#{atchFileId,jdbcType=NUMERIC}
+	,#{assiNm,jdbcType=VARCHAR}
+	,#{assiCont,jdbcType=VARCHAR}
+	,#{assiPeriod,jdbcType=DATE}
+	,#{assiScore,jdbcType=NUMERIC}
+ 	,'정상'
+	)
+	</insert>
+	
+	<update id="updateAssignment" parameterType="kr.or.ddit.lecture.vo.AssignmentVO">
+		UPDATE assignment
+		SET
+		  ATCH_FILE_ID =  #{atchFileId,jdbcType=NUMERIC}
+		, ASSI_NM =  #{assiNm,jdbcType=VARCHAR}
+		, ASSI_CONT =  #{assiCont,jdbcType=VARCHAR}
+		, ASSI_PERIOD =  #{assiPeriod,jdbcType=DATE}
+		, ASSI_SCORE =  #{assiScore,jdbcType=NUMERIC}
+		WHERE
+        assi_cd = #{assiCd} 	
+	</update>
+	<update id="deleteAssignment" parameterType="string">
+		UPDATE assignment
+		SET
+		ASSI_STATE = '삭제' 
+		where
+		assi_cd = #{assiCd} 	
+	</update>
+
+</mapper>

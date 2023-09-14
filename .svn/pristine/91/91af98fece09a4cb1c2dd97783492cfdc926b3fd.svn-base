@@ -1,0 +1,8 @@
+imagePath
+#/resources/boardImages --> \uc694\ub7f0\uc2dd\uc784!
+atchPath=
+#file:D:/webstudy06Files --> \uc694\ub7f0\uc2dd\uc784!
+acaNoticeImagePath=/resources/acaNoticeImages
+atchPath=file:D:/acaNoticeFiles
+studentSavePath=/resources/studentImages
+researchJournalSavePath=/resources/researchJournalSaveRes

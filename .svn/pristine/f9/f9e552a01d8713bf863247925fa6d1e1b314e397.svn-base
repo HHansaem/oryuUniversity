@@ -1,0 +1,18 @@
+package kr.or.ddit.lectureContents.assignmentSub.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+
+@Mapper
+public interface AssignmentSubDAO {
+	//과제 제출 목록 조회
+	public List<AssignmentSubVO> selectAssignmentSubList(PaginationInfo paging);
+	//과제 제출 상세 조회
+	public AssignmentSubVO selectAssignmentSub(String lecCd, String assiCd, String stCd);
+	//과제 점수 업데이트
+	public int updateAssignmentScore(AssignmentSubVO assignSub);
+}

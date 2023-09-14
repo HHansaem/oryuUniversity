@@ -1,0 +1,49 @@
+package kr.or.ddit.research.vo;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import org.apache.ibatis.annotations.Many;
+import org.apache.ibatis.type.Alias;
+
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessManagementVO;
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessPlanVO;
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.common.validate.UpdateGroup;
+import lombok.Data;
+
+/**
+ * 연구 & 연구일지 VO 클래스
+ */
+@Data
+public class ResearchVO implements Serializable {
+
+	private long rnum;
+	
+	@NotBlank(groups = {InsertGroup.class, UpdateGroup.class})
+	private String reseCd;        // 연구 코드 (필수)
+
+	@NotBlank(groups = {InsertGroup.class, UpdateGroup.class})
+	private String acBuCd;        // 학술사업코드 (필수)
+
+	private String reseName;     // 연구 이름
+
+	private String reseShortCont; // 연구 간단 설명
+
+	private String reseCont;      // 연구 내용
+
+	private LocalDate reseDate;   // 연구 날짜
+
+	private String reseStat;      // 연구 상태
+
+	private String reseAutNm;     // 연구 담당자 이름
+
+	private Integer atchFileId;   // 첨부 파일 ID
+
+	
+	private List<AcademicBusinessManagementVO> abmVOList;
+
+}

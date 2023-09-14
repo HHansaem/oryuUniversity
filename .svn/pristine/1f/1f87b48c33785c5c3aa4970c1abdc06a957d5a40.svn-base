@@ -1,0 +1,55 @@
+package kr.or.ddit.clubMember.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.clubMember.dao.ClubMemberDAO;
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.student.vo.StudentVO;
+
+@Service
+public class ClubMemberServiceImpl implements ClubMemberService {
+	@Inject
+	private ClubMemberDAO clubMemberDAO;
+	
+	@Override
+	public List<StudentVO> stuClubList(String prCd) {
+		return clubMemberDAO.stuClubList(prCd);
+	}
+
+	@Override
+	public int clubMemInsert(ClubMemberVO clubMem) {
+		return clubMemberDAO.clubMemInsert(clubMem);
+	}
+
+	@Override
+	public ClubMemberVO clubMemInsertView(String stCd) {
+		return clubMemberDAO.clubMemInsertView(stCd);
+	}
+
+	@Override
+	public List<ClubMemberVO> clubMemInsertList(PaginationInfo paging) {
+		return clubMemberDAO.clubMemInsertList(paging);
+	}
+
+	@Override
+	public int clubMemPass(String stCd) {
+		return clubMemberDAO.clubMemPass(stCd);
+	}
+
+	@Override
+	public int clubMemNoPass(String stCd) {
+		return clubMemberDAO.clubMemNoPass(stCd);
+	}
+
+	@Override
+	public List<ClubMemberVO> stuClubMemInsertList(String stCd) {
+		return clubMemberDAO.stuClubMemInsertList(stCd);
+	}
+
+
+}

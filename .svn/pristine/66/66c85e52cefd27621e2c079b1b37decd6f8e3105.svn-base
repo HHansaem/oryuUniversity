@@ -1,0 +1,26 @@
+package kr.or.ddit.academicbusinessmanagement.service;
+
+import java.util.List;
+
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessManagementVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+/**
+ * 학술사업관리 service
+ */
+public interface AcademicBusinessManagementService {
+
+	//전체 학술사업관리 조회
+	public List<AcademicBusinessManagementVO> retrieveAcademicBusinessManagementList(PaginationInfo paging);
+	
+	//학술사업코드를 이용한 학술사업 한개 조회 학술사업코드를 이용한 조회(acBucd)
+	public AcademicBusinessManagementVO retrieveAcademicBusinessManagementVO(String acBuCd);
+	
+	//학술사업 등록
+	public ServiceResult createAcademicBusinessManagement(AcademicBusinessManagementVO abm);
+
+	//학술사업 수정
+	public ServiceResult modifyAcademicBusinessManagement(AcademicBusinessManagementVO abm);
+
+}

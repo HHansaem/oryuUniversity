@@ -1,0 +1,26 @@
+package kr.or.ddit.subject.service;
+
+import java.util.List;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+/**
+ * 과목 service
+ * @author rottw
+ *
+ */
+public interface SubjectService {
+	// 전체 과목 조회(페이징용)
+	public List<SubjectVO> retrieveSubjectList(PaginationInfo paging);
+	// 과목 등록
+	public ServiceResult createSubject(SubjectVO subject);
+	// 과목코드로 과목 한개 조회
+	public SubjectVO retrieveSubject(String subjCd);
+	// 과목 수정
+	public int modifySubject(SubjectVO subject);
+	// 과목 삭제
+	public int removeSubject(SubjectVO subject);
+
+}

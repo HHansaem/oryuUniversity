@@ -1,0 +1,305 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+/* 	.custom-a{ */
+/* 	    background: #f6f8fa; */
+/* 	    color: #000000; */
+/* 	    border-radius: 0; */
+/* 	    border: 1px solid #CED4DA; */
+/* 	    padding: 0.75rem 1.5rem; */
+/* 	    text-decoration: none; /* 밑줄 제거 */ */
+/* 	    cursor: default; /* 마우스 커서 모양을 기본으로 변경 */ */
+/* 	    margin-left: 513px; */
+/*     } */
+    .custom-font{
+    	font-size: 18px;
+    }
+    .min-height-div{
+    	min-height: 200px;
+    }
+    .custom-border{
+    	border: 1px solid #ced4da85;
+    	padding: 25px;
+    }
+    .custom-mb{
+    	margin-bottom: 12px;
+    }
+</style>
+<div class="card box-shadow d-flex" style="min-height: 87%; border-radius:20px;">
+	<div class="h-100">
+		<div>
+			<div class="card-body col-md-12" style="padding: 1rem 1rem 0.5rem 1rem;">
+				<div class="table-responsive">
+					<table class="table" style="width: 100%;">
+						<thead>
+							<tr>
+								<th>
+									<div>
+										<h4>${assign.assiNm}</h4>
+									</div>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<div class="d-flex align-items-center custom-font">
+										<div class="custom-flex-item">마감기한: ${assign.endTime}</div>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="custom-flex-item custom-font">
+											<span>등록된 파일:</span>
+											<c:if
+												test="${not empty assign.fileGroup and not empty assign.fileGroup.detailList }">
+												<c:forEach items="${assign.fileGroup.detailList}"
+													var="fileDetail">
+													<c:url value="/download.do" var="downloadURL">
+														<c:param name="atchFileId"
+															value="${fileDetail.atchFileId}" />
+														<c:param name="fileSn" value="${fileDetail.fileSn}" />
+													</c:url>
+													<a href="${downloadURL}">${fileDetail.orignlFileNm }</a>
+												</c:forEach>
+											</c:if>
+										</div>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="d-flex">
+										<div class="custom-flex-item custom-font min-height-div">
+											${assign.assiCont}</div>
+									</div>
+								</td>
+							</tr>
+							<sec:authorize access="hasRole('ROLE_PR')">
+								<tr>
+									<td>
+										<div class="d-flex align-items-center justify-content-end">
+											<div>
+												<a class="btn btn-primary"
+													href="${pageContext.request.contextPath}/lecture/homeworkUpdate.do?assiCd=${assign.assiCd}">수정</a>
+											</div>
+											<div style="margin-left: 10px">
+												<a class="btn btn-primary"
+													href="${pageContext.request.contextPath}/lecture/homeworkList.do?lecCd=${lecCd}">목록으로
+													돌아가기</a>
+											</div>
+										</div>
+									</td>
+								</tr>
+							</sec:authorize>
+							<sec:authorize access="hasRole('ROLE_ST')">
+								<tr>
+									<td>
+										<ul class="nav nav-tabs" id="myTab" role="tablist">
+											<li class="nav-item"><a class="nav-link active"
+												id="profile-tab" data-toggle="tab" href="#assign"
+												role="tab" aria-controls="assign" aria-selected="true">제출
+													정보</a></li>
+											<li class="nav-item"><a class="nav-link"
+												id="home-tab" data-toggle="tab" href="#home" role="tab"
+												aria-controls="home" aria-selected="false">파일 제출</a></li>
+											<li class="nav-item"><a class="nav-link"
+												id="profile-tab" data-toggle="tab" href="#profile"
+												role="tab" aria-controls="profile" aria-selected="false">텍스트
+													제출</a></li>
+										</ul>
+										<div class="d-flex">
+											<div class="tab-content" id="myTabContent" style="width:100%;">
+												<div class="tab-pane fade" id="home"
+													role="tabpanel" aria-labelledby="home-tab">
+													<form:form modelAttribute="assignSubmission"
+														class="submitForm" method="post" enctype="multipart/form-data">
+														<form:input path="lecCd" type="hidden" />
+														<form:input path="assuCd" type="hidden" />
+														<form:input path="assiCd" type="hidden" />
+														<form:input path="stCd" type="hidden" />
+														<form:input path="atchFileId" type="hidden" />
+														<form:input path="submStat" type="hidden" />
+														<form:input path="submDate" type="hidden" />
+														<div>
+															<div>
+																<input type="file" name="auFiles" class="form-control"
+																	multiple="multiple">
+															</div>
+															<div class="d-flex justify-content-end mt-2">
+																<input type="submit" class="btn btn-primary">
+															</div>
+														</div>
+													</form:form>
+													<!-- Home 탭의 내용 -->
+												</div>
+												<div class="tab-pane fade" id="profile" role="tabpanel"
+													aria-labelledby="profile-tab">
+													<form:form modelAttribute="assignSubmission"
+														class="submitForm" method="post" enctype="multipart/form-data">
+														<div>
+															<div>
+																<form:textarea path="assuText" type="textarea"
+																	class="form-control" />
+																<form:input path="lecCd" type="hidden" />
+																<form:input path="assuCd" type="hidden" />
+																<form:input path="assiCd" type="hidden" />
+																<form:input path="stCd" type="hidden" />
+																<form:input path="atchFileId" type="hidden" />
+																<form:input path="submStat" type="hidden" />
+																<form:input path="submDate" type="hidden" />
+															</div>
+															<div class="d-flex justify-content-end mt-2">
+																<input type="submit" class="btn btn-primary">
+															</div>
+														</div>
+													</form:form>
+													<!-- Profile 탭의 내용 -->
+												</div>
+												<div class="tab-pane fade show active" id="assign" role="tabpanel"
+													aria-labelledby="assign-tab">
+														<div>
+															<div>
+																<c:choose>
+																	<c:when test="${assignSubmission.assuCd != null}">
+																		<p>
+																			제출상태: <span style="font-weight: bold;">제출</span>
+																		</p>
+																	</c:when>
+																	<c:otherwise>
+																		<p>
+																			제출상태: <span style="font-weight: bold;">미제출</span>
+																		</p>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+															<div>
+																<c:choose>
+																	<c:when test="${assignSubmission.submDate != null}">
+																		<p>
+																			제출일시: <span style="font-weight: bold;">${assignSubmission.submitTime}</span>
+																		</p>
+																	</c:when>
+																	<c:otherwise>
+																		<p>
+																			제출일시: <span style="font-weight: bold;">존재하지
+																				않습니다.</span>
+																		</p>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+															<div>
+																<c:choose>
+																	<c:when test="${assignSubmission.assuScore != null}">
+																		<p>
+																			제출점수: <span style="font-weight: bold;">${assignSubmission.assuScore}/${assign.assiScore}</span>
+																		</p>
+																	</c:when>
+																	<c:otherwise>
+																		<p>
+																			제출점수: <span style="font-weight: bold;"> 평가된 점수가 존재하지 않습니다.</span>
+																		</p>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+															<div>
+																<c:choose>
+																	<c:when
+																		test="${not empty assignSubmission.fileGroup and not empty assignSubmission.fileGroup.detailList}">
+																		<c:forEach
+																			items="${assignSubmission.fileGroup.detailList}"
+																			var="fileDetail" varStatus="cnt">
+																			<c:url value="/download.do" var="downloadURL">
+																				<c:param name="atchFileId"
+																					value="${fileDetail.atchFileId}" />
+																				<c:param name="fileSn" value="${fileDetail.fileSn}" />
+																			</c:url>
+																			<div class="custom-mb">
+																				제출파일 ${cnt.index+1}: <a href="${downloadURL}">${fileDetail.orignlFileNm }</a>
+																			</div>
+																		</c:forEach>
+																	</c:when>
+																	<c:otherwise>
+																		<div class="custom-mb">
+																			제출파일: <span style="font-weight: bold;">존재하지
+																				않습니다.</span>
+																		</div>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+															<div>
+																<c:choose>
+																	<c:when test="${assignSubmission.assuText != null}">
+																		<p>
+																			제출텍스트: <span style="font-weight: bold;">${assignSubmission.assuText}</span>
+																		</p>
+																	</c:when>
+																	<c:otherwise>
+																		<p>
+																			제출텍스트: <span style="font-weight: bold;">존재하지
+																				않습니다.</span>
+																		</p>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+														</div>
+												</div>
+											</div>
+										</div>
+									</td>
+								</tr>
+							</sec:authorize>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+<script>
+	$(function() {
+		$('#myTab a').on('click', function(e) {
+			e.preventDefault();
+			$(this).tab('show');
+		});
+	});
+	
+    $(document).ready(function() {
+        // 폼 제출 시 동적으로 action 값을 변경
+        $('.submitForm').submit(function(e) {
+        	e.preventDefault();
+        	var assuCd = $(this).find("input[name='assuCd']").val();
+        	var assiCd = $(this).find("input[name='assiCd']").val();
+        	var newAction = "${pageContext.request.contextPath}/lecture/assignSubmissionInsert.do";
+        	if(assuCd != ""){
+            	newAction = '${pageContext.request.contextPath}/lecture/assignSubmissionUpdate.do';
+        	}
+        	
+        	var formData = new FormData(this);
+        	$.ajax({
+    	        type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+    	        data: formData,
+    	        url: newAction,
+    	        contentType : false,
+    	        processData : false,  
+    	        success: function(response) {
+    	        	if(response=="성공"){
+    	        		alert("과제가 등록되었습니다.");
+    	        		assignView(assiCd);       		
+    	        	}
+    	        },
+    	        error: function(xhr, status, error) {
+    	            console.error(error);
+    	        }
+    	    });
+        });
+    });
+</script>
+</script>
+

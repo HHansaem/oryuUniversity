@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.research.dao.ResearchDAO">
+
+	
+	
+	<select id="selectResearchList" resultType="kr.or.ddit.research.vo.ResearchVO">
+	SELECT
+		RESE_CD
+		, AC_BU_CD
+		, ATT_CD
+		, RESE_NM
+		, RESE_CONT
+		, RESE_POST_DATE
+		, RESE_STAT
+		, RESE_DELETE
+	FROM
+    RESEARCH
+	</select>
+	
+	<select id="selectResearch" parameterType="String" > <!--  resultMap="researchMap"> -->
+	
+	SELECT
+		RESE_CD
+		, AC_BU_CD
+		, ATT_CD
+		, RESE_NM
+		, RESE_CONT
+		, RESE_POST_DATE
+		, RESE_STAT
+		, RESE_DELETE
+	FROM
+    RESEARCH
+	
+	
+	</select>
+	
+	<insert id="insertResearch" parameterType="kr.or.ddit.research.vo.ResearchVO">
+	
+	INSERT INTO RESEARCH (
+		RESE_CD
+		, AC_BU_CD
+		, ATT_CD
+		, RESE_NM
+		, RESE_CONT
+		, RESE_POST_DATE
+		, RESE_STAT
+		, RESE_DELETE
+		) VALUES (
+		    #{reseCd,jdbcType=VARCHAR}
+		    , #{acBuCd,jdbcType=VARCHAR}
+		    , #{attCd,jdbcType=VARCHAR}
+		    , #{reseNm,jdbcType=VARCHAR}
+		    , #{reseCont,jdbcType=CLOB}
+		    , #{resePostDate,jdbcType=DATE}
+		    , #{reseStat,jdbcType=VARCHAR}
+		    , #{ReseDelete,jdbcType=VARCHAR}
+		)
+	
+	</insert>
+	
+	<update id="updateResearch" parameterType="kr.or.ddit.research.vo.ResearchVO">
+	
+	UPDATE RESEARCH
+	SET
+			RESE_CD = #{reseCd,jdbcType=VARCHAR}     
+		, AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}        
+		, ATT_CD = #{attCd,jdbcType=VARCHAR}
+		, RESE_NM = #{reseNm,jdbcType=VARCHAR}         
+		, RESE_CONT = #{reseCont,jdbcType=CLOB}
+		, RESE_POST_DATE = #{resePostDate,jdbcType=DATE}
+		, RESE_STAT = #{reseStat,jdbcType=VARCHAR}
+		, RESE_DELETE = #{ReseDelete,jdbcType=VARCHAR}
+	
+	
+	</update>
+	
+	<delete id="deleteResearch" parameterType="String">
+	
+		UPDATE RESEARCH
+		SET
+			RESE_DELETE = '1'
+		WHERE RESE_CD = #{reseCd}
+	
+	</delete>
+
+
+</mapper>

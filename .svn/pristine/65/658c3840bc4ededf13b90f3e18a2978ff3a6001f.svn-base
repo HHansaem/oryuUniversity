@@ -1,0 +1,31 @@
+package kr.or.ddit.clubMember.vo;
+
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+public class ClubMemberVO {
+	@NotBlank
+	private String stCd;
+	@NotBlank 
+	private String clubCd;
+	 private String clubAppCon;
+	 private String clubMemPlan;
+	 @DateTimeFormat(iso = ISO.DATE)
+	 private LocalDate clubAppDate;
+	 private String clubEntSta;
+	 @DateTimeFormat(iso = ISO.DATE)
+	 private LocalDate clubEntDate;
+	 private String clubSeRe;
+	 @DateTimeFormat(iso = ISO.DATE)
+	 private LocalDate clubSeReDate;
+	 private String clubReRea;
+	 private String clubMemClass;
+}

@@ -1,0 +1,64 @@
+package kr.or.ddit.lecture.controller;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.lecture.service.NoticeService;
+import kr.or.ddit.lecture.vo.NoticeVO;
+
+@Controller
+@RequestMapping("/lecture/noticeUpdate.do")
+public class NoticeUpdateController {
+	
+	@Inject
+	private NoticeService service;
+
+	@GetMapping
+	public String getHandler(
+			Model model
+			, @RequestParam(name = "what") String lnNum
+	) {
+		NoticeVO notice = service.retrieveNotice(lnNum);
+		model.addAttribute("notice", notice);
+		
+		return "lecture/notice/noticeEdit";
+	}
+	
+	@PostMapping
+	public String postHandler(
+			Model model
+			, @ModelAttribute("notice") NoticeVO notice
+			, BindingResult errors
+			, HttpSession session
+	) {
+		String logicalViewName = null;
+		if(!errors.hasErrors()) {
+			
+			notice.setLecCd((String)session.getAttribute("lecCd"));
+			
+			boolean result = service.modifyNotice(notice);
+			if(result == true) {
+				logicalViewName = "redirect:/lecture/noticeView.do?what=" + notice.getLnNum();
+			}else {
+				model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하세요.");
+				logicalViewName = "lecture/notice/noticeEdit";
+			}
+		}else {
+			logicalViewName = "lecture/notice/noticeEdit";
+		}
+		return logicalViewName;
+	}
+}
+
+
+
+

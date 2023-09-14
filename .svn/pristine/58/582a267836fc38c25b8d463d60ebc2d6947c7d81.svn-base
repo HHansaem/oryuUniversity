@@ -1,0 +1,462 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>    
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+.gradInfo {
+	margin-top: 3px;
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 20px;
+	padding-right: 40px;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.gradInfo-header {
+	margin: 20px 0 11px 40px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.gradInfo-body {
+	margin: -13px 11px 20px 40px;
+	font-size: 12px;
+}
+
+.span-title {
+	font-weight: bold;
+	color: #248AFD;
+	margin-right: 12px;
+}
+
+select {
+    padding: 0; /* 위 아래 여백을 없애는 스타일 */
+    display: inline-block; /* 셀렉트 박스를 인라인 블록 요소로 표시하여 텍스트 흐름을 방해하지 않도록 함 */
+    vertical-align: middle; /* 수직 정렬을 가운데로 설정 */
+}
+button {
+ 	margin-left: 10px;
+}
+.row {
+	margin: 10px;
+}
+th {
+	text-align: center;
+}
+
+td {
+	text-align: center;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div class="custom-card">
+			<div class="card-header"
+				style="border-radius: 20px 20px 0 0; background-color: #154FA9; font-weight: bold; color: white;">강의관리</div>
+			<div class="card-body">
+			<div class="card gradInfo">
+			<div class="gradInfo-header">
+				<i class="mdi mdi-check-circle" style="color: green;"></i> 수강신청 관리 페이지
+				<hr style="border-color: black;">
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">검색자</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;단대,학과,이수구분,학년,학기,이수구분을 선택하여 원하는 강의를 검색 해주세요.
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">요청확정 및 취소</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;요청 확정 및 취소시 변경이 불가합니다. 신중히 진행해주세요.
+			</div>
+			<div class="gradInfo-body" id="gradeStudents"></div>
+			<div style="display: flex; justify-content: flex-end; width: 100%; margin-top: -50px;">
+	        	<button id="commitRow" class="btn btn-outline-info mb-3"  style="padding: 12px; border-radius: 10px; type="button">수강요청확정</button>
+				<button id="cancelRow" class="btn btn-outline-info mb-3"  style="padding: 12px; border-radius: 10px; type="button">수강요청취소</button>
+		    </div>
+		</div>
+		<div class="row justify-content-center">
+			<div class="col-2">
+				<select name="college" class="form-select">
+					<option value>단대선택</option>
+					<c:forEach items="${collegeList }" var="college">
+						<option value="${college.colgeCd }">${college.colgeNm }</option>
+					</c:forEach>
+				</select>
+			</div>
+			<div class="col-2">
+				<select name="dtCd" class="form-select">
+					<option value>학과선택</option>
+					<c:forEach items="${departmentList }" var="department">
+						<option value="${department.dtCd }"
+							class="${department.colgeCd }">${department.dtNm }</option>
+					</c:forEach>
+				</select>
+			</div>
+			<div class="col-2">
+				<select name="classfication" class="form-select">
+					<option value>이수구분선택</option>
+					<c:forEach items="${classificationList }" var="classification">
+						<option value="${classification.cfCode }">${classification.cfName }</option>
+					</c:forEach>
+				</select>
+			</div>
+			<div class="col-2">
+				<select name="grade" class="form-select">
+					<option value>학년선택</option>
+					<option value="1">1학년</option>
+					<option value="2">2학년</option>
+					<option value="3">3학년</option>
+					<option value="4">4학년</option>
+				</select>
+			</div>
+			<div class="col-2">
+				<select name="semester" class="form-select">
+					<option value>학기선택</option>
+					<option value="1">1학기</option>
+					<option value="2">2학기</option>
+					<option value="3">하계학기</option>
+					<option value="4">동계학기</option>
+				</select>
+			</div>
+			<div class="col-2">
+				<select name="stat" class="form-select">
+					<option value>신청상태</option>
+					<option value="REQ">신청요청</option>
+					<option value="FIN">신청확정</option>
+					<option value="REF">신청거절</option>
+				</select>
+			</div>
+		</div>
+		<div class="row justify-content-center">
+			<div id="searchUI" class="col-1">
+				<form:select path="simpleCondition.searchType" class="form-select">
+					<form:option value="" label="전체" />
+					<form:option value="lCode" label="강의코드" />
+					<form:option value="lName" label="강의명" />
+					<form:option value="sCode" label="학생코드" />
+					<form:option value="pCode" label="교수코드" />
+				</form:select>
+			</div>
+			<div id="searchUI" class="col-2">
+				<form:input path="simpleCondition.searchWord" class="form-control" />
+			</div>
+			<div class="col-1">
+				<input type="button" value="검색" id="searchBtn"
+					class="btn btn-success" />
+			</div>
+		</div>
+		<div class="row justify-content-center">
+			<table class="table">
+				<thead class="table-light">
+					<tr>
+						<th><input id="toggleCheckBoxes" type="checkbox"
+									name="checkBox"></th>
+						<th>과목명(과목코드)</th>
+						<th>강의명(강의코드)</th>
+						<th>교수명</th>
+						<th>학생명(학생코드)</th>
+						<th>강의실(강의실코드)</th>
+						<th>이수구분</th>
+						<th>신청일자</th>
+						<th>신청상태</th>
+					</tr>
+			</thead>
+			<tbody>
+				<c:set var="enrollmentList" value="${paging.dataList }"/>
+					<c:choose>
+						<c:when test="${empty enrollmentList }">
+							<tr>
+								<td colspan="9">조건에 맞는 신청이 없음.</td>
+							</tr>	
+						</c:when>
+						<c:otherwise>
+							<c:forEach items="${enrollmentList }" var="enrollment">
+								<tr data-id="${enrollment.lecCd}" class="clickable-row">
+									<td class="col-xm-1"><input type="checkbox" name="checkBox"></td>
+									<td class="col-xm-1">${enrollment.subjNm}(${enrollment.subjCd})</td>
+									<td class="col-xm-1">${enrollment.lecture.lecLectTitle}(${enrollment.lecCd})</td>
+									<td hidden="" class="col-xm-1 lecCd">${enrollment.lecCd}</td>
+									<td class="col-xm-1">${enrollment.prNm}</td>
+									<td class="col-xm-1">${enrollment.stNm}(${enrollment.stCd})</td>
+									<td hidden="" class="col-xm-1 stCd">${enrollment.stCd}</td>
+									<td class="col-sm-1">${enrollment.clasNm}(${enrollment.clasCd})</td>
+									<td class="col-xm-1">
+										<c:choose>
+											<c:when test="${enrollment.subjComType eq '1'}">
+												<span class="badge badge-primary"> <c:out
+														value="전공필수" />
+												</span>
+											</c:when>
+											<c:when test="${enrollment.subjComType eq '2'}">
+												<span class="badge badge-info"> <c:out
+														value="전공선택" />
+												</span>
+											</c:when>
+											<c:when test="${enrollment.subjComType eq '3'}">
+												<span class="badge badge-secondary"> <c:out
+														value="교양필수" />
+												</span>
+											</c:when>
+											<c:when test="${enrollment.subjComType eq '4'}">
+												<span class="badge badge-light"> <c:out
+														value="교양선택" />
+												</span>
+											</c:when>
+										</c:choose>
+									</td>
+									<td class="col-xm-1">${enrollment.enroApplDate}</td>
+									<td class="col-xm-1">
+										<c:choose>
+											<c:when test="${enrollment.enroApplStat eq 'FIN'}">
+												<span class="badge badge-success">
+													<c:out value="신청확정"/>
+												</span>
+											</c:when>
+											<c:when test="${enrollment.enroApplStat eq 'REQ'}">
+												<span class="badge badge-info">
+													<c:out value="신청요청"/>
+												</span>
+											</c:when>
+											<c:when test="${enrollment.enroApplStat eq 'REF'}">
+												<span class="badge badge-danger">
+													<c:out value="신청거절"/>
+												</span>
+											</c:when>
+										</c:choose>
+									</td>																								
+								</tr>
+							</c:forEach>
+						</c:otherwise>
+					</c:choose>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="9">
+						<div class="d-flex justify-content-center mb-3">
+							${paging.pagingHTML }
+								</div>
+							</td>	
+						</tr>
+					</tfoot>
+				</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 검색조건 받기 -->
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="college" id="college" value="${detail.college }" />
+	<input type="hidden" name="dtCd" id="dtCd" value="${detail.dtCd }" />
+	<input type="hidden" name="classfication" id="classfication" value="${detail.classfication }" />
+	<input type="hidden" name="lecStat" id="lecStat" value="${detail.lecStat }" />
+	<input type="hidden" name="grade" id="grade" value="${detail.grade }" />
+	<input type="hidden" name="semester" id="semester" value="${detail.semester }" />
+	<input type="hidden" name="stat" id="stat" value="${detail.stat }" />
+
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<!-- 검색조건내에 조건걸기 -->
+<script>
+let $dtCd = $('[name="dtCd"]');
+$('[name="college"]').on("change", function (event) {
+   let colgeCd = $(this).val();
+   if (colgeCd) {
+      $dtCd.find("option").hide();
+      $dtCd.find(`option:first`).show();
+      $dtCd.find(`option.\${colgeCd}`).show();
+   } else {
+      $dtCd.find("option").show();
+   }
+}).trigger("change");
+</script>
+<!-- pagination -->
+<script>
+function fn_paging(page) {
+    searchForm.page.value = page;
+    searchForm.requestSubmit();
+ }
+ $(searchBtn).on("click", function (event) {
+    $(searchUI).find(":input[name]").each(function (idx, input) {
+       let name = input.name;
+       let value = $(input).val();
+       $(searchForm).find(`[name=\${name}]`).val(value);
+    });
+    let dtCd = $("select[name='dtCd']").val();
+    let classfication = $("select[name='classfication']").val();
+    let grade = $("select[name='grade']").val();
+    let semester = $("select[name='semester']").val();
+    let stat = $("select[name='stat']").val();
+    $("#searchForm input[name='dtCd']").val(dtCd);
+    $("#classfication").val(classfication);
+    $("#grade").val(grade);
+    $("#semester").val(semester);
+    $("#stat").val(stat);
+
+    $(searchForm).submit();
+ });
+</script>
+<!--강의상세보기 -->
+<!-- <script> -->
+//     document.addEventListener("DOMContentLoaded", function() {
+//         var clickableRows = document.querySelectorAll(".clickable-row");
+//         clickableRows.forEach(function(row) {
+//             row.addEventListener("click", function() {
+//                 var id = this.getAttribute("data-id");
+<%--                 window.location.href = "<%=request.getContextPath()%>/lecture/lectureView.do?lecCd=" + id; --%>
+//             });
+//         });
+//     });
+<!-- </script> -->
+<script>
+// 수강요청확정버튼 펑션
+$('#commitRow').on('click', function () {
+
+   event.preventDefault();
+   let selectedRows = $("input:checked").closest('tr'); // Get selected rows
+   let dataToSend = [];
+
+   selectedRows.each(function () {
+      let lecCd = $(this).find('.lecCd').text(); // Get lecCd from the row
+      let stCd = $(this).find('.stCd').text(); // Get stCd from the row
+      dataToSend.push({ lecCd: lecCd, stCd: stCd }); // Push to the array
+   });
+   if (dataToSend.length == 0) {
+      Swal.fire({
+         title: '선택된 신청이 없습니다.',
+         icon: 'info',
+      });
+      event.preventDefault();
+      return;
+   } else {
+      Swal.fire({
+         title: '신청을 확정하시겠습니까?',
+         icon: 'info',
+         showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+         confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+         cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+         confirmButtonText: '확정', // confirm 버튼 텍스트 지정
+         cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+      }).then(result => {
+         if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+            let setting = {
+               url: "/oryuUniversity/enrollment/commitEnrollment.do",
+               method: "post",
+               dataType: "text",
+               contentType: "application/json",
+               data: JSON.stringify(dataToSend),
+               success: function (resp) {
+                  if (resp == "success") {
+                     Swal.fire({
+                        title: '수강신청 확정 완료',
+                        icon: 'success',
+                     }).then(result => {
+                        if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+                           window.location.href = "<%=request.getContextPath()%>/enrollment/mngEnrollmentList.do";
+                        }
+                     })
+                  } else {
+                     Swal.fire({
+                        title: '수강신청 확정 실패',
+                        icon: 'error',
+                     });
+                  }
+               },
+               error: function (jqXHR, status, error) {
+                  console.log(jqXHR)
+                  console.log(status)
+                  console.log(error)
+               }
+            }
+            $.ajax(setting);
+         }
+      });
+   }
+});
+//수강요청취소버튼 펑션
+$('#cancelRow').on('click', function () {
+      event.preventDefault();
+      let selectedRows = $("input:checked").closest('tr'); // Get selected rows
+      let dataToSend = [];
+
+      selectedRows.each(function () {
+         let lecCd = $(this).find('.lecCd').text(); // Get lecCd from the row
+         let stCd = $(this).find('.stCd').text(); // Get stCd from the row
+         dataToSend.push({ lecCd: lecCd, stCd: stCd }); // Push to the array
+      });
+      if (dataToSend.length == 0) {
+         Swal.fire({
+            title: '선택된 신청이 없습니다.',
+            icon: 'info',
+         });
+         event.preventDefault();
+         return;
+      } else {
+         Swal.fire({
+            title: '신청을 거절하시겠습니까?',
+            icon: 'info',
+            showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+            confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+            cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+            confirmButtonText: '확정', // confirm 버튼 텍스트 지정
+            cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+         }).then(result => {
+            if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+               let setting = {
+                  url: "/oryuUniversity/enrollment/rejectEnrollment.do",
+                  method: "post",
+                  dataType: "text",
+                  contentType: "application/json",
+                  data: JSON.stringify(dataToSend),
+                  success: function (resp) {
+                     if (resp == "success") {
+                        Swal.fire({
+                           title: '수강신청 거절 완료',
+                           icon: 'success',
+                        }).then(result => {
+                           if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+                              window.location.href = "<%=request.getContextPath()%>/enrollment/mngEnrollmentList.do";
+                        }
+                     })
+                  } else {
+                     Swal.fire({
+                        title: '수강신청 거절 실패',
+                        icon: 'error',
+                     });
+                  }
+               },
+               error: function (jqXHR, status, error) {
+                  console.log(jqXHR)
+                  console.log(status)
+                  console.log(error)
+               }
+            }
+            $.ajax(setting);
+         }
+      });
+   }
+});
+
+$(document).ready(function() {
+    // 버튼 클릭 시 해당 열의 체크박스들의 상태를 토글
+    $('#toggleCheckBoxes').click(function() {
+        var isChecked = $(this).prop('checked');
+        $(':checkbox[name="checkBox"]').prop('checked', isChecked);
+    });
+    // 삭제 버튼 클릭 시 선택한 체크박스들을 삭제
+    $('#deleteRow').click(function() {
+        var selectedCheckboxes = $(':checkbox[name="checkBox"]:checked');
+        if (selectedCheckboxes.length > 0) {
+            var subjCdList = selectedCheckboxes.closest('tr').find('.subjCd').map(function() {
+                return $(this).text();
+            }).get();
+            // 여기서 subjCdList를 서버로 전송하거나 필요한 동작을 수행하세요.
+            // 예를 들어 AJAX 요청으로 삭제를 처리할 수 있습니다.
+            console.log('Selected Subject Codes:', subjCdList);
+            // 선택한 체크박스들 해제
+            selectedCheckboxes.prop('checked', false);
+        } 
+    });
+});
+</script>

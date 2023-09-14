@@ -1,0 +1,380 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec"%>
+<style>
+.narrow-modal-button {
+	width: 100px; /* 원하는 가로폭을 지정 */
+    padding: 7px; /* 원하는 패딩을 지정 */
+    margin: 10px;
+    float: right;
+    }
+.modal-title {
+    font-size: 18px; /* 원하는 글씨 크기로 조정 */
+    font-weight: bold; /* 굵게 표시 */
+    }
+.table th, .table td, .table tr {
+	border: 0.5px solid #e0e0e0;
+	text-align: center;
+	}
+.modal-body {
+    max-height: calc(100vh - 350px); /* 예시로 모달 높이 제한 */
+    overflow-y: auto;
+	}
+.gradInfo {
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 10px;
+	padding-right: 40px;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.gradInfo-header {
+	margin: 20px 0 11px 40px;
+	font-size: 14px;
+	font-weight: bold;
+}
+.gradInfo-body {
+	margin: -13px 40px 13px 40px;
+	font-size: 12px;
+}
+.circle {
+    width: 4px;
+    height: 4px;
+    background-color: black;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 12px 3px 6px;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: auto;">
+      <div class="h-100" style="height: 800px !important;">
+      <div class="card-header" style="border-radius: 20px 20px 0 0; background-color:#154FA9; font-weight:bold; color:white; margin-bottom: 10px;">졸업이수 조건관리</div>
+      
+      <div class="card gradInfo">
+			<div class="gradInfo-header">
+				<i class="mdi mdi-check-circle" style="color: green;"></i> 졸업사정 관리
+				<hr style="border-color: black;">
+			</div>
+			<div class="gradInfo-body">
+		    	<div>
+					<button type="button" class="btn btn-outline-danger narrow-modal-button" data-bs-toggle="modal" data-bs-target="#exampleModal3" data-bs-whatever="@getbootstrap">졸업요건삭제</button>
+					<button type="button" class="btn btn-outline-success narrow-modal-button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">졸업요건수정</button>
+					<button type="button" class="btn btn-outline-info narrow-modal-button" data-bs-toggle="modal" data-bs-target="#exampleModal2" data-bs-whatever="@getbootstrap">졸업요건추가</button>
+				</div>
+				<div class="circle"></div> 각 단과의 졸업요건을 추가, 수정, 삭제 할 수 있습니다.<br>
+			    <div class="circle"></div> 졸업 요건은 최저이수조건을 기준으로 관리합니다.<br>
+			    <div class="circle"></div> 정보관리부서 : 학사관리팀 및 융합대학 교학팀
+			</div>
+		</div>
+      
+<table class="table table-hover" style="max-width: 1500px; margin: 0 auto;">
+	<thead class="table-light">
+		<tr>
+			<th>단과 / 졸업요건</th>
+			<c:forEach items="${graduationTypeList}" var="graduationType">
+				<th>${graduationType.geGradCondType}</th>
+			</c:forEach>
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="graduationConditionList" value="${graduationConditionList}" />
+		<c:forEach items="${collegeTypeList}" var="collegeType" varStatus="loop">
+			<tr>
+				<td>${collegeType.colgeNm}</td>
+				<c:forEach begin="0" end="${fn:length(graduationTypeList) - 1}" varStatus="gradLoop">
+					<td>${graduationConditionList[loop.index + (gradLoop.index * fn:length(collegeTypeList))].gradCond}</td>
+				</c:forEach>
+			</tr>
+		</c:forEach>
+	</tbody>
+</table>
+</div></div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">졸업 요건 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<form:form method="post" modelAttribute="graduation" action="${pageContext.request.contextPath}/graduation/updateGraduation.do" id="modifyForm">
+          <div class="mb-3">
+            <label for="select-box1" class="col-form-label">단과</label>
+            <select class="form-select" id="select-box1" name="colgeCd">
+            	<option value="">단과선택</option>
+	              <c:forEach items="${collegeTypeList}" var="collegeType">
+	              	<option value="${collegeType.colgeCd }">
+	              		${collegeType.colgeNm}
+	              	</option>
+	              </c:forEach>
+            </select>
+          </div>
+
+			<c:forEach items="${graduationTypeList}" var="graduationType">
+	            <div class="mb-3">
+	                <label class="col-form-label">
+	                    ${graduationType.geGradCondType}
+	                </label>
+	                <form:input path="gradCond" class="form-control" />
+	                <span class="error" style="color: red;"></span>
+	                <input type="hidden" value="${graduationType.geGradCondType}" name="geGradCondType">
+	            </div>
+	        </c:forEach>
+
+	      </div>
+	      <div class="modal-footer">
+	        <button type="submit" class="btn btn-outline-info" id="modifyBtn">수정</button>
+	        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+	      </div>
+	    </form:form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">졸업 요건 추가</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<form:form method="post" modelAttribute="graduation" action="${pageContext.request.contextPath}/graduation/insertGraduation.do" id="createForm">
+          <div class="mb-3">
+            <label class="col-form-label" style="font-weight: bold;">졸업요건</label>
+            	<form:input path="geGradCondType" class="form-control" />
+          </div>
+
+			<c:forEach items="${collegeTypeList}" var="collegeType" varStatus="loop">
+			    <c:if test="${loop.index % 2 == 0}">
+			        <div class="row">
+			    </c:if>
+			    <div class="col-md-6">
+			        <div class="mb-3">
+			            <label class="col-form-label">
+			                ${collegeType.colgeNm}
+			            </label>
+			            <form:input id="${loop.index }" path="gradCond" class="form-control"/>
+			            <span class="error" style="color: red;"></span>
+			            <input type="hidden" value="${collegeType.colgeCd}" name="colgeCd">
+			        </div>
+			    </div>
+			    <c:if test="${loop.index % 2 != 0 || loop.last}">
+			        </div>
+			    </c:if>
+			</c:forEach>
+
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-outline-primary" id="auto">자동완성</button>
+	        <button type="submit" class="btn btn-outline-info" id="createBtn">등록</button>
+	        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+	      </div>
+	    </form:form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-size">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">졸업 요건 삭제</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<form:form method="post" modelAttribute="graduation" action="${pageContext.request.contextPath}/graduation/deleteGraduation.do" id="removeForm">
+          <div class="mb-3">
+            <label for="select-box1" class="col-form-label">요건선택</label>
+            <select class="form-select" id="select-box" name="geGradCondType">
+              <c:forEach items="${graduationTypeList}" var="graduationType">
+              	<option value="${graduationType.geGradCondType }">
+              		${graduationType.geGradCondType}
+              	</option>
+              </c:forEach>
+            </select>
+          </div>
+	   </div>
+	      <div class="modal-footer">
+	        <button type="submit" class="btn btn-outline-danger" id="removeBtn">삭제</button>
+	        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+	      </div>
+	    </form:form>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("exampleModal").querySelector("form");
+        form.addEventListener("submit", function(event) {
+        	event.preventDefault();
+            const gradCondInputs = form.querySelectorAll('input[name="gradCond"]');
+            let valid = true;
+
+            gradCondInputs.forEach(function(input) {
+                const errorSpan = input.nextElementSibling;
+                if (input.value.trim() === "") {
+                    errorSpan.textContent = "졸업 요건을 입력해주세요.";
+                    valid = false;
+                } else {
+                    errorSpan.textContent = "";
+                }
+            });
+
+            if (valid) {
+            	Swal.fire({
+     			   title: '수정하시겠습니까?',
+     			   icon: 'info',
+     			   
+     			   showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+     			   confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+     			   cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+     			   confirmButtonText: '수정', // confirm 버튼 텍스트 지정
+     			   cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+     			   
+     			   reverseButtons: false, // 버튼 순서 거꾸로
+     			   
+     			}).then(result => {
+     			   // 만약 Promise리턴을 받으면,
+     			   if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+     			   
+     			      Swal.fire('수정이 완료되었습니다.', '', 'success').then((result2)=>{
+     			    	  if(result2.isConfirmed){
+     				      	$(modifyForm).submit();
+     			    	  }
+     			      });
+     			   }
+     			});
+            }
+        });
+    });
+    
+    $(removeBtn).on("click",function(){
+    	event.preventDefault();
+    	
+    	Swal.fire({
+			   title: '삭제하시겠습니까?',
+			   icon: 'warning',
+			   
+			   showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+			   confirmButtonColor: '#d33', // confrim 버튼 색깔 지정
+			   cancelButtonColor: '#ccc', // cancel 버튼 색깔 지정
+			   confirmButtonText: '삭제', // confirm 버튼 텍스트 지정
+			   cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+			   
+			   reverseButtons: false, // 버튼 순서 거꾸로
+			   
+			}).then(result => {
+			   // 만약 Promise리턴을 받으면,
+			   if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+			   
+			      Swal.fire('삭제가 완료되었습니다.', '', 'success').then((result2)=>{
+			    	  if(result2.isConfirmed){
+				      	$(removeForm).submit();
+			    	  }
+			      });
+			   }
+			});
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form2 = document.getElementById("exampleModal2").querySelector("form");
+        form2.addEventListener("submit", function(event) {
+        	event.preventDefault();
+            const gradCondInputs = form2.querySelectorAll('input[name="gradCond"]');
+            let valid = true;
+
+            gradCondInputs.forEach(function(input) {
+                const errorSpan = input.nextElementSibling;
+                if (input.value.trim() === "") {
+                    errorSpan.textContent = "졸업 요건을 입력해주세요.";
+                    valid = false;
+                } else {
+                    errorSpan.textContent = "";
+                }
+            });
+
+            if (valid) {
+            	Swal.fire({
+     			   title: '등록하시겠습니까?',
+     			   icon: 'question',
+     			   
+     			   showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+     			   confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+     			   cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+     			   confirmButtonText: '등록', // confirm 버튼 텍스트 지정
+     			   cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+     			   
+     			   reverseButtons: false, // 버튼 순서 거꾸로
+     			   
+     			}).then(result => {
+     			   // 만약 Promise리턴을 받으면,
+     			   if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+     			   
+     			      Swal.fire('등록이 완료되었습니다.', '', 'success').then((result2)=>{
+     			    	  if(result2.isConfirmed){
+     				      	$(createForm).submit();
+     			    	  }
+     			      });
+     			   }
+     			});
+            }
+        });
+    });
+</script>
+
+<script>
+$(document).ready(function() {
+    const form = $("#exampleModal").find("form");
+    const selectBox = $("#select-box1"); // 단과 선택 select 엘리먼트
+    const gradCondInputs = form.find('input[name="gradCond"]'); // 졸업 요건 입력 input 엘리먼트
+    
+    selectBox.on("change", function() {
+        const selectedColgeCd = selectBox.val();
+        
+        // AJAX 요청을 보내고 선택된 단과의 졸업 요건 정보를 가져옴
+        $.ajax({
+            url: "/oryuUniversity/graduation/changeCond.do",
+            method : "get",
+            data: { colgeCd: selectedColgeCd },
+            success: function(data) {
+                if (data && data.length > 0) {
+                    for(var i = 0; i < data.length; i++) {
+                    	var graduationVO = data[i];
+                    	var gradCondInput = gradCondInputs.eq(i);
+                        gradCondInput.val(graduationVO.gradCond);
+                    }
+                } else {
+                    gradCondInputs.val(""); // 존재하지 않는 경우 값 초기화
+                }
+            },
+            error: function(error) {
+                console.error("Error fetching graduation condition:", error);
+                gradCondInputs.val(""); // 에러 발생 시 값 초기화
+            }
+        });
+    });
+});
+
+$('#auto').on('click', function () {
+	
+	$('#geGradCondType').val("테스트조건명");
+	$('#0').val("10");
+	$('#1').val("11");
+	$('#2').val("12");
+	$('#3').val("13");
+	$('#4').val("14");
+	$('#5').val("15");
+	$('#6').val("16");
+	$('#7').val("17");
+	$('#8').val("18");
+	$('#9').val("19");
+});
+
+</script>

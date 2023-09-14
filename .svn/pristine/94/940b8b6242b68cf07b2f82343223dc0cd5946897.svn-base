@@ -1,0 +1,40 @@
+package kr.or.ddit.academicbusinessmanagement.service;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessEvaluationVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class AcademicBusinessEvalutionServiceImpl implements AcademicBusinessEvalutionService {@Override
+	
+	public List<AcademicBusinessEvaluationVO> selectAllList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int insertAcademicBusinessEvaluation(AcademicBusinessEvaluationVO academicBusinessEvaluationVO,
+			HttpServletRequest req) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int deleteAcademicBusinessEvalution() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int modifyAcademicBusinessEvalution(AcademicBusinessEvaluationVO vo, HttpServletRequest req) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

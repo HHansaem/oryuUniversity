@@ -1,0 +1,593 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<script src="${pageContext.request.contextPath }/resources/js/ckeditor/ckeditor.js"></script>
+<style>
+    .custom-hr {
+        border: 0; /* 기본 경계선 제거 */
+        height: 1px; /* 선의 높이 */
+        background-color: #333; /* 선의 색상 */
+        margin: 20px 0; /* 위아래 여백 */
+    }
+    .divMargin{
+    	margin-top: 10px;
+    }
+    .notification {
+            display: none;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            color: #3f3e91;
+            border-radius: 5px;
+    }
+    .form-group{
+        padding: 10px;
+    	border: #cbcbcb 1px solid;
+    	font-weight: bold;
+    	border-radius: 15px;
+    }
+    label{
+    	font-weight: bold;
+    }
+    select.form-control{
+    	color: #000000;
+	}
+	.updateBtn{
+		margin-right: 10px;
+	}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+      <div class="h-100">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="tabbable">
+						<ul class="nav nav-tabs" id="myTab" role="tablist">
+							<li class="nav-item"><a class="nav-link active show"
+								href="#exam" data-toggle="tab">세부사항</a></li>
+							<li class="nav-item"><a class="nav-link" href="#examQue"
+								data-toggle="tab">문제작성</a></li>
+						</ul>
+						<div class="tab-content" style="border:0;">
+							<div class="tab-pane active" id="exam">
+								<form:form method="post" modelAttribute="exam" id="examDetail">
+									<form:input path="lecCd" type="hidden"/>
+									<form:input path="examCd" type="hidden"/>
+									<form:input path="examScore" type="hidden"/>
+									<div class="form-group">
+										<label>제목</label>
+										<form:input path="examNm" type="text" class="form-control"/> 
+									</div>
+									<div class="form-group">
+										<label>시험 전달사항</label>
+										<form:textarea path="examCont" class="form-control" id="examCont" rows="8" cols="100"/> 
+									</div>
+									<div class="form-group">
+										<label>유형</label>
+										<form:input path="examType" class="form-control"/>
+									</div>
+									<div class="form-group d-flex">
+										<div class="col-md-3">
+										<label>시작시간</label> 
+										<form:input path="examStaTime" type="dateTime-local" class="form-control" id="examDateTime"/>
+										</div>
+										<div class="col-md-3">
+										<label>마감시간</label> 
+										<form:input path="examEndTime" type="dateTime-local" class="form-control"/>
+										</div>
+										<div class="col-md-3">
+										<label>시험시간(분)</label> 
+										<form:input path="examTakeTime" type="number" class="form-control" placeholder="분 단위를 입력해주세요"/>
+										</div>
+									</div>
+									<button type="button" class="btn btn-primary" id="examAjax">저장</button>
+									<button type="button" class="btn btn-primary" id="exam-activate" onclick="updateState()">시험 활성화</button>
+									<div class="notification"></div>
+									<form:input path="examState" type="hidden"/>
+								</form:form>
+							</div>
+							<div class="tab-pane" id="examQue">
+							<c:forEach items="${exam.examQueList}" var="examQue" varStatus="cnt">
+								<form class="queForm">
+									<input type="hidden" name="lecCd" value="${lecCd}"/>
+									<input type="hidden" name="examCd" value="${exam.examQueList[cnt.index].examCd}"/>
+									<input type="hidden" name="eqCd" value="${exam.examQueList[cnt.index].eqCd}"/>
+									<div>
+										<label class="titleLabel">${cnt.index+1}번 문제</label>
+									</div>
+									<input type="hidden" name="eqNum" value="${cnt.index+1}">
+									<div class="form-group divMargin">
+										<label>문제유형</label>
+										<select class="form-control examQueType" value="${exam.examQueList[cnt.index].eqType}" name="eqType">
+											<c:choose>
+												<c:when test="${exam.examQueList[cnt.index].eqType eq '주관식'}">
+													<option value="객관식">객관식</option>
+		        									<option value="주관식" selected>주관식</option>
+												</c:when>
+												<c:otherwise>
+													<option value="객관식" selected>객관식</option>
+		        									<option value="주관식">주관식</option>
+												</c:otherwise>
+											</c:choose>
+		        							
+		    							</select> 
+									</div>
+									<div class="form-group">
+										<label>문제지문</label>
+										<textarea class="form-control" rows="8" cols="100" name="eqQt">${exam.examQueList[cnt.index].eqQt}</textarea>
+									</div>
+									<div class="examView">
+									<c:if test="${exam.examQueList[cnt.index].eqType eq '객관식'}">
+										<label class="viewLabel">문제보기</label> 
+										<div class="form-group d-flex flex-row">
+											<label>1번</label>
+											<div class="col-sm-6">
+											<input type="text" class="form-control" name="eqView1" value="${exam.examQueList[cnt.index].eqView1}"/>
+											</div>
+										</div>
+										<div class="form-group d-flex flex-row">
+											<label>2번</label>
+											<div class="col-sm-6">
+											<input type="text" class="form-control" name="eqView2" value="${exam.examQueList[cnt.index].eqView2}"/>
+											</div>
+										</div>
+										<div class="form-group d-flex flex-row">
+											<label>3번</label>
+											<div class="col-sm-6">
+											<input type="text" class="form-control" name="eqView3" value="${exam.examQueList[cnt.index].eqView3}"/>
+											</div>
+										</div>
+										<div class="form-group d-flex flex-row">
+											<label>4번</label>
+											<div class="col-sm-6">
+											<input type="text" class="form-control" name="eqView4" value="${exam.examQueList[cnt.index].eqView4}"/>
+											</div>
+										</div>
+									</c:if>
+									</div>
+									<div class="form-group d-flex flex-row align-items-center">
+										<label>정답</label>
+										<div class="col-sm-3 examAnswerDiv">
+											<c:choose>
+												<c:when test="${exam.examQueList[cnt.index].eqType eq '객관식'}">
+													<select name="eqAnsw" class="form-control examAnswer" value="${exam.examQueList[cnt.index].eqAnsw}">
+														<option value="">정답선택</option>
+														<c:forEach begin="1" end="4" varStatus="answCnt">
+															<c:choose>
+																<c:when test="${answCnt.index eq exam.examQueList[cnt.index].eqAnsw}">
+																	<option value="${answCnt.index}" selected>${answCnt.index}번</option>
+																</c:when>
+																<c:otherwise>
+																	<option value="${answCnt.index}">${answCnt.index}번</option>
+																</c:otherwise>
+															</c:choose>
+														</c:forEach>
+													</select>
+												</c:when>
+												<c:when test="${exam.examQueList[cnt.index].eqType eq '주관식'}">
+													<input type="text" class="form-control" name="eqAnsw" value="${exam.examQueList[cnt.index].eqAnsw}">
+												</c:when>
+											</c:choose>
+										</div> 
+										<label>배점</label>
+										<div class="col-sm-3">
+										<input type="number" class="form-control" name="eqScore" value="${exam.examQueList[cnt.index].eqScore}"/>
+										</div>
+										<button type="button" class="btn btn-primary updateBtn">문제 등록</button>
+										<button type="button" class="btn btn-primary deleteBtn">문제 삭제</button>
+									</div>
+									<div class="notification"></div> 
+								</form>
+								<hr class="custom-hr">
+								</c:forEach>
+								<button type="button" class="btn btn-primary" id="addQueBtn" onclick="addQuestion()">문제 추가</button>
+								<button type="button" class="btn btn-primary" id="updateQueBtn" onclick="updateAllQuestion()">전체 문제 등록</button>
+								<div id="notification"></div>
+								<form method="post" id="hideForm"></form>
+							</div>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+ 	</div>
+ </div>
+<script>
+	$(function() {
+		$('#myTab a').on('click', function(e) {
+			e.preventDefault();
+			$(this).tab('show');
+		});
+	});
+	
+	 function showNotification(message) {
+         $(".notification").text(message);
+         $(".notification").show();
+     }
+	 function showNotification2(message) {
+         $("#notification").text(message);
+         $("#notification").show();
+     }
+        
+     function hideNotification() {
+         $(".notification").hide();
+     }
+     function hideNotification2() {
+         $("#notification").hide();
+     }
+	
+// 	CKEDITOR.replace('examCont',{
+// 		  // 현재 보내는 주소 설정
+// 	      filebrowserImageUploadUrl: '${pageContext.request.contextPath }/uploadImage.do' 
+// 	});
+	
+	function updateState(){
+		var examDetailVal = $("#examDetail").find("input, textarea, select");
+		var examCdVal = $("#examDetail").find("input[name='examCd']").val();
+		var valFlag = true;
+		examDetailVal.each(function(){
+			var value = $(this).val().trim();
+			var text = $(this).text().trim();
+			 if (value == "" && text == "") {
+				  valFlag = false;
+			 }
+		});
+		if(valFlag){
+			 $.ajax({
+	               type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	               data: {examCd : examCdVal},
+	               url: "${pageContext.request.contextPath}/lecture/examStateUpdate.do",
+	               success: function(response) {
+	               	if(response.result==='성공'){
+	               		 showNotification("정상적으로 변경되었습니다.");
+	               		 setTimeout(function() {
+	                            hideNotification(); // 일정 시간 후 알림 숨기기
+	                        }, 3000);
+	               	}else if(response.result=='실패'){
+	               		 showNotification("세부사항을 저장해주세요.");
+	               		 setTimeout(function() {
+	                            hideNotification(); // 일정 시간 후 알림 숨기기
+	                     }, 3000);
+	               	}
+	               },
+	               error: function(xhr, status, error) {
+	                   console.error(error);
+	               }
+	           });
+		}else{
+			showNotification("모든 세부사항을 입력 후 저장해주세요");
+			setTimeout(function() {
+            	hideNotification();
+            }, 3000);
+		}
+	}
+	
+	function updateAllQuestion(){
+		var formDetailElements = $("#examDetail input, #examDetail textarea, #examDetail select").not("[type='submit']");
+		var formQueElements = $(".queForm");
+		$("#hideForm").empty();
+		
+		formDetailElements.each(function() {
+	        var name = $(this).attr("name");
+	        var value = "";
+	        if(name=='examCont'){
+	        	var textareaValue = $(this).val();
+	        	value = textareaValue.replace(/\n/g, '<br>'); 
+	        }else{
+	        	value = $(this).val();
+	        }
+	        
+	        var detailInput = $("<input>", {
+	            type: "hidden",
+	            name: name,
+	            value: value
+	        });
+			$("#hideForm").append(detailInput);
+		});
+		
+		formQueElements.each(function(idx,element){
+			$(element).find("input, textarea, select").not("[name='lecCd']").each(function() {
+		        var name = $(this).attr("name");
+		        var tagName = this.tagName.toLowerCase();
+		        var value = "";
+		        if(tagName=='textarea'){
+		        	var textareaValue = $(this).val();
+		        	value = textareaValue.replace(/\n/g, '<br>'); 
+		        }else{
+		        	value = $(this).val();
+		        }
+		        
+		        var queInput = $("<input>", {
+		            type: "hidden",
+		            name: "examQueList["+idx+"]."+name,
+		            value: value
+		        });
+				$("#hideForm").append(queInput);
+			});
+		});
+		
+		var formData = $("#hideForm").serializeArray();
+		 $.ajax({
+               type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+               data: formData,
+               url: "${pageContext.request.contextPath}/lecture/allExamQueInsert.do",
+               success: function(response) {
+               	if(response.result==='성공'){
+                     var $stateInput = $("#examDetail").find("input[name='examState']");
+                 	 if(!$.trim($stateInput.val())){
+                 		$stateInput.val('비활성');
+                 	 }
+               		 showNotification2("정상적으로 저장되었습니다.");
+                     $("input[name='eqNum']").each(function(idx){
+                    	 var num = $(this).val();
+                    	 var $form = $(this).closest("form");
+                    	 $form.find("input[name='eqCd']").val(response.eqCdList[idx]);
+                     });
+               		 setTimeout(function() {
+                            hideNotification2(); // 일정 시간 후 알림 숨기기
+                        }, 3000);
+               	}else if(response.result=='실패'){
+               		 showNotification2("문제 항목을 입력해주세요");
+               		 setTimeout(function() {
+                            hideNotification2(); // 일정 시간 후 알림 숨기기
+                        }, 3000);
+               	}
+               },
+               error: function(xhr, status, error) {
+                   console.error(error);
+               }
+           });
+	}
+	function addQuestion() {
+		var addButton = $("#addQueBtn");
+		var num = addButton.prevAll("form").length+1;
+   		var template = $("#questionTemplate");
+   		var newForm = template.contents().clone();
+   		var examCd = $('input[name="examCd"]').val();
+   		console.log(examCd);
+   		addButton.before(newForm);
+   		$("html, body").animate({ scrollTop: $(document).height() }, 10);
+		var form = addButton.prevAll("form").first();
+   		form.find("input[name='eqNum']").val(num);
+   		form.find("label.titleLabel").text(num+"번 문제");
+   		form.find("input[name='examCd']").val(examCd);
+   	}
+	 
+	$(document).on('change','.examQueType', function() {
+	    var selectedValue = this.value; // 선택된 값 가져오기
+	    var id = $(this).attr("id");
+	    var examView = $(this).closest("form").find("div[class='examView']");
+	    var examAnswerDiv = $(this).closest("form").find("div.examAnswerDiv");
+	    examView.empty();
+	    examAnswerDiv.empty();
+	    if (selectedValue === '객관식') {
+	    	var selectElement = $("<select>").addClass("form-control examAnswer").attr("name", "eqAnsw");
+	    	var options = ["1", "2", "3", "4"];
+	    	var examViewDiv = $("<div>").attr("class", "examView");
+	    	var problemLabel = $("<label>").text("문제보기");
+	    	examViewDiv.append(problemLabel);
+		    for (var i = 1; i <= 4; i++) {
+		          var divElement = $("<div>").addClass("form-group d-flex flex-row");
+		          var labelElement = $("<label>").text(i + "번");
+		          var inputHideElement = $("<input>").attr({
+		              type: "hidden",
+		              name: "examViewList["+ (i-1) +"].evCd",
+		              value: i
+		          });
+		          var inputElement = $("<input>").attr({
+		              type: "text",
+		              class: "form-control",
+		              name: "examViewList["+ (i-1) +"].evCont"
+		          });
+		          var innerDivElement = $("<div>").addClass("col-sm-3");
+		          
+		          innerDivElement.append(inputElement);
+		          divElement.append(labelElement, innerDivElement);
+		          examViewDiv.append(divElement);
+		   	}
+		    examView.replaceWith(examViewDiv);
+		    var optionElement = $("<option>").text("정답 선택");
+		    selectElement.append(optionElement);
+    		$.each(options, function(index, value) {
+    	        optionElement = $("<option>").text(value+"번").val(value);
+    	        selectElement.append(optionElement);
+    	    });
+    		examAnswerDiv.append(selectElement);			    	
+	    } else if (selectedValue === '주관식') {
+	    	var inputElement = $("<input>").attr({
+	            type: "text",
+	            class: "form-control",
+	            name: "eqAnsw"
+	        });
+	    	examAnswerDiv.append(inputElement);
+	    }
+	});
+	
+	$(document).on('click','.deleteBtn', function(){
+		var form = $(this).closest("form");
+		var formData = form.serializeArray();
+		var hr = form.next("hr");
+		var url = "${pageContext.request.contextPath}/lecture/examQueDelete.do";
+		 $.ajax({
+	               type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+	               data: formData,
+	               url: url,
+	               success: function(response) {
+	               	if(response.result==='성공'){
+	               		var forms = form.nextAll("form.queForm");
+	               		forms.each(function(){
+	               			var labelElement = $(this).find("label.titleLabel");
+	               		    var inputElement = $(this).find("input[name='eqNum']");
+	               		    if (inputElement.length > 0) {
+	               		        var currentValue = parseInt(inputElement.val());
+	               		        if (!isNaN(currentValue)) {
+	               		            var newValue = currentValue - 1;
+	               		            inputElement.val(newValue);
+	               		            labelElement.text(newValue+"번 문제");
+	               		        }
+	               		    }
+	               		});
+					    form.remove();
+					    hr.remove();
+	               	}else if(response.result=='실패'){
+	               	 	showNotification("문제 삭제가 실패하였습니다.");
+	               		setTimeout(function() {
+	                    	hideNotification(); // 일정 시간 후 알림 숨기기
+	                    }, 3000);
+	               	}
+	               },
+	               error: function(xhr, status, error) {
+	                   console.error(error);
+	               }
+	       });
+				
+	});
+	
+	
+	$(document).on('click','.updateBtn', function(){
+		var form = $(this).closest("form");
+		var formData = form.serializeArray();
+		var url = "${pageContext.request.contextPath}/lecture/examQueInsert.do";
+		if(form.find('input[name="eqCd"]').val() !== ""){
+			url = "${pageContext.request.contextPath}/lecture/examQueUpdate.do"
+		}
+		 $.ajax({
+                type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+                data: formData,
+                url: url,
+                success: function(response) {
+                	if(response.result==='성공'){
+                		$('input[name="examCd"]').val(response.examCd);
+                		 form.find('input[name="eqCd"]').val(response.eqCd);
+                		 showNotification("정상적으로 저장되었습니다.");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}else if(response.result=='실패'){
+                		 showNotification("문제 항목을 입력해주세요");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+	});
+	
+	
+	$(document).ready(function() {
+		
+		  var textareas = document.getElementsByTagName('textarea');
+		  for (var i = 0; i < textareas.length; i++) {
+		    var textarea = textareas[i];
+		    var currentValue = textarea.value;
+		    var newValue = currentValue.replaceAll(/<br>|&lt;br&gt;/g, '\n');
+		    textarea.value = newValue;
+		  }
+		
+		$("#examAjax").click(function() {
+			var url = "${pageContext.request.contextPath}/lecture/examInsert.do";
+			if($("#examDetail").find('input[name="examCd"]').val() !== ""){
+				url = "${pageContext.request.contextPath}/lecture/examUpdate.do";
+			}
+            $.ajax({
+                type: "POST", // 또는 GET 등 사용할 HTTP 메서드 선택
+                data: $('#examDetail').serializeArray(),
+                url: url,
+                success: function(response) {
+                	if(response.result==='성공'){
+                		$('input[name="examCd"]').val(response.examCd);
+                		if($('input[name="examState"]').val() == ""){
+                			$('input[name="examState"]').val("비활성");
+                		}
+                		 showNotification("정상적으로 저장되었습니다.");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}else if(response.result=='실패'){
+                		 showNotification("세부사항을 입력해주세요");
+                		 setTimeout(function() {
+                             hideNotification(); // 일정 시간 후 알림 숨기기
+                         }, 3000);
+                	}
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        });
+		
+	});
+	
+	
+</script>
+
+<template id="questionTemplate">
+	<form role="form" class="queForm">
+		<input type="hidden" name="lecCd" value="${lecCd}"/>
+		<input type="hidden" name="eqCd" value=""/>
+		<input type="hidden" name="examCd" value=""/> 
+		<label class="titleLabel"></label> <input type="hidden" name="eqNum" value="1">
+		<div class="form-group divMargin">
+			<label>문제유형</label> <select class="form-control examQueType"
+				name="eqType">
+				<option value="객관식">객관식</option>
+				<option value="주관식">주관식</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label>문제지문</label>
+			<textarea class="form-control" name="eqQt" rows="8" cols="100"></textarea>
+		</div>
+		<div class="examView">
+			<label class="viewLabel">문제보기</label>
+			<div class="form-group d-flex flex-row divMargin">
+				<label>1번</label>
+				<div class="col-sm-6">
+					<input type="text" class="form-control" name="eqView1" />
+				</div>
+			</div>
+			<div class="form-group d-flex flex-row">
+				<label>2번</label>
+				<div class="col-sm-6">
+				<input type="text" class="form-control" name="eqView2" />
+				</div>
+			</div>
+			<div class="form-group d-flex flex-row">
+				<label>3번</label>
+				<div class="col-sm-6">
+				<input type="text" class="form-control" name="eqView3" />
+				</div>
+			</div>
+			<div class="form-group d-flex flex-row">
+				<label>4번</label>
+				<div class="col-sm-6">
+					<input type="text" class="form-control" name="eqView4" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group d-flex flex-row align-items-center">
+			<label>정답</label>
+			<div class="col-sm-3 examAnswerDiv">
+				<select class="form-control examAnswer" name="eqAnsw">
+					<option value="">정답선택</option>
+					<option value="1">1번</option>
+					<option value="2">2번</option>
+					<option value="3">3번</option>
+					<option value="4">4번</option>
+				</select>
+			</div>
+			<label>배점</label>
+			<div class="col-sm-3">
+				<input type="number" class="form-control" name="eqScore" />
+			</div>
+			<button type="button" class="btn btn-primary updateBtn">문제
+				등록</button>
+			<button type="button" class="btn btn-primary deleteBtn">문제
+				삭제</button>
+		</div>
+	</form>
+	<hr class="custom-hr">
+</template>

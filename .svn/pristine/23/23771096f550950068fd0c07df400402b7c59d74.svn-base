@@ -1,0 +1,176 @@
+package kr.or.ddit.enrollment.service;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.enrollment.dao.EnrollmentDAO;
+import kr.or.ddit.enrollment.vo.EnrollmentVO;
+import kr.or.ddit.lecture.dao.LectureDAO;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.lectureContents.assignmentSub.dao.AssignmentSubDAO;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+import kr.or.ddit.lectureSchedule.dao.LectureScheduleDAO;
+import kr.or.ddit.student.dao.StudentDAO;
+import kr.or.ddit.student.vo.StudentVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class EnrollmentServiceImpl implements EnrollmentService {
+	
+	@Inject
+	private EnrollmentDAO enrollmentDAO;
+	@Inject
+	private StudentDAO studentDAO;
+	@Inject
+	private LectureDAO lectureDAO;
+	@Inject
+	private LectureScheduleDAO lectureScheduleDAO;
+	@Inject
+	private AssignmentSubDAO assignSubDAO;
+	
+	// 수강신청목록 조회(교직원)
+	@Override
+	public List<EnrollmentVO> retrieveEnrollmentList(PaginationInfo paging) {
+		// 토탈자료 개수
+		long totalRecord = enrollmentDAO.selectTotalRecord(paging);
+		// 페이징 객체에 토탈레코드 저장
+		paging.setTotalRecord(totalRecord);
+		// 페이징 객체를 이용하여 전체 강의 조회 후 리턴
+		return enrollmentDAO.selectEnrollmentList(paging);
+	}
+	
+	// 수강요청확정(교직원)
+	@Transactional
+	@Override
+	public int acceptEnrollment(List<EnrollmentVO> reqList) {
+		
+		int count = 0;
+		
+		for(EnrollmentVO enroll : reqList ) {
+			count += enrollmentDAO.commitEnrollment(enroll);
+		}
+		return count;
+	}
+	
+	// 수강요청거절(교직원)
+	@Transactional
+	@Override
+	public int rejectEnrollment(List<EnrollmentVO> reqList) {
+		int count = 0;
+		
+		for(EnrollmentVO enroll : reqList ) {
+			count += enrollmentDAO.refuseEnrollment(enroll);
+		}
+		return count;
+	}
+	
+	// 수강신청목록 조회(학생)
+	@Override
+	public List<EnrollmentVO> retrieveMyEnrollmentList(String stCd) {
+		return enrollmentDAO.selectMyEnrollmentList(stCd);
+	}
+	
+	// 수강 신청 (학생)
+	@Transactional
+	@Override
+	public int sendEnrollement(EnrollmentVO enrollment) throws RuntimeException{
+		
+		int count = 0;
+		String stCd = enrollment.getStCd();
+		String[] lecCds = enrollment.getLecCds();
+		StudentVO student = studentDAO.selectStudent(stCd);
+
+		for(String cd : lecCds) {
+		
+		enrollment.setLecCd(cd);
+		
+		LectureVO lecture = lectureDAO.selectLecture(cd);
+		
+		// 학생 본인의 제한학점
+		int stLiCre = student.getStLiCre();
+		// 수강 중인 학점 총합
+		int lecLectCred = enrollmentDAO.checkCred(stCd);
+		// 현재 등록 하려는 강의학점
+		int presentCred = Integer.parseInt(lecture.getLecLectCred());
+		
+		if(stLiCre<lecLectCred+presentCred) {
+			System.out.println("학생 제한 학점 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("현학기 제한 학점을 초과했습니다.", stCd));
+		}
+		// 강의 제한 인원 체크
+		int limitStudent = Integer.parseInt(lecture.getLecEnroLimit());
+		// 강의 등록한 인원 체크
+		int presentStudent = enrollmentDAO.countStudent(cd);
+		
+		if(limitStudent<presentStudent+1) {
+			System.out.println("강의 인원 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("강의 인원 제한을 초과했습니다.", stCd));
+		}
+		// 강의시간 중복 체크
+		int dupli = enrollmentDAO.duplicateCheck(enrollment);
+		if (dupli>0) {
+			System.out.println("강의시간 중복 오류뻉============================================");
+			throw new RuntimeException(MessageFormat.format("선택한 강의는 기존 신청한 강의와 시간이 중복됩니다.", stCd));
+		}
+		
+		count+=enrollmentDAO.submitEnrollment(enrollment);
+		
+		}
+		
+		return count;
+	}
+	
+	// 수강신청 취소 (학생)
+	@Transactional
+	@Override
+	public int deleteEnrollment(EnrollmentVO enrollment) {
+		
+		int count = 0;
+
+		String[] lecCds = enrollment.getLecCds();
+
+		for(String cd : lecCds) {
+		
+		enrollment.setLecCd(cd);
+		
+		count+=enrollmentDAO.cancelEnrollment(enrollment);
+		
+		}
+		
+		return count;
+	}
+	
+	// 학생 현재 학기 수강목록 조회
+	@Override
+	public List<EnrollmentVO> retrieveSTEnrollmentList(String stCd) {
+		return enrollmentDAO.selectSTEnrollmentList(stCd);
+	}
+
+	// 강의별 성적 비율 조회
+	@Override
+	public LectureVO retrieveGradeRate(String lecCd) {
+		LectureVO lecVO = new LectureVO();
+		int totalStudent = assignSubDAO.selectEnrollmentCount(lecCd);
+		lecVO = enrollmentDAO.selectGradeRate(lecCd);
+		lecVO.setEnrollmentCount(totalStudent);
+		return lecVO;
+	}
+
+	// 모든 점수 조회(과제, 출석, 시험, 최종)
+	@Override
+	public List<EnrollmentVO> selectAllScore(PaginationInfo paging, String lecCd) {
+		long totalRecord = enrollmentDAO.selectTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		return enrollmentDAO.selectAllScore(paging, lecCd);
+	}
+	
+}

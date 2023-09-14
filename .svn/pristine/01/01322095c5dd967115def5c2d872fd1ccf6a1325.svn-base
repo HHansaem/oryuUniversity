@@ -1,0 +1,70 @@
+<%@ page import="kr.or.ddit.thesis.vo.ThesisVO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+
+<form:form method="post" modelAttribute="thesis" enctype="multipart/form-data">
+<table class="thesisForm">
+	<tr>
+		<th>논문코드</th>
+			<td>
+				<form:input path=thesCd class="form-control" />
+				<form:errors path="thesCd" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>학술사업코드</th>
+			<td>
+				<form:input path=acBuCd class="form-control" />
+				<form:errors path="acBuCd" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>첨부파일</th>
+			<td>
+				<form:input path=attCd class="form-control" />
+				<form:errors path="attCd" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>논문명</th>
+			<td>
+				<form:input path=thesNm class="form-control" />
+				<form:errors path="thesNm" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>논문내용</th>
+			<td>
+				<form:input path=thesCont class="form-control" />
+				<form:errors path="thesCont" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>논문게시일자</th>
+			<td>
+				<form:input path=thesPostDate class="form-control" />
+				<form:errors path="thesPostDate" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>논문수정일</th>
+			<td>
+				<form:input path=thesModDate class="form-control" />
+				<form:errors path="thesModDate" class="error" />
+			</td>
+	</tr>
+	<tr>
+		<th>논문분류명</th>
+			<td>
+				<form:input path=thesClNm class="form-control" />
+				<form:errors path="thesClNm" class="error" />
+			</td>
+	</tr>
+	
+
+</table>
+</form:form>
+
+</html>

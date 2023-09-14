@@ -1,0 +1,274 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>    
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<style>
+	th{
+	text-align: center;
+	}
+	td{
+	text-align: center;
+	}
+	.custom-card {
+	margin-left:200px;
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -20px;
+  }
+</style>
+<div class="custom-card">
+	<div class="col-sm-10 stretch-card">
+		<div class="card">
+			<div class="card-body">
+			<div>
+				<tr><td><h4><br>취업현황 목록</h4><td></tr>
+				<table class="table">
+					<tr>
+						<td class="col-sm-1">
+							<div>
+								<select name="college" class="form-select">
+						               <option value>단대선택</option>
+						               <c:forEach items="${collegeList }" var="college">
+						                  <option value="${college.colgeCd }" >${college.colgeNm }</option>
+						               </c:forEach>
+								</select>
+							</div>
+						</td>
+						<td class="col-sm-1">
+							<div>
+								<select name="dtCd" class="form-select">
+						               <option value>학과선택</option>
+						               <c:forEach items="${departmentList }" var="department">
+						                  <option value="${department.dtCd }" class="${department.colgeCd }" >${department.dtNm }</option>
+						               </c:forEach>
+								</select>
+							</div>
+						</td>
+						<td class="col-sm-1">
+							<div>
+								<select name="status" class="form-select">
+									<option value>취업상태</option>
+										<option value="취업" >취업</option>
+										<option value="미취업" >미취업</option>
+								</select>
+							</div>
+						</td>
+						<td class="col-sm-3">
+							<div id="searchUI" class="row justify-content-center">
+								<div  class="col-auto">
+									<form:select path="simpleCondition.searchType" class="form-select">
+										<form:option value="" label="전체" />
+										<form:option value="code" label="학번" />
+										<form:option value="name" label="학생명" />
+									</form:select>
+								</div>
+								<div  class="col-auto">
+									<form:input path="simpleCondition.searchWord" class="form-control"/>
+								</div>
+								<div  class="col-auto">
+									<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+				</div>
+				<table class="table">
+					<thead class="table-light">
+						<tr>
+							<th>체크</th>
+							<th>단대</th>
+							<th>학과</th>
+							<th>학번</th>
+							<th>학생명</th>
+							<th>취업상태</th>
+							<th>취업연도</th>
+							<th>취업분야</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:set var="studentList" value="${paging.dataList }"/>
+							<c:choose>
+								<c:when test="${empty studentList }">
+									<tr>
+										<td class="col-sm-9">조건에 맞는 학생이 없음.</td>
+									</tr>	
+								</c:when>
+								<c:otherwise>
+									<c:forEach items="${studentList }" var="student">
+										<tr>
+											<td class="col-sm-1"><input type="checkbox" name="checkBox"></td>
+											<td class="col-sm-1">${student.colgeNm}</td>
+											<td class="col-sm-1">${student.dtNm}</td>
+											<td class="col-sm-1 stCd">${student.stCd}</td>
+											<td class="col-sm-1">${student.stNm}</td>
+											<td class="col-sm-1">
+												<c:choose>
+													<c:when test="${student.empStat eq '취업'}">
+														<span class="badge badge-success">
+															<c:out value="취업"/>
+														</span>
+													</c:when>
+													<c:when test="${student.empStat eq '미취업'}">
+														<span class="badge badge-danger">
+															<c:out value="미취업"/>
+														</span>
+													</c:when>
+												</c:choose>
+											</td>
+											<td class="col-sm-1">${student.empYear}</td>
+											<td class="col-sm-1">${student.empField}</td>
+										</tr>
+									</c:forEach>
+								</c:otherwise>
+							</c:choose>
+					</tbody>
+					<tfoot>
+				</tfoot>
+			</table>
+				<tr>
+					<td colspan="2">
+						<div class="btn-group btn-group-md" role="group">
+							<button id="modifyRow" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">과목수정</button>
+						</div>	
+					</td>
+					<td>
+					<div class="d-flex justify-content-center mb-3">
+					${paging.pagingHTML }
+					</div>
+					<td>
+				</tr>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- modal body -->
+<div class="modal" data-url="${viewURL}" id="staticBackdrop" tabindex="-1">
+   <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+         <div class="modal-header">
+         <h5 class="modal-title">과목수정</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body"></div>
+      </div>
+   </div>
+</div>
+<!-- 검색조건 받기 -->
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="college" id="college" />
+	<input type="hidden" name="dtCd" id="dtCd" />
+	<input type="hidden" name="status" id="status" />
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<!-- 검색조건내에 조건걸기 -->
+<script>
+ 	let $dtCd = $('[name="dtCd"]');
+ 	$('[name="college"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${colgeCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+ 	
+<!-- pagination -->
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+	$(searchBtn).on("click", function(event){
+		$(searchUI).find(":input[name]").each(function(idx, input){
+			let name = input.name;
+			let value = $(input).val();
+			$(searchForm).find(`[name=\${name}]`).val(value);
+			
+			console.log("name : " + name + ", value : " + value);
+		});
+		
+		let college = $("select[name='college']").val();
+		let dtCd = $("select[name='dtCd']").val();
+		let status = $("select[name='status']").val();
+		
+// 		console.log(college);
+// 		console.log(dtCd);
+// 		console.log(status);
+		
+		$("#searchForm input[name='college']").val(college);
+    	$("#searchForm input[name='dtCd']").val(dtCd);
+    	$("#searchForm input[name='status']").val(status);
+		
+		$(searchForm).submit();
+	});
+
+<!-- 상태변경 버튼 -->
+$('#deleteRow').on('click',function(){
+    let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+    let subjCd=[];
+    for(let i = 0;i<$checkSubjCd.length;i++){
+    	subjCd.push($checkSubjCd[i].innerText);
+    }
+    let setting = {
+       url : "/oryuUniversity/subject/subjectDelete.do",
+       method : "post",
+       dataType : "text",
+       traditional: true,
+       data : {
+          subjCd : subjCd
+       },
+       success : function(resp) {
+          if(resp=="success"){
+            alert("상태수정 성공")
+            window.location.href="<%=request.getContextPath()%>/subject/mngSubjectList.do";
+          }else{
+			alert("상태수정 실패");
+          }
+       },
+       error : function(jqXHR, status, error) {
+          console.log(jqXHR)
+          console.log(status)
+          console.log(error)
+       }
+    }
+
+    $.ajax(setting);
+ })
+ 
+<!--과목수정 버튼 -->
+$(staticBackdrop).on('show.bs.modal',function(event){
+    let $checkSubjCd= $("input:checked").parent('td').siblings('.subjCd');
+    console.log($checkSubjCd);
+    if($checkSubjCd.length==1){
+        let $modalBody = $(this).find(".modal-body");
+        let subjCd = $checkSubjCd.text();
+        console.log(subjCd);
+        if(subjCd){
+           let setting = {
+             url : `${pageContext.request.contextPath}/subject/subjectUpdate.do`,
+             dataType : "html",
+             data : {
+            	 subjCd:subjCd
+             },
+             success : function(resp) {
+                $modalBody.html(resp);
+             }
+          }
+          $.ajax(setting);
+        }
+    }else{
+		alert("수정은 한개씩 가능합니다.");
+		event.preventDefault(); 
+		return;
+    }
+ }).on('hidden.bs.modal',function(){
+    let $modalBody = $(this).find(".modal-body");
+    $modalBody.empty();
+ })
+</script>

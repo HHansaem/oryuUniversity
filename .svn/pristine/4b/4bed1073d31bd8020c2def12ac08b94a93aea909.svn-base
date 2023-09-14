@@ -1,0 +1,93 @@
+package kr.or.ddit.lectureContents.attendance.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import kr.or.ddit.lectureContents.attendance.service.AttendanceService;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+import kr.or.ddit.lectureSchedule.service.LectureScheduleService;
+import kr.or.ddit.lectureSchedule.vo.LectureScheduleVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class AttendanceScoreUpdateController {
+	
+	@Inject
+	private AttendanceService service;
+	@Inject
+	LectureScheduleService lecScheService;
+	
+	@PostMapping("/lecture/attendScoreUpdate.do")
+	@ResponseBody
+	public Object attendanceScore(
+			@RequestBody List<Map<String, Integer>>scoreInfoList
+			, String lecCd
+			, HttpSession session
+	) {
+		List<Map<String, Integer>> resultMapList = new ArrayList<>();
+		
+		session.removeAttribute("lecCd");
+		session.setAttribute("lecCd", lecCd);
+		
+		lecCd = scoreInfoList.get(0).get("lecCd").toString();
+		
+		for(Map<String, Integer> scoreInfo : scoreInfoList) {
+			Integer absenceInput = scoreInfo.get("absence");
+			Integer scoreInput = scoreInfo.get("score");
+			
+			Map<String, Integer> resultMap = new HashMap<>();
+			resultMap.put("absenceInput", absenceInput);
+			resultMap.put("scoreInput", scoreInput);
+
+			boolean result = service.modifyAttendScore(lecCd, absenceInput, scoreInput);
+			if(result) {
+				String scheCd = "";
+				String week = "1";
+				if(!StringUtils.isBlank(lecCd)) {
+					List<LectureScheduleVO> schedule = lecScheService.retrieveLectureScheduleDetail(lecCd);
+					scheCd = schedule.get(0).getScheCd();
+				}
+				AttendanceVO attendance =  new AttendanceVO();
+				attendance.setLecCd(lecCd);
+				attendance.setAttsSche(scheCd);
+				attendance.setAttsWeek(week);
+				List<AttendanceVO> attendanceList = service.retrieveAttendanceList(attendance);
+				log.info("ㅠㅠㅠattendanceList"+attendanceList);
+				for(AttendanceVO score : attendanceList) {
+					String key = score.getLecCd().toString();
+					Integer value = score.getAtteScore();
+					
+					Map<String, Integer> scoreMap = new HashMap<>();
+					scoreMap.put("key", value);
+					log.info("ㅠㅠㅠscoreMap"+scoreMap);
+					resultMapList.add(scoreMap);
+				}
+				resultMapList.add(resultMap);
+			}else {
+				Map<String, Integer> response = new HashMap<>();
+				response.put("message", 0);
+				resultMapList.add(response);
+			}
+		}
+		
+		return resultMapList;
+	}
+	
+}

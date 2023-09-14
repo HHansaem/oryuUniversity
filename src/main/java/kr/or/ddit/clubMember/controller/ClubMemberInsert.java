@@ -1,0 +1,81 @@
+package kr.or.ddit.clubMember.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import kr.or.ddit.academicChange.vo.AcademicChangeVO;
+import kr.or.ddit.clubMember.service.ClubMemberService;
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+
+//동아리 가입 신청
+@PreAuthorize("hasRole('ROLE_ST')")
+@Controller
+@RequestMapping("/clubMember/clubInsertOn.do")
+public class ClubMemberInsert {
+	@Inject
+	private ClubMemberService service;
+
+	@Inject
+	private StudentService stuService;
+
+	@ModelAttribute("clubMem") // ("")이름을 지정하고 그 지정된 이름은 jsp에도 있어야 한다
+	public ClubMemberVO clubMem() {
+
+		return new ClubMemberVO();
+	}
+
+	/**
+	 * 동아리 입부 신청 폼으로 이동
+	 * 
+	 * @return
+	 */
+	@GetMapping
+	public String clubMemInsert(
+			Model model
+			, Authentication authentication
+			, @RequestParam("what") String clubCd
+			) {
+		StudentVO stuInfo = stuService.retrieveStudent(authentication.getName());
+		model.addAttribute("stuInfo", stuInfo);
+		model.addAttribute("clubCd",clubCd );
+		return "clubMember/clubMemberForm";
+	}
+
+	/**
+	 * 동아리 입부 신청
+	 */
+	@PostMapping
+	public String clubMemInsetOn(
+			Model model
+			,Authentication authentication 
+			,@ModelAttribute("clubMem") ClubMemberVO clubMem
+			,RedirectAttributes redirectAttributes
+			) {
+		
+		int success = service.clubMemInsert(clubMem);
+		
+		if(success > 0 )
+		{
+			String message = "가입 신청 성공";
+			redirectAttributes.addFlashAttribute("message", message);
+			return "redirect:/club/clubListView.do";
+		}else {
+				String message = "가입 신청 실패";
+				model.addAttribute("message", message);
+				return "redirect:/club/clubInsertRequestListView.do";
+		}
+	}
+
+}

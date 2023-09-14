@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.staff.dao.StaffDAO">
+	
+	<sql id="searchFrag">
+		<trim prefix=" WHERE ">
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(TS_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'tsnum'">
+        				INSTR(TS_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(TS_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(TS_CD, #{simpleCondition.searchWord}) > 0 
+        			</otherwise>
+        		</choose>
+        	</if>
+        </trim>
+	</sql>
+	<select id="selectTotalRecord" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM TEACHING_STAFF	
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectStaffList" resultType="kr.or.ddit.staff.vo.StaffVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*
+		    FROM (
+				SELECT 
+					TS_CD, TS_NM, TS_DEP, TS_PH, TS_EMAIL
+					,TS_PASS, TS_FIC, TS_ROLE, TS_STATUS
+					,TS_ADDR1, TS_ADDR2, TS_REG1, TS_REG2
+				FROM TEACHING_STAFF
+				<include refid="searchFrag" />
+		       	ORDER BY ROWID DESC
+		    ) A
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="selectStaff" parameterType="string" resultType="kr.or.ddit.staff.vo.StaffVO">
+		SELECT 
+			TS_CD, TS_NM, TS_DEP, TS_PH, TS_EMAIL
+			,TS_PASS, TS_FIC, TS_ROLE, TS_STATUS
+			,TS_ADDR1, TS_ADDR2, TS_REG1, TS_REG2
+		FROM TEACHING_STAFF 
+		WHERE TS_CD = #{tsCd}
+	</select>
+	
+	<insert id="insertStaff" parameterType="kr.or.ddit.staff.vo.StaffVO">
+		INSERT INTO TEACHING_STAFF(
+				TS_ADDR1
+				,TS_ADDR2
+				,TS_REG1
+				,TS_REG2
+				,TS_CD
+				,TS_DEP
+				,TS_NM
+				,TS_PH
+				,TS_EMAIL
+				,TS_PASS
+				,TS_FIC
+				,TS_STATUS
+				) 
+			VALUES(
+				 #{tsAddr1,jdbcType=VARCHAR}
+				, #{tsAddr2,jdbcType=VARCHAR}
+				, #{tsReg1,jdbcType=VARCHAR}
+				, #{tsReg2,jdbcType=VARCHAR}
+				, #{tsCd,jdbcType=VARCHAR}
+				, #{tsDep,jdbcType=VARCHAR}
+				, #{tsNm,jdbcType=VARCHAR}
+				, #{tsPh,jdbcType=VARCHAR}
+				, #{tsEmail,jdbcType=VARCHAR}
+				, #{tsPass,jdbcType=VARCHAR}
+				, #{tsFic,jdbcType=VARCHAR}
+				, #{tsStatus,jdbcType=VARCHAR}
+				)
+	</insert>
+	
+	<update id="updateStaff" parameterType="kr.or.ddit.staff.vo.StaffVO">
+		UPDATE TEACHING_STAFF SET 
+			 TS_DEP = #{tsDep,jdbcType=VARCHAR}
+			, TS_NM = #{tsNm,jdbcType=VARCHAR}
+			, TS_PH = #{tsPh,jdbcType=VARCHAR}
+			, TS_FIC = #{tsFic,jdbcType=VARCHAR}
+			, TS_STATUS = #{tsStatus,jdbcType=VARCHAR}
+			, TS_EMAIL = #{tsEmail,jdbcType=VARCHAR}
+			, TS_ADDR1 = #{tsAddr1,jdbcType=VARCHAR}
+			, TS_ADDR2 = #{tsAddr2,jdbcType=VARCHAR}
+		WHERE TS_CD = #{tsCd,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteStaff" parameterType="string">
+		UPDATE TEACHING_STAFF 
+		SET 
+		TS_STATUS = '탈퇴' 
+		WHERE TS_CD = #{tsCd}
+	</delete>
+	
+</mapper>

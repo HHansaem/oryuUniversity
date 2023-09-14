@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.academicBusinessReport.dao.ABRDAO">
+
+	<!-- 보고작성자명으로 검색, 보고서명으로 검색, 보고서번호로 검색 -->
+   <sql id="searchFrag">
+      <where>
+           <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty">
+              <choose>
+                 <when test="simpleCondition.searchType eq 'buReAutNm'">
+                    INSTR(BU_RE_AUT_NM, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'buReNm'">
+                    INSTR(BU_RE_NM, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <when test="simpleCondition.searchType eq 'buReCont'">
+                    INSTR(BU_RE_CONT, #{simpleCondition.searchWord}) > 0
+                 </when>
+                 <otherwise> <!-- 전체 옵션 선택 -->
+                    INSTR(BU_RE_AUT_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(BU_RE_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(BU_RE_CONT, #{simpleCondition.searchWord}) > 0
+                 </otherwise>
+              </choose>
+           </if>
+        </where>
+   </sql>
+   
+   <!-- 총 조회수 -->
+     <select id="selectTotalRecord" resultType="long" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT COUNT(*)
+      FROM AC_BU_RE
+      <include refid="searchFrag"></include>
+   </select>
+   
+   <select id="selectABRList" resultType="kr.or.ddit.academicBusinessReport.vo.ABRVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+      SELECT B.*
+      FROM(
+          SELECT ROWNUM RNUM, A.*
+          FROM(
+              SELECT 
+                  	BU_RE_SN
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, BU_RE_NM
+					, BU_RE_SHORT_CONT
+					, BU_RE_CONT
+					, BU_RE_DATE
+					, BU_RE_AUT_NM
+					, BU_RE_EV_NM
+					, BU_RE_EV_CONT
+					, BU_RE_EV_AUT_NM
+              FROM AC_BU_RE
+              <include refid="searchFrag"/>
+              ORDER BY BU_RE_SN DESC
+          ) A
+      ) B
+       <![CDATA[
+         WHERE RNUM >= #{startRow} AND RNUM <=#{endRow}
+         ]]>
+   </select>
+   
+
+   <resultMap type="kr.or.ddit.academicBusinessReport.vo.ABRVO" id="aBRMap" autoMapping="true">
+      <id property="buReSn" column="BU_RE_SN"/>
+      <association property="fileGroup" javaType="kr.or.ddit.atch.vo.AtchFileVO">
+         <id property="atchFileId" column="ATCH_FILE_ID"/>
+         <result property="creatDt" column="CREAT_DT"/>
+         <result property="useAt" column="USE_AT"/>
+         <collection property="detailList" ofType="kr.or.ddit.atch.vo.AtchFileDetailVO" autoMapping="true">
+            <id property="atchFileId" column="ATCH_FILE_ID"/>
+            <id property="fileSn" column="FILE_SN"/>
+         </collection>
+      </association>
+   </resultMap>
+
+    
+    <select id="selectABR" parameterType="string" resultMap="aBRMap">
+    
+          WITH ATCH_FILE_VIEW AS(
+          SELECT *
+          FROM ATCH_FILE INNER JOIN ATCH_FILE_DETAIL 
+          USING(ATCH_FILE_ID)
+      )
+      SELECT
+                  BU_RE_SN
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, BU_RE_NM
+					, BU_RE_SHORT_CONT
+					, BU_RE_CONT
+					, BU_RE_AUT_NM
+					, BU_RE_EV_NM
+					, BU_RE_EV_CONT
+					, BU_RE_EV_AUT_NM
+					, BU_RE_DATE
+					
+		          , ATCH_FILE_ID
+		          , FILE_SN
+		          , FILE_STRE_COURS
+		          , STRE_FILE_NM
+		          , ORIGNL_FILE_NM
+		          , FILE_EXTSN
+		          , FILE_SIZE
+		          , FILE_MIME
+		          
+				  , CREAT_DT
+		          , USE_AT
+          
+      FROM AC_BU_RE 
+      LEFT OUTER JOIN ATCH_FILE_VIEW USING (ATCH_FILE_ID)
+      WHERE BU_RE_SN = #{buReSn}
+    </select>
+    
+    <insert id="insertABR" parameterType="kr.or.ddit.academicBusinessReport.vo.ABRVO">
+    	<selectKey order="BEFORE" resultType="string" keyProperty="buReSn">
+    		SELECT AC_BU_RE_SEQ.NEXTVAL FROM DUAL	 
+    	</selectKey>
+    	INSERT INTO AC_BU_RE (
+    				BU_RE_SN
+					, AC_BU_CD
+					, ATCH_FILE_ID
+					, BU_RE_NM
+					, BU_RE_SHORT_CONT
+					, BU_RE_CONT
+					, BU_RE_DATE
+					, BU_RE_AUT_NM
+					, BU_RE_EV_NM
+					, BU_RE_EV_CONT
+					, BU_RE_EV_AUT_NM
+    				) VALUES (
+    				#{buReSn,jdbcType=VARCHAR}		
+					, #{acBuCd,jdbcType=VARCHAR}
+					, #{atchFileId,jdbcType=NUMERIC}
+					, #{buReNm,jdbcType=VARCHAR}
+					, #{buReShortCont,jdbcType=CLOB}
+					, #{buReCont,jdbcType=CLOB}
+					, SYSDATE
+					, #{buReAutNm,jdbcType=VARCHAR}
+					, #{buReEvNm,jdbcType=VARCHAR}
+					, #{buReEvCont,jdbcType=CLOB}
+					, #{buReEvAutNm,jdbcType=VARCHAR}
+    	)
+    	
+    </insert>
+    
+    <update id="updateABR" parameterType="kr.or.ddit.academicBusinessReport.vo.ABRVO">
+    
+				UPDATE AC_BU_RE
+							SET
+						AC_BU_CD = #{acBuCd,jdbcType=VARCHAR}
+						, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+						, BU_RE_NM = #{buReNm,jdbcType=VARCHAR}
+						, BU_RE_SHORT_CONT = #{buReShortCont,jdbcType=CLOB}
+						, BU_RE_CONT = #{buReCont,jdbcType=CLOB}
+						, BU_RE_DATE = SYSDATE
+						, BU_RE_AUT_NM = #{buReAutNm,jdbcType=VARCHAR}
+						, BU_RE_EV_NM = #{buReEvNm,jdbcType=VARCHAR}
+						, BU_RE_EV_CONT = #{buReEvCont,jdbcType=CLOB}
+				WHERE 
+						BU_RE_SN = #{buReSn}
+    </update>
+    
+    <delete id="deleteABR" parameterType="kr.or.ddit.academicBusinessReport.vo.ABRVO">
+    
+    	DELETE FROM AC_BU_RE
+    	WHERE
+    			BU_RE_SN = #{buReSn}
+    
+    </delete>
+    
+    
+   
+   </mapper>

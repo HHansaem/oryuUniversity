@@ -1,0 +1,35 @@
+package kr.or.ddit.schedule.vo.adapter;
+
+import java.time.LocalDateTime;
+
+import kr.or.ddit.schedule.vo.AcademicScheduleVO;
+
+public class AcaSchedultWrapper extends FullCalendarEvent<AcademicScheduleVO>{
+
+	public AcaSchedultWrapper(AcademicScheduleVO adaptee) {
+		super(adaptee);
+	}
+
+	@Override
+	public String getId() {
+		return getData().getAsCd();
+	}
+
+	@Override
+	public String getTitle() {
+		return getData().getAsNm();
+	}
+
+	@Override
+	public LocalDateTime getStart() {
+		return getData().getAsStart().atStartOfDay();
+	}
+
+	@Override
+	public LocalDateTime getEnd() {
+		return getData().getAsEnd().atStartOfDay();
+	}
+	
+	
+
+}

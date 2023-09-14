@@ -1,0 +1,32 @@
+package kr.or.ddit.notice.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.notice.service.NotificationService;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class NoticeCountController {
+	
+	@Inject
+	private NotificationService service;
+	
+	@GetMapping("/notice/count.do")
+	@ResponseBody
+	public String getMessageCount(
+		Authentication authentication
+	) {
+		UserDetails userdetail = (UserDetails)authentication.getPrincipal();
+		String userId = userdetail.getUsername();
+		String count = Integer.toString(service.countNotice(userId));
+		log.info("신규알림개수"+count);
+        return count;
+    }
+}

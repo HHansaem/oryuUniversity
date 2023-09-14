@@ -1,0 +1,153 @@
+package kr.or.ddit.lecture.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.college.dao.CollegeDAO;
+import kr.or.ddit.college.vo.CollegeVO;
+import kr.or.ddit.common.dao.CommonDAO;
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.common.vo.ClassRoomVO;
+import kr.or.ddit.common.vo.DaytimeScheduleVO;
+import kr.or.ddit.department.dao.DepartmentDAO;
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.lecture.service.LectureService;
+import kr.or.ddit.lecture.vo.LectureVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.subject.dao.SubjectDAO;
+import kr.or.ddit.subject.vo.SubjectVO;
+
+@Controller
+@RequestMapping("/lecture/")
+public class LectureInsertController {
+	
+	@Inject
+	private LectureService service;
+	
+	@ModelAttribute("lecture")
+	public LectureVO lecture() {
+		return new LectureVO();
+	}
+	
+	@Inject 
+	private DepartmentDAO departmentDAO;
+	@Inject
+	private CollegeDAO collegeDAO;
+	@Inject
+	private SubjectDAO subjectDAO;
+	@Inject
+	private CommonDAO commonDAO;
+	
+	@ModelAttribute("classRoomList")
+	public List<ClassRoomVO> classRoomList(){
+		return commonDAO.selectClassRoomList();
+	}
+	
+	@ModelAttribute("daytimeScheduleList")
+	public List<DaytimeScheduleVO> daytimeScheduleList(){
+		return commonDAO.selectDaytimeScheduleList();
+	}
+
+	@ModelAttribute("subjectList")
+	public List<SubjectVO> subjectList(){
+		return subjectDAO.SubjectList();
+	}
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList(){
+		return departmentDAO.selectDepartmentList();
+	}
+	@ModelAttribute("collegeList")
+	public List<CollegeVO> collegeList(){
+		return collegeDAO.selectCollegeList();
+	}
+	
+	// 강의 등록(교직원) get
+	@GetMapping("lectureInsert.do")
+	public String lectureForm() {
+		return "lecture/lectureForm";
+	}
+	// 강의 등록(교직원) post
+	@PostMapping("lectureInsert.do")
+	public String lectureInsert(
+		@Validated(InsertGroup.class)@ModelAttribute("lecture") LectureVO lecture
+		, Errors errors
+		, Model model
+	) {
+		String logicalViewName = null;
+
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.createLecture(lecture);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/lectureList.do";
+			}else {
+				model.addAttribute("message", "강의 등록 중 문제 발생");
+				logicalViewName = "lecture/lectureForm";
+			}
+		}else {
+			logicalViewName = "lecture/lectureForm";
+		}
+		
+		return logicalViewName;
+	}
+	
+	// 강의 요청(교수) get
+	@GetMapping("lectureRequest.do")
+	public String requestForm() {
+		return "lecture/lectureForm";
+	}
+	// 강의 요청(교수) post
+	@PostMapping("lectureRequest.do")
+	public String lectureRequest(
+		@Validated(InsertGroup.class)@ModelAttribute("lecture") LectureVO lecture
+		, Errors errors
+		, Model model
+	) {
+		String logicalViewName = null;
+
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.submitLecture(lecture);
+			if(ServiceResult.OK == result) {
+				logicalViewName = "redirect:/lecture/lectureListForPr.do";
+			}else {
+				model.addAttribute("message", "강의 등록 중 문제 발생");
+				logicalViewName = "lecture/lectureForm";
+			}
+		}else {
+			logicalViewName = "lecture/lectureForm";
+		}
+		
+		return logicalViewName;
+	}
+
+	// 강의 요청 수락(교직원)
+	@PostMapping("lectureAllow.do")
+	@ResponseBody
+	public String deleteSubject(
+			String[] lecCd
+	) {
+		int cnt = 0;
+		String result = null;
+		for(String cd : lecCd) {
+			LectureVO lecture = service.retrieveLecture(cd);
+			cnt += service.allowLecture(lecture);
+		}
+		if(cnt==lecCd.length) {
+			result="success";
+		}else {
+			result="fail";
+		}
+		return result;
+	}
+}

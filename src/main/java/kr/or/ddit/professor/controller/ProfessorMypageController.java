@@ -1,0 +1,32 @@
+package kr.or.ddit.professor.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.professor.service.ProfessorService;
+import kr.or.ddit.professor.vo.ProfessorVO;
+
+@Controller
+public class ProfessorMypageController {
+
+	@Inject
+	private ProfessorService service;
+	
+	@RequestMapping("/mypage/professorView.do")
+	public String mypageView(
+		Authentication authentication
+		, Model model
+	){
+		String prCd = authentication.getName();
+		ProfessorVO professor = service.retrieveProfessor(prCd);
+		model.addAttribute("professor", professor);
+		
+		return "professor/professorMypageView";
+	}
+	
+	
+}

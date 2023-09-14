@@ -1,0 +1,34 @@
+package kr.or.ddit.job.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.job.dao.JobDAO;
+import kr.or.ddit.job.vo.JobVO;
+
+@Service
+public class JobServiceImpl implements JobService {
+	
+	@Inject
+	private JobDAO jobDAO;
+	
+	@Override
+	public List<JobVO> retriveJobList(PaginationInfo paging) {
+		// 토탈자료 개수
+		long totalRecord = jobDAO.selectTotalRecord(paging);
+		// 페이징 객체에 토탈레코드 저장
+		paging.setTotalRecord(totalRecord);
+		// 페이징 객체를 이용하여 전체과목조회 후 리턴
+		return jobDAO.selectJobList(paging);
+	}
+
+	@Override
+	public int createJobAd(JobVO job) {
+		return jobDAO.insertJobAd(job);
+	}
+
+}

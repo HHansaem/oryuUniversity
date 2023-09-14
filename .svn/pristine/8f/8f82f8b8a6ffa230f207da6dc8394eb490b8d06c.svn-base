@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.clubMember.dao.ClubMemberDAO">
+
+<select id="stuClubList" resultType="kr.or.ddit.student.vo.StudentVO" parameterType="String">
+SELECT
+   STUDENT.ST_CD
+  , STUDENT.DT_CD
+  , ST_NM
+  , ST_PH
+  , ST_EMAIL
+  , ST_PASS
+  , ST_FIC
+  , ST_LI_CRE
+  , ST_STATUS
+  , ST_ROLE
+  , ST_ADDR1
+  , ST_ADDR2
+  , ST_REG1
+  , ST_REG2
+  , DT_NM
+  , CLUB_MEM_CLASS
+FROM
+    STUDENT INNER JOIN CLUB ON STUDENT.ST_CD = CLUB.ST_CD
+            INNER JOIN DEPARTMENT ON STUDENT.DT_CD = DEPARTMENT.DT_CD
+            INNER JOIN
+            (SELECT PROFESSOR.PR_CD, CLUB.ST_CD FROM PROFESSOR INNER JOIN CLUB ON PROFESSOR.PR_CD = CLUB.PR_CD) P 
+            ON STUDENT.ST_CD = P.ST_CD 
+            INNER JOIN CLUB_MEMBER ON STUDENT.ST_CD=CLUB_MEMBER.ST_CD 
+               
+WHERE  P.PR_CD= #{prCd}
+</select>
+
+<insert id="clubMemInsert" parameterType="kr.or.ddit.clubMember.vo.ClubMemberVO">
+INSERT INTO CLUB_MEMBER (
+CLUB_MEM_CD
+, ST_CD
+, CLUB_CD
+, CLUB_APP_DATE
+, CLUB_MEM_PLAN
+, CLUB_APP_CON
+, CLUB_ENT_STA
+) VALUES(
+CLUB_MEM_SEQ.NEXTVAL
+, #{stCd,jdbcType=VARCHAR}
+,#{clubCd,jdbcType=VARCHAR}
+,SYSDATE
+,#{clubMemPlan,jdbcType=VARCHAR}
+,#{clubAppCon,jdbcType=VARCHAR}
+,'신청')
+</insert>
+
+<sql id="searchFrag">
+    <trim prefix=" WHERE ">
+        <if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+            <choose>
+                <when test="simpleCondition.searchType eq 'stCd'">
+                    INSTR(ST_CD, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'stNm'">
+                    INSTR(ST_NM, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <when test="simpleCondition.searchType eq 'dtNm'">
+                    INSTR(DT_NM, #{simpleCondition.searchWord}) > 0 
+                </when>
+                <otherwise>
+                    INSTR(ST_CD, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(ST_NM, #{simpleCondition.searchWord}) > 0
+                    OR
+                    INSTR(DT_NM, #{simpleCondition.searchWord}) > 0
+                </otherwise>
+            </choose>
+        </if>
+    </trim>
+</sql>
+
+
+<select id="prfselectTotalRecord" resultType="long" parameterType="kr.or.ddit.clubMember.vo.ClubMemberVO">
+ WITH STUDENT_INFO AS (
+SELECT  ST_CD,ST_NM, DT_NM FROM STUDENT S 
+INNER JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD
+ )
+ SELECT COUNT(*)
+ FROM CLUB_MEMBER C 
+ INNER JOIN STUDENT_INFO S ON C.ST_CD = S.ST_CD 
+ <include refid="searchFrag"></include>
+</select>
+
+<select id="clubMemInsertList" resultType="kr.or.ddit.clubMember.vo.ClubMemberVO">
+
+SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.*
+          FROM(
+        SELECT
+        S.ST_CD
+        , ST_NM
+        , ST_PH
+        , DT_NM
+        , CLUB_ENT_STA
+        ,CLUB_APP_DATE
+    FROM STUDENT S
+    INNER JOIN DEPARTMENT D ON S.DT_CD = D.DT_CD
+    INNER JOIN CLUB_MEMBER C ON S.ST_CD = C.ST_CD
+              WHERE CLUB_CD = #{clubCd} AND CLUB_ENT_STA='신청'
+              ORDER BY CLUB_APP_DATE DESC
+          ) A
+      ) B
+<![CDATA[
+      WHERE RNUM >= #{paging.startRow} AND RNUM <=#{paging.endRow}
+]]>
+
+</select>
+
+<select id="clubMemInsertView" parameterType="String" resultType="kr.or.ddit.clubMember.vo.ClubMemberVO">
+SELECT 
+C.ST_CD
+,ST_NM
+,DT_NM
+,ST_EMAIL
+,CLUB_APP_CON
+,CLUB_MEM_PLAN
+,CLUB_APP_DATE
+FROM CLUB_MEMBER C
+INNER JOIN(
+SELECT ST_CD, ST_NM, DT_NM, ST_EMAIL
+FROM STUDENT S INNER JOIN DEPARTMENT D ON S.DT_CD=D.DT_CD
+) S ON C.ST_CD = S.ST_CD
+WHERE C.ST_CD=#{stCd}
+</select>
+
+</mapper>

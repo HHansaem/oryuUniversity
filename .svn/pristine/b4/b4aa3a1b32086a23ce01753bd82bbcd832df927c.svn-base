@@ -1,0 +1,52 @@
+package kr.or.ddit.acBuDoc.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.atch.vo.AtchFileVO;
+import lombok.Data;
+
+@Data
+public class AcBuDocVO {
+
+	private long rnum; // low값 순번
+	@NotBlank
+	private String buDocCd; //학술문서코드 PK | AC_DOC_CD_SEQ ->시퀀스명
+	@NotBlank
+	private String acBuCd; //학술사업코드 FK
+	private String buDocNm; //학술문서이름
+	private String buDocShortCont; //학술문서내용요약
+	private String buDocCont; //학술문서내용
+	private String buDocAutNm; //학술문서저자명
+	private String buDocEvNm; //학술문서평가명 -> 적합, 부적합 관리자가 입력!
+	private String buDocEvCont; //학술문서평가내용 -> 부족한 내용이나, 평가에 대해 입력. 교직원의 상세페이지에서 입력할 수 있게!
+	private String buDocEvAutNm; // 학술문서평가작성자명
+	private String buDocClass; //학술문서클래스 분류명 -> 분류명은 사회과학, 인문학 등으로 나눠질 예정.
+	private String buDocKeyword; // 학술문서클래스키워드명
+	private LocalDate buDocPostDate; //학술문서게시일
+
+// --- 파일 업로드 부분 ---
+	
+	private Integer atchFileId; //첨부파일코드
+	
+	private MultipartFile[] acBuDocFiles; //acBuDoc첨부파일
+	
+	private AtchFileVO fileGroup; //AtchFileVO를 가진 fileGroup
+	
+	private List<MultipartFile> acBuDocUploadFiles; //첨부파일 리스트를 가진 acBuDocFiles
+
+// --- 총합, 랭킹용 변수---
+    
+	private List<DocumentSummaryVO> documentSummaries;
+   
+	
+//랭킹용.    
+    
+	private int buDocRank;
+	
+//평가 검색용
+}

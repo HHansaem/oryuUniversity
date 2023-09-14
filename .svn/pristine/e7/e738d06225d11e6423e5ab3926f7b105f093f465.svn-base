@@ -1,0 +1,155 @@
+package kr.or.ddit.clubMember.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.club.vo.ClubVO;
+import kr.or.ddit.clubMember.dao.ClubMemberDAO;
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.student.vo.StudentVO;
+
+@Service
+public class ClubMemberServiceImpl implements ClubMemberService {
+	@Inject
+	private ClubMemberDAO clubMemberDAO;
+	
+	@Override
+	public List<StudentVO> stuClubList(String clubCd) {
+		return clubMemberDAO.stuClubList(clubCd);
+	}
+
+	@Override
+	public int clubMemInsert(ClubMemberVO clubMem) {
+		return clubMemberDAO.clubMemInsert(clubMem);
+	}
+
+	@Override
+	public ClubMemberVO clubMemInsertView(String stCd,String clubCd) {
+		return clubMemberDAO.clubMemInsertView(stCd,clubCd);
+	}
+
+	@Override
+	public List<ClubMemberVO> clubMemInsertList(PaginationInfo paging,String clubCd) {
+		
+		long totalRecord = clubMemberDAO.prfselectTotalRecord(paging, clubCd);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubMemberDAO.clubMemInsertList(paging,clubCd);
+	}
+
+	@Override
+	public int clubMemberInsertPass(String stCd, String clubCd) {
+		return clubMemberDAO.clubMemberInsertPass(stCd,clubCd);
+	}
+
+	@Override
+	public int clubMemberInsertNoPass(String stCd, String clubCd) {
+		return clubMemberDAO.clubMemberInsertNoPass(stCd,clubCd);
+	}
+
+
+	@Override
+	public List<ClubMemberVO> stuReqClubList(PaginationInfo paging,String stCd) {
+		
+		long totalRecord = clubMemberDAO.stuReqClubCount(stCd);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubMemberDAO.stuReqClubList(paging, stCd);
+	}
+
+	@Override
+	public ClubMemberVO stuClassCheck(String stCd,String clubCd) {
+		return clubMemberDAO.stuClassCheck(stCd,clubCd);
+	}
+
+
+	@Override
+	public int clubMemberWthdrClub(String stCd,String clubCd) {
+		return clubMemberDAO.clubMemberWthdrClub(stCd,clubCd);
+	}
+
+	@Override
+	public List<ClubMemberVO> clubMemberWthdrClubList(PaginationInfo paging,String clubCd) {
+		long totalRecord = clubMemberDAO.clubMemberWthdrClubCount(clubCd);
+		
+		paging.setTotalRecord(totalRecord);
+		
+		return clubMemberDAO.clubMemberWthdrClubList(paging, clubCd);
+	}
+
+	
+	
+	
+//	@Override
+//	public int clubHeadDownUpdate(String stCd) {
+//		return clubMemberDAO.clubHeadDownUpdate(stCd);
+//	}
+
+//	@Override
+//	public int clubHeadUpUpdate(String stCd, String clubCd) {
+//		return clubMemberDAO.clubHeadUpUpdate(stCd,clubCd);
+//	}
+
+	@Override
+	public long prfselectTotalRecord(PaginationInfo paging, String clubCd) {
+		return clubMemberDAO.prfselectTotalRecord(paging, clubCd);
+	}
+
+	@Override
+	public long clubMemberWthdrClubCount(String clubCd) {
+		return clubMemberDAO.clubMemberWthdrClubCount(clubCd);
+	}
+
+	@Override
+	public long stuReqClubCount(String stCd) {
+		return clubMemberDAO.stuReqClubCount(stCd);
+	}
+
+//	@Override
+//	@Transactional
+//	public int clubHeadUpdate(String stCd1, String stCd2) {
+//		if ((stCd1 != null && !stCd1.trim().isEmpty())&&(stCd2 !=null && !stCd2.trim().isEmpty())) {
+//		int successDown = clubMemberDAO.clubHeadDownUpdate(stCd1);
+//			if(successDown>0)
+//			{
+//				int successUp=clubMemberDAO.clubHeadUpUpdate(stCd2);
+//				if(successUp>0)
+//				{
+//					return 1;
+//				}else {
+//					return 0;
+//				}
+//			}else {
+//				return 0;
+//			}
+//		}else {
+//			return 0;
+//		}
+//	}
+
+	@Override
+	public List<StudentVO> prfClubList(String prCd) {
+		return clubMemberDAO.prfClubList(prCd);
+	}
+
+	@Override
+	public int stuClassWthdrClub(String stCd, String clubCd) {
+		return clubMemberDAO.stuClassWthdrClub(stCd, clubCd);
+	}
+
+//	@Override
+//	public int clubHeadDownUpdate(String clubCd) {
+//		return clubMemberDAO.clubHeadDownUpdate(clubCd);
+//	}
+
+
+
+
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.graduation.dao.GraduationDAO">
+	
+<!-- 	SELECT DISTINCT -->
+<!--     G.GE_GRAD_COND_TYPE, -->
+<!--     G.COLGE_CD, -->
+<!--     G.GRAD_COND -->
+<!-- FROM -->
+<!--     STUDENT S -->
+<!--     JOIN DEPARTMENT D ON S.DT_CD = D.COLGE_CD -->
+<!--     JOIN GRADUATION G ON D.COLGE_CD = G.COLGE_CD -->
+<!-- WHERE -->
+<!--     S.ST_CD = '1'; -->
+	
+</mapper>

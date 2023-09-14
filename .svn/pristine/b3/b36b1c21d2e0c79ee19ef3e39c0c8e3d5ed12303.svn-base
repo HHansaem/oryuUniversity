@@ -1,0 +1,49 @@
+package kr.or.ddit.clubMember.service;
+
+import java.util.List;
+
+import kr.or.ddit.clubMember.vo.ClubMemberVO;
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.student.vo.StudentVO;
+
+public interface ClubMemberService {
+
+	
+	/**
+	 * 동아리에 소속된 부원
+	 * @param clubCd
+	 * @return
+	 */
+	public List<StudentVO> stuClubList(String prCd);
+	
+	/**
+	 * 동아리 가입 신청
+	 */
+	public int clubMemInsert(ClubMemberVO clubMem);
+	
+	/**
+	 * 동아리 가입 신청 세부사항
+	 */
+	public ClubMemberVO clubMemInsertView(String stCd);
+	
+	/**
+	 * (교수) 동아리 신청서 목록
+	 */
+	public List<ClubMemberVO> clubMemInsertList(PaginationInfo paging);
+	
+	/**
+	 * 동아리 신청 가입 승인
+	 */
+	public int clubMemPass(String stCd);
+	
+	/**
+	 * 동아리 신청 가입 거절
+	 */
+	public int clubMemNoPass(String stCd);
+	
+	/**
+	 * 본인이 신청한 동아리 신청서 확인
+	 */
+	public List<ClubMemberVO> stuClubMemInsertList(String stCd);
+	
+}

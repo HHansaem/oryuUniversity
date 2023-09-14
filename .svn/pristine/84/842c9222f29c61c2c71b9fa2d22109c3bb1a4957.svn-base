@@ -1,0 +1,32 @@
+package kr.or.ddit.lectureContents.attendance.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.lectureContents.attendance.service.AttendanceService;
+import kr.or.ddit.lectureContents.vo.AttendanceVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+@Controller
+@RequestMapping("/lecture/AttendanceInsert.do")
+public class AttendanceInsertController {
+	
+	@Inject
+	AttendanceService atService;
+	
+	
+	@PostMapping
+	public String saveAttendance(List<AttendanceVO> attendanceList) {
+		
+		ServiceResult result = atService.registerAttendance(attendanceList); 
+		
+		
+		return "";
+	}
+}

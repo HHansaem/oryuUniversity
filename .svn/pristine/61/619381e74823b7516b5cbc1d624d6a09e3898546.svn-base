@@ -1,0 +1,54 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<style>
+	.list-container {
+		border: 1px solid silver;
+		width: 65%
+	}
+</style>
+<div class="list-container">
+	<table class="table">
+		<tr>
+			<td>
+				<h4><br>제출 목록</h4>
+			</td>
+		</tr>
+	</table>
+	<table class="table">
+		<thead class="table-light">
+			<tr>
+				<th>학번</th>
+				<th>이름</th>
+				<th>파일명</th>
+				<th>제출일시</th>
+				<th>점수</th>
+			<tr>
+		</thead>
+		<tbody>
+			<c:set var="assignSubList" value="${paging.dataList }"/>
+			<c:choose>
+				<c:when test="${empty assignSubList }">
+					<tr>
+						<td colspan="5">제출된 과제가 없습니다.</td>
+					</tr>
+				</c:when>
+				<c:otherwise>
+					<c:forEach items="${assignSubList }" var="assignSub">
+						<tr>
+						<c:url value="/lecture/assignSubList.do" var="viewURL">
+							<c:param name="what" value="${assignSub.assuCd }"></c:param>
+						</c:url>
+						<td>${assignSub.stCd }</td>
+<%-- 						<td><a href="${viewURL }">${assignSub.atchFileId }</a></td> --%>
+						<td>${assignSub.stNm }</td>
+						<td>${assignSub.atchFileId }</a></td>
+						<td>${assignSub.submDate }</td>
+						<td>${assignSub.assuScore }</td>
+					</tr>
+					</c:forEach>
+				</c:otherwise>
+			</c:choose>
+		</tbody>
+	</table>
+</div>

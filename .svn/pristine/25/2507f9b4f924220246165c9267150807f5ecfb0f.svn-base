@@ -1,0 +1,90 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<table class="table">
+	<thead>
+		<tr>
+			<th colspan="9">
+				<div class="d-flex justify-content-end">
+					<div class="d-flex col-md-5">
+						<select class="form-select">
+							<option value>주차선택</option>
+							<option value>1주차</option>
+							<option value>2주차</option>
+							<option value>3주차</option>
+							<option value>4주차</option>
+							<option value>5주차</option>
+							<option value>6주차</option>
+							<option value>7주차</option>
+							<option value>8주차</option>
+							<option value>9주차</option>
+							<option value>10주차</option>
+							<option value>11주차</option>
+							<option value>12주차</option>
+							<option value>13주차</option>
+							<option value>14주차</option>
+							<option value>15주차</option>
+							<option value>16주차</option>
+						</select>
+						<select class="form-select">
+							<option value>교시선택</option>
+							<option value=""></option>
+						</select>
+						<input type="button" class="btn btn-info" value="검색하기" style="color:white;"/>
+					</div>
+				</div>
+			</th>
+		</tr>
+		<tr class="custom-color">
+			<th colspan="9" class="text-center">1주차 월요일 2교시</th>
+		</tr>
+		<tr>
+			<th class="text-center">
+				학번
+			</th>
+			<th class="text-center">
+				이름
+			</th>
+			<th class="text-center">
+				학과
+			</th>
+			<th class="text-center">출석일</th>
+			<th class="text-center">결석일</th>
+			<th class="text-center">지각일</th>
+			<th colspan="3" class="text-center">
+				<span>출석상태</span>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="text-center custom-Font">
+				20230823
+			</td>
+			<td class="text-center custom-Font">
+				김냠냠
+			</td>
+			<td class="text-center custom-Font">
+				컴퓨터공학과
+			</td>
+			<td class="text-center">7일</td>
+			<td class="text-center">1일</td>
+			<td class="text-center">1일</td>
+			<td colspan="3">
+				<div class="d-flex justify-content-center">
+					<div class="form-check form-check-inline">
+						<input class="form-check-input" type="radio" name="attendance" value="present"/>
+						<label class="form-check-label custom-Font">출석</label>
+					</div>
+					<div class="form-check form-check-inline">
+						<input class="form-check-input" type="radio" name="attendance" value="late"/>
+						<label class="form-check-label custom-Font">지각</label>
+					</div>
+					<div class="form-check form-check-inline">
+						<input class="form-check-input" type="radio" name="attendance" value="absent"/>
+						<label class="form-check-label" style="font-size:17px;">결석</label>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>

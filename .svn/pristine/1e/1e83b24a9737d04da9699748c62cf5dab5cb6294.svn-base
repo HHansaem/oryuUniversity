@@ -1,0 +1,30 @@
+package kr.or.ddit.academicbusinessmanagement.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.academicbusinessmanagement.service.AcademicBusinessEvalutionService;
+import kr.or.ddit.academicbusinessmanagement.vo.AcademicBusinessEvaluationVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/AcademicBusinessEvalution")
+public class AcademicBusinessEvalutionController {
+	
+	@Autowired
+	AcademicBusinessEvalutionService service;
+
+	public List<AcademicBusinessEvaluationVO> AcademicBusinessEvalutionList(Model model){
+		
+//		List<AcademicBusinessEvaluationVO> getList = service.
+		
+		return null;
+		
+	}
+	
+}

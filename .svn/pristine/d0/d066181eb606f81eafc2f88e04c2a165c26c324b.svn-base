@@ -1,0 +1,61 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<!-- 동아리 수정 -->
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+   <div class="h-100">
+      <div class="custom-card">
+         <div class="card-header" style="border-radius: 20px 20px 0 0; background-color:#154FA9; font-weight:bold; color:white;">동아리 수정 요청</div>
+         <div class="card-body">
+		<form:form method="post" modelAttribute="club"
+			action="${pageContext.request.contextPath }/club/clubUpdate.do"
+			enctype="multipart/form-data">
+			<table class="table table-border">
+				<tr>
+					<th>동아리 이름</th>
+					<td><input class="form-control" type="text" name="clubNm"
+						value="${club.clubNm }" /><span class="error">${errors["club.clubNm"]}</span></td>
+				</tr>
+				<tr>
+					<th>동아리 부장</th>
+					<td><input class="form-control" type="text" name="clubNm"
+						value="${club.studentVO.stNm}" /><span class="error">${errors["club.studentVO.stNm"]}</span>
+					</td>
+				</tr>
+				<tr>
+					<th>담당교수명</th>
+					<td>${club.professorVO.prNm }</td>
+				</tr>
+				<tr>
+					<th>동아리계획서</th>
+					<td><textarea class="form-control"
+							name="form-control form-control-lg">${club.clubPlan }</textarea>
+						<span class="error">${errors["club.clubPlan"]}</span></td>
+				</tr>
+				<tr>
+					<th>동아리 소개글</th>
+					<td><textarea class="form-control"
+							name="form-control form-control-lg">${club.clubDetail }</textarea>
+						<span class="error">${errors["club.clubDetail"]}</span></td>
+				</tr>
+				<tr>
+					<th>동아리 대표사진</th>
+					<td><input type="file" name="clubFicFile" /> <form:errors
+							path="clubFicFile" class="error" /></td>
+				</tr>
+
+				<tr>
+					<td colspan="2"><input class="btn btn-primary" type="submit"
+						value="수정요청"> <input class="btn btn-danger" type="reset"
+						value="취소" onclick="history.back();"></td>
+				</tr>
+			</table>
+		</form:form>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>

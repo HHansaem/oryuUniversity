@@ -1,0 +1,34 @@
+package kr.or.ddit.lectureContents.vo;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.common.validate.DeleteGroup;
+import kr.or.ddit.validate.groups.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "eqCd")
+public class ExamQuestionVO {
+	@NotBlank(groups = {UpdateGroup.class})
+	private String eqCd;
+	@NotBlank(groups = UpdateGroup.class)
+	private String examCd;
+	private String eqType;
+	private String eqQt;
+	private String eqAnsw;
+	private Integer eqScore;
+	@NotNull(groups = DeleteGroup.class)
+	private Integer eqNum;
+	private String eqView1;
+	private String eqView2;
+	private String eqView3;
+	private String eqView4;
+	private List<ExamViewVO> examViewList;
+}

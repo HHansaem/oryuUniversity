@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.email.dao.MailDAO">
+<select id="mailAutoLogin" parameterType="String" resultType="kr.or.ddit.email.vo.MailVO">
+SELECT DISTINCT MAIL_ID,MAIL_PW,MAIL_URL,MAIL_PORT FROM MAIL WHERE ID =#{id}
+</select>
+
+<insert id="mailIDInsert" parameterType="kr.or.ddit.email.vo.MailVO">
+INSERT INTO MAIL(MAIL_ID,MAIL_PW,MAIL_URL,MAIL_PORT,ID)
+VALUES(#{mailId},#{mailPw},'pop.naver.com','995',#[id])
+</insert>
+
+<select id="mailCheck" parameterType="String" resultType="long">
+SELECT DISTINCT COUNT(*) FROM MAIL WHERE ID = #{id}
+</select>
+
+</mapper>

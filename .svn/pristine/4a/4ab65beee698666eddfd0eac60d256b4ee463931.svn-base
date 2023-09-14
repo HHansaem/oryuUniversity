@@ -1,0 +1,26 @@
+package kr.or.ddit.lectureContents.exam.controller;
+
+import java.util.Collection;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/lecture/examQueView.do")
+public class ExamQueDetailController {
+	
+	@GetMapping
+	public String examQueView(Model model,String examCd,String lecCd,Authentication authentication) {
+		if(authentication != null) {
+			
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			userDetails.getUsername();
+		}
+		return null;
+	}
+}

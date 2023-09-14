@@ -1,0 +1,154 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<form:form method="post" modelAttribute="staff" enctype="multipart/form-data">
+<table class="table">
+	<tr>
+		<th>직번</th>
+		<td> 
+			<form:input path="tsCd"/>
+			<form:errors path="tsCd" class="error" />
+		</td>	
+	</tr>
+	<tr>
+		<th>부서</th>
+		<td> 
+			<form:select path="tsDep" id="tsDepSelect" >
+				<form:option value="" label="부서선택" />
+				<form:option value="행정" label="행정" />
+				<form:option value="학사" label="학사" />
+			</form:select>
+			<form:errors path="tsDep" class="error" />
+			<span id="tsDepNotSelect" class="error"></span>
+		</td>	
+	</tr>
+	<tr>
+		<th>이름</th>
+		<td>
+			<form:input path="tsNm" />
+			<form:errors path="tsNm" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>전화번호</th>
+		<td>
+			<form:input path="tsPh" />
+			<form:errors path="tsPh" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주민등록번호</th>
+		<td>
+			<form:input path="tsReg1" />
+			<form:errors path="tsReg1" class="error"/>
+			-
+			<form:input path="tsReg2" />
+			<form:errors path="tsReg2" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>프로필사진</th>
+		<td>
+			<input type="file" name="tsImage" accept="image/*" />
+			<form:errors path="tsFic" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>근적상태</th>
+		<td> 
+			<form:select path="tsStatus">
+				<form:option value="재직" label="재직" />
+				<form:option value="휴직" label="휴직" />
+				<form:option value="탈퇴" label="탈퇴" />
+			</form:select>
+			<form:errors path="tsStatus" class="error" />
+		</td>
+	</tr>
+	<tr>
+		<th>이메일</th>
+		<td>
+			<form:input path="tsEmail" type="email"/>
+			<form:errors path="tsEmail" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>주소</th>
+		<td>
+			<form:input path="tsAddr1" id="address"/>
+			<button type="button" id="address_btn">주소 검색</button>
+			<form:errors path="tsAddr1" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>상세주소</th>
+		<td>
+			<form:input path="tsAddr2" id="address_detail"/>
+			<form:errors path="tsAddr2" class="error"/>
+		</td>
+	</tr>
+	<tr>
+		<th>비밀번호</th>
+		<td>
+			<form:input path="tsPass" id="tsPass" type="password"/>
+			<form:errors path="tsPass" class="error"/>
+		</td>
+	</tr>
+	<tr>
+    	<th>비밀번호 확인</th>
+    	<td>
+        	<input id="tsPassConfirm" type="password" />
+        	<span id="passwordMatchError" class="error"></span>
+   		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="submit" value="등록" onclick="onSubmitForm(event)">
+			<input type="reset" value="취소">
+			<input type="button" value="뒤로가기" 
+				onclick="history.back();">
+			<a href="<c:url value='/staff/staffList.do'/>">목록으로</a>
+		</td>
+	</tr>
+</table>
+</form:form>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+window.onload = function(){
+    document.getElementById("address_btn").addEventListener("click", function(){
+        new daum.Postcode({
+            oncomplete: function(data) {
+                document.getElementById("address").value = data.address;
+                document.getElementById("address_detail").focus();
+            }
+        }).open();
+    });
+    document.getElementById("tsPassConfirm").addEventListener("keyup", function() {
+        var password = document.getElementById("tsPass").value;
+        var passwordConfirm = this.value;
+
+        if (password !== passwordConfirm) {
+            document.getElementById("passwordMatchError").innerText = "비밀번호가 일치하지 않습니다.";
+        } else {
+            document.getElementById("passwordMatchError").innerText = "비밀번호가 일치합니다.";
+        }
+    });
+}
+</script>
+<script>
+	function onSubmitForm(event) {
+		var department = document.getElementById("tsDepSelect").value;
+	    var password = document.getElementById("tsPass").value;
+	    var passwordConfirm = document.getElementById("tsPassConfirm").value;
+	
+		if (!department) {
+			document.getElementById("tsDepNotSelect").innerText = "부서를 선택해주세요."
+       		event.preventDefault();
+    }
+	
+	    if (password !== passwordConfirm) {
+	        alert("비밀번호가 일치하지 않습니다.");
+	        event.preventDefault();
+	    }
+	}
+</script>

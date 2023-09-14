@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.club.dao.ClubDAO">
+
+
+ 
+<insert id="insertClub" parameterType="kr.or.ddit.club.vo.ClubVO">
+  INSERT INTO CLUB(CLUB_CD, ST_CD, PR_CD, CLUB_NM, CLUB_PLAN, CLUB_STATUS, CLUB_APP_DATE)
+  VALUES(CLUB_SEQ.NEXTVAL, #{stCd}, (SELECT PR_CD FROM PROFESSOR WHERE PR_NM=#{professorVO.prNm}),
+         #{clubNm}, #{clubPlan}, #{clubStatus}, SYSDATE)
+</insert>
+
+<select id="insertViewClub" parameterType="kr.or.ddit.club.vo.ClubVO" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM
+, C.CLUB_PLAN, C.CLUB_APP_DATE, C.CLUB_STATUS, C.CLUB_REFUSE 
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE C.CLUB_CD = #{clubCd}
+</select>
+
+<select id="insertListClub" parameterType="kr.or.ddit.club.vo.ClubVO" resultType="kr.or.ddit.club.vo.ClubVO">
+SELECT C.CLUB_CD,C.ST_CD, S.ST_NM AS "STUDENTVO.stNm", P.PR_NM AS "PROFESSORVO.prNm", C.CLUB_NM, C.CLUB_PLAN, C.CLUB_STATUS 
+FROM CLUB C 
+INNER JOIN student S ON C.ST_CD = S.ST_CD 
+INNER JOIN professor P ON C.PR_CD = P.PR_CD 
+WHERE C.ST_CD = #{Cd} OR C.PR_CD=#{Cd}
+</select>
+
+<update id="insertApproval" parameterType="String">
+UPDATE CLUB SET CLUB_STATUS=#{param2}
+WHERE CLUB_CD=#{param1}
+
+</update>
+
+<update id="insertRefuse" parameterType="String">
+UPDATE CLUB SET CLUB_STATUS = #{clubStatus}, CLUB_REFUSE = #{clubRefuse}
+WHERE CLUB_CD=#{clubCd}
+
+</update>
+
+</mapper>

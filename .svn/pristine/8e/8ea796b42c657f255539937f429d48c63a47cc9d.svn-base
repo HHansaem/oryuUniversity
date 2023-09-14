@@ -1,0 +1,23 @@
+package kr.or.ddit.lectureContents.vo;
+
+import javax.validation.constraints.NotBlank;
+
+import kr.or.ddit.common.validate.InsertGroup;
+import kr.or.ddit.common.validate.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of = "attsCd")
+public class AttendanceStateVO {
+	@NotBlank(groups=UpdateGroup.class)
+	private String attsCd;
+	@NotBlank(groups=InsertGroup.class)
+	private String attsSche;
+	@NotBlank(groups=InsertGroup.class)
+	private String attsState;
+	@NotBlank(groups=InsertGroup.class)
+	private String attsWeek;
+	@NotBlank(groups=InsertGroup.class)
+	private String attCd;
+}

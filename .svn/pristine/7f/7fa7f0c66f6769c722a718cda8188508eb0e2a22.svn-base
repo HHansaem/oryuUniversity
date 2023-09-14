@@ -1,0 +1,50 @@
+package kr.or.ddit.lectureContents.assignmentSub.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lectureContents.assignment.service.AssignmentService;
+import kr.or.ddit.lectureContents.assignmentSub.service.AssignmentSubService;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+
+@Controller
+@RequestMapping("/lecture")
+public class AssignmentSubRetreiveController {
+	
+	@Inject
+	private AssignmentSubService service;
+	
+	@RequestMapping("assignSubList.do")
+	public String assignSubList(
+			Model model
+			, @RequestParam Map<String, Object> detailCondition
+			, String lecCd
+			, String assiCd
+			, String stCd
+	) {
+		PaginationInfo<AssignmentSubVO> paging = new PaginationInfo<>();
+		detailCondition.put("lecCd", lecCd);
+		detailCondition.put("assiCd", assiCd);
+		detailCondition.put("stCd", stCd);
+		
+		paging.setDetailCondition(detailCondition);
+		
+		List<AssignmentSubVO> assignSubList = service.retrieveAssignmentSubList(paging);
+		paging.setDataList(assignSubList);
+		
+		model.addAttribute("paging", paging);
+		
+		return "lecture/homework/ajax/homeworkSubList";
+	}
+}
+
+
+

@@ -1,0 +1,46 @@
+package kr.or.ddit.lectureContents.assignmentSub.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.common.vo.PaginationInfo;
+import kr.or.ddit.lectureContents.assignmentSub.dao.AssignmentSubDAO;
+import kr.or.ddit.lectureContents.vo.AssignmentSubVO;
+
+@Service
+public class AssignmentSubServiceImpl implements AssignmentSubService {
+
+	@Inject
+	private AssignmentSubDAO assignSubDAO;
+	
+	@Override
+	public List<AssignmentSubVO> retrieveAssignmentSubList(PaginationInfo paging) {
+		return assignSubDAO.selectAssignmentSubList(paging);
+	}
+
+	@Override
+	public AssignmentSubVO retrieveAssignmentSub(String lecCd, String assiCd, String stCd) {
+		return assignSubDAO.selectAssignmentSub(lecCd, assiCd, stCd);
+	}
+
+	@Override
+	public boolean modifyAssignmentScore(AssignmentSubVO assignSub) {
+		boolean result;
+		int cnt = assignSubDAO.updateAssignmentScore(assignSub);
+		if(cnt > 0) {
+			result = true;
+		}else {
+			result = false;
+		}
+		return result;
+	}
+
+}
+
+
+
+
+

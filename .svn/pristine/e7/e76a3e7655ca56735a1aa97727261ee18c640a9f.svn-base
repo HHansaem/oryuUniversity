@@ -1,0 +1,32 @@
+package kr.or.ddit.academicbusinessmanagement.vo;
+
+import java.time.LocalDate;
+
+import javax.validation.constraints.NotBlank;
+
+import org.apache.ibatis.type.Alias;
+
+import lombok.Data;
+
+/**
+ * @author PC-22 학술사업 보고서 VO
+ */
+@Data
+@Alias("abr")
+public class AcademicBusinessReportVO extends AcademicBusinessManagementVO{
+
+	@NotBlank
+	private String buReSn;
+	@NotBlank
+	private String acBuCd;
+	private Integer atchFileId;
+	private String buReNm;
+	private String buReShortCont;
+	private String buReCont;
+	private LocalDate buReDate;
+	private String buReAutNm;
+	private String buReEvNm;
+	private String buReEvCont;
+	private String buReEvAutNm;
+
+}

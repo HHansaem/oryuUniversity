@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.professor.dao.ProfessorDAO">
+	
+	<sql id="searchFrag">
+		<where>
+        	<if test="simpleCondition neq null and simpleCondition.searchWord neq null and not simpleCondition.searchWord.isEmpty()">
+        		<choose>
+        			<when test="simpleCondition.searchType eq 'name'">
+        				INSTR(PR_NM, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<when test="simpleCondition.searchType eq 'prnum'">
+        				INSTR(PR_CD, #{simpleCondition.searchWord}) > 0 
+        			</when>
+        			<otherwise>
+	        			INSTR(PR_NM, #{simpleCondition.searchWord}) > 0
+	        			OR 
+	        			INSTR(PR_CD, #{simpleCondition.searchWord}) > 0 
+        			</otherwise>
+        		</choose>
+        	</if>
+        	<if test="detailCondition neq null">
+        		<choose>
+        			<when test="detailCondition.dtCd neq null and not detailCondition.dtCd.isEmpty">
+			            AND D.DT_CD = #{detailCondition.dtCd}
+			        </when>
+        		</choose>
+        		<choose>
+        			<when test="detailCondition.prStatus neq null and not detailCondition.prStatus.isEmpty">
+			            AND PR_STATUS = #{detailCondition.prStatus}
+			        </when>
+        		</choose>
+        	</if>
+        </where>
+	</sql>
+	<select id="selectTotalRecord" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, D.DT_NM
+		    FROM (
+				SELECT 
+					PR_CD, DT_CD, PR_NM, PR_PH, PR_EMAIL
+					,PR_PASS, PR_PIC, PR_ROLE, PR_STATUS
+					,PR_ADDR1, PR_ADDR2, PR_REG1, PR_REG2
+				FROM PROFESSOR
+		       	ORDER BY ROWID DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+			<include refid="searchFrag" />
+		)
+		SELECT COUNT(*)
+		FROM ORDEREDMEMBER
+	</select>
+	
+	<select id="selectProfessorList" resultType="kr.or.ddit.professor.vo.ProfessorVO" parameterType="kr.or.ddit.common.vo.PaginationInfo">
+		WITH ORDEREDMEMBER AS (
+		    SELECT ROWNUM RNUM, A.*, D.DT_NM
+		    FROM (
+				SELECT 
+					PR_CD, DT_CD, PR_NM, PR_PH, PR_EMAIL
+					,PR_PASS, PR_PIC, PR_ROLE, PR_STATUS
+					,PR_ADDR1, PR_ADDR2, PR_REG1, PR_REG2
+				FROM PROFESSOR
+		       	ORDER BY TO_NUMBER(PR_CD) DESC
+		    ) A
+		    LEFT JOIN DEPARTMENT D ON A.DT_CD = D.DT_CD
+			<include refid="searchFrag" />
+		)
+		SELECT *
+		FROM ORDEREDMEMBER
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="selectProfessor" parameterType="string" resultType="kr.or.ddit.professor.vo.ProfessorVO">
+		SELECT 
+			P.PR_CD, D.DT_NM, P.PR_NM, P.PR_PH, P.PR_EMAIL
+			,P.PR_PASS, P.PR_PIC, P.PR_ROLE, P.PR_STATUS
+			,P.PR_ADDR1, P.PR_ADDR2, P.PR_REG1, P.PR_REG2, P.DT_CD
+		FROM PROFESSOR P 
+		INNER JOIN DEPARTMENT D ON P.DT_CD = D.DT_CD 
+		WHERE P.PR_CD = #{prCd}
+	</select>
+	
+	<insert id="insertProfessor" parameterType="kr.or.ddit.professor.vo.ProfessorVO">
+		INSERT INTO PROFESSOR(
+				PR_ADDR1
+				,PR_ADDR2
+				,PR_REG1
+				,PR_REG2
+				,PR_CD
+				,DT_CD
+				,PR_NM
+				,PR_PH
+				,PR_EMAIL
+				,PR_PASS
+				,PR_PIC
+				) 
+			VALUES(
+				 #{prAddr1,jdbcType=VARCHAR}
+				, #{prAddr2,jdbcType=VARCHAR}
+				, #{prReg1,jdbcType=VARCHAR}
+				, #{prReg2,jdbcType=VARCHAR}
+				, #{prCd,jdbcType=VARCHAR}
+				, #{dtCd,jdbcType=VARCHAR}
+				, #{prNm,jdbcType=VARCHAR}
+				, #{prPh,jdbcType=VARCHAR}
+				, #{prEmail,jdbcType=VARCHAR}
+				, #{prPass,jdbcType=VARCHAR}
+				, #{prPic,jdbcType=VARCHAR}
+				)
+	</insert>
+	
+	<update id="updateProfessor" parameterType="kr.or.ddit.professor.vo.ProfessorVO">
+		UPDATE PROFESSOR SET 
+			 DT_CD = #{dtCd,jdbcType=VARCHAR}
+			, PR_NM = #{prNm,jdbcType=VARCHAR}
+			, PR_PH = #{prPh,jdbcType=VARCHAR}
+			, PR_PASS = #{prPass,jdbcType=VARCHAR}
+			, PR_EMAIL = #{prEmail,jdbcType=VARCHAR}
+			, PR_ADDR1 = #{prAddr1,jdbcType=VARCHAR}
+			, PR_ADDR2 = #{prAddr2,jdbcType=VARCHAR}
+			<if test="prPic neq null and not prPic.isEmpty()">
+			, PR_PIC = #{prPic,jdbcType=VARCHAR}
+			</if>
+		WHERE PR_CD = #{prCd,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteProfessor" parameterType="string">
+		UPDATE PROFESSOR 
+		SET 
+		PR_STATUS = '탈퇴' 
+		WHERE PR_CD = #{prCd}
+	</delete>
+	
+</mapper>

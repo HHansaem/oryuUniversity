@@ -1,0 +1,152 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>    
+	<!-- 내가 속한 동아리 -->
+	<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+   <div class="h-100">
+      <div class="custom-card">
+         <div class="card-header" style="border-radius: 20px 20px 0 0; background-color:#154FA9; font-weight:bold; color:white;">MY동아리</div>
+         <div class="card-body">
+	<h2>${club.clubNm }</h2>
+	<table class="table table-border">
+		
+		<tr>
+			<th>동아리 부장</th>
+			<td>${club.studentVO.stNm}</td>
+		</tr>
+		<tr>
+			<th>동아리 지도 교수</th>
+			<td>${club.professorVO.prNm }</td>
+		</tr>
+		<tr>
+			<th>동아리 상태</th>
+			<td>${club.clubStatus }</td>
+		</tr>
+		<tr>
+			<th>동아리 설명</th>
+			<td>${club.clubDetail }</td>
+		</tr>
+		<tr>
+			<th>동아리 계획서</th>
+			<td >${club.clubPlan }</td>
+		</tr>
+		</table>
+		
+		<table class="table table-border">
+		<tr><th colspan="5"><h3>동아리 인원</h3></th></tr>
+		<tr>
+			<th>이 름</th>
+			<th>학 번</th>
+			<th>학 과</th>
+			<th>전화번호</th>
+			<th>동아리직급</th>
+		</tr>
+		<c:if test="${empty memClub }">
+		<tr>
+			<td colspan="5">동아리에 부원이 없습니다.</td>
+		</tr>
+	</c:if>
+		<c:if test="${not empty memClub }">
+			<c:forEach items="${memClub }" var="memClub"><!-- memClub이 비어있지 않는다면 리스트 출력 -->
+				<tr>
+					<td>${memClub.stNm }</td>
+					<td>${memClub.stCd }</td>
+					<td>${memClub.dtNm }</td>
+					<td>${memClub.stPh }</td>
+					<td>${memClub.clubMemClass }</td>
+				</tr>
+			</c:forEach>
+		</c:if>
+		</table>
+		<sec:authorize access="hasRole('ROLE_PR')" >
+		<div id="clubInsertReqMem">
+		</div>
+		<div id="clubMemberWthdrClubList">
+		</div>
+		</sec:authorize>
+		<table class="table table-border">
+		<tr>
+		<td colspan="2">
+				
+				<sec:authorize access="hasRole('ROLE_ST')" >
+				<input class="btn btn-danger" type="button" value = "탈퇴하기" onclick="clubQuit()"> 
+				</sec:authorize>
+				<sec:authorize access="hasRole('ROLE_PR')" >
+				<input class="btn btn-success" type="button" value="수정" onclick="clubUpdate()"> 
+				<input class="btn btn-danger" type="button" value="폐부신청" onclick="closingClub()"> 
+				</sec:authorize>
+				<input class="btn btn-secondary" type=button value="뒤로가기" onclick="history.back();">
+			</td>
+		</tr>
+	</table>
+		</div>
+		</div>
+		</div>
+		</div>
+		
+<script>
+	function clubUpdate(){
+		window.location.href = "${pageContext.request.contextPath}/club/clubUpdateForm.do?who=${club.clubCd}";
+	}
+	
+	function clubQuit(){
+		window.location.href = "${pageContext.request.contextPath}/clubMember/clubMemberWthdrClub.do?what=${club.clubCd}";
+	}
+	
+	function closingClub(){
+		window.location.href = "${pageContext.request.contextPath}/club/clubClosed.do?what=${club.clubCd}";
+	}
+	
+	
+
+window.addEventListener("load", function () {
+    loadClubMemberList();
+    clubMemberWthdrClubList();
+});
+
+function loadClubMemberList() {
+    var clubCd = "${club.clubCd}";
+    var xhr = new XMLHttpRequest();
+    var url = "${pageContext.request.contextPath}/clubMember/prfClubMemberList.do?what=" + clubCd;
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                document.getElementById("clubInsertReqMem").innerHTML = xhr.responseText;
+            } else {
+                alert("동아리 멤버 목록을 불러오는데 오류가 발생했습니다.");
+            }
+        }
+    };
+    xhr.send();
+}
+
+
+
+function clubMemberWthdrClubList() {
+    var clubCd = "${club.clubCd}";
+    var xhr = new XMLHttpRequest();
+    var url = "${pageContext.request.contextPath}/clubMember/prfClubMemberWthdrClubList.do?what=" + clubCd;
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                document.getElementById("clubMemberWthdrClubList").innerHTML = xhr.responseText;
+            } else {
+                alert("동아리 탈퇴 멤버 목록을 불러오는데 오류가 발생했습니다.");
+            }
+        }
+    };
+    xhr.send();
+}
+
+
+if(message)
+	{
+	alert(message);
+	}
+</script>
+		

@@ -1,0 +1,43 @@
+package kr.or.ddit.thesis.controller;
+
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import kr.or.ddit.thesis.service.ThesisService;
+import kr.or.ddit.thesis.vo.ThesisVO;
+
+@Controller
+public class ThesisDeleteController {
+
+	@Inject
+	private ThesisService service;
+	
+	@PostMapping("/thesis/thesisDelete.do")
+	public String postHandler(
+			Model model
+			, @RequestParam String thesCd
+			) {
+		String logicalViewName = "redirect:/thesisList";
+		ThesisVO thesis = service.retrieveThesis(thesCd);
+		return logicalViewName;
+//		boolean success = service.removeThesis(String thesCd);
+		
+//		if(success) {
+//			logicalViewName = "redirect:/thesis/thesisList.do";
+//		}else {
+//			model.addAttribute("message", "논문 삭제 중 문제 발생");
+//			logicalViewName = "redirect:/thesis/thesisList.do";
+//		}
+//		return logicalViewName;
+		
+	}
+	
+}

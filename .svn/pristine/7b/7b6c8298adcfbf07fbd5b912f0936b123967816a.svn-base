@@ -1,0 +1,259 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>    
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<table class="table">
+<tr><td><h4><br>강의 목록</h4><td></tr>
+</table>
+<table class="table">
+	<tr>
+		<td colspan="2">
+			<div>
+				<select name="college" class="form-select">
+		               <option value>단대선택</option>
+		               <c:forEach items="${collegeList }" var="college">
+		                  <option value="${college.colgeCd }" >${college.colgeNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="2">
+			<div>
+				<select name="dtCd" class="form-select">
+		               <option value>학과선택</option>
+		               <c:forEach items="${departmentList }" var="department">
+		                  <option value="${department.dtCd }" class="${department.colgeCd }" >${department.dtNm }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+		<td colspan="2">
+			<div>
+				<select name="classfication" class="form-select">
+		               <option value>이수구분선택</option>
+		               <c:forEach items="${classificationList }" var="classification">
+		                  <option value="${classification.cfCode }" >${classification.cfName }</option>
+		               </c:forEach>
+				</select>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div>
+				<select name="grade" class="form-select">
+		               <option value>학년선택</option>
+		                  <option value="1" >1학년</option>
+		                  <option value="2" >2학년</option>
+		                  <option value="3" >3학년</option>
+		                  <option value="4" >4학년</option>
+				</select>
+			</div>
+		</td>
+		<td colspan="2">
+			<div>
+				<select name="semester" class="form-select">
+		               <option value>학기선택</option>
+		                  <option value="1" >1학기</option>
+		                  <option value="2" >2학기</option>
+		                  <option value="3" >하계학기</option>
+		                  <option value="4" >동계학기</option>
+				</select>
+			</div>
+		</td>
+		<td colspan="4">
+			<div id="searchUI" class="row justify-content-center">
+				<div  class="col-auto">
+					<form:select path="simpleCondition.searchType" class="form-select">
+						<form:option value="" label="전체" />
+						<form:option value="lCode" label="강의코드" />
+						<form:option value="lName" label="강의명" />
+						<form:option value="sCode" label="과목코드" />
+						<form:option value="sName" label="과목명" />
+						<form:option value="pName" label="교수명" />
+					</form:select>
+				</div>
+				<div  class="col-auto">
+					<form:input path="simpleCondition.searchWord" class="form-control"/>
+				</div>
+				<div  class="col-auto">
+					<input type="button" value="검색" id="searchBtn" class="btn btn-success"/>
+ 				<a href="<c:url value='/lecture/lectureInsert.do'/>" class="btn btn-primary">강의등록</a>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+<table class="table">
+	<thead class="table-light">
+		<tr>
+			<th>체크</th>
+			<th>강의코드</th>
+			<th>과목명</th>
+			<th>교수명</th>
+			<th>강의명</th>
+			<th>학년코드</th>
+			<th>학기코드</th>
+			<th>강의학점</th>
+			<th>제한인원</th>
+			<th>강의분반</th>
+			<th>강의상태</th>
+			<th>강의계획서</th>
+			<th>강의실,교시 선택</th>
+		</tr>
+	</thead>
+	<tbody>
+		<c:set var="lectureList" value="${paging.dataList }"/>
+			<c:choose>
+				<c:when test="${empty lectureList }">
+					<tr>
+						<td colspan="20">조건에 맞는 과목이 없음.</td>
+					</tr>	
+				</c:when>
+				<c:otherwise>
+					<c:forEach items="${lectureList }" var="lecture">
+						<tr data-id="${lecture.lecCd}" class="clickable-row">
+							<td class="col-md-2"><input type="checkbox" name="checkBox"></td>
+							<td class="lecCd">${lecture.lecCd}</td>
+							<td>${lecture.subject.subjNm}</td>
+							<td>${lecture.professor.prNm}</td>
+							<td>${lecture.lecLectTitle}</td>
+							<td>${lecture.lecGraCd}</td>
+							<td>${lecture.lecSemeCd}</td>
+							<td>${lecture.lecLectCred}</td>
+							<td>${lecture.lecEnroLimit}</td>
+							<td>${lecture.lecLectDivision}</td>
+							<td>${lecture.lecStat}</td>
+							<td>
+							<c:if test="${not empty lecture.fileGroup and not empty lecture.fileGroup.detailList }">
+								<c:forEach items="${lecture.fileGroup.detailList }" var="fileDetail">
+									<c:url value="/download.do" var="downloadURL">
+										<c:param name="atchFileId" value="${fileDetail.atchFileId }" />
+										<c:param name="fileSn" value="${fileDetail.fileSn }" />
+									</c:url>
+									<a href="${downloadURL }">${fileDetail.orignlFileNm }</a>
+								</c:forEach>
+							</c:if>
+							</td>
+							<c:url value='/lecture/lectureScheduleInsert.do' var="updateURL">
+								<c:param name="what" value="${lecture.lecCd}" />
+							</c:url>
+							<td><a href="${updateURL }" class="btn btn-primary" >등록</a></td>
+						</tr>
+					</c:forEach>
+				</c:otherwise>
+			</c:choose>
+	</tbody>
+	<tfoot>
+		<tr>
+		<div class="btn-group btn-group-md" role="group">
+			<td colspan="2">
+				<button id="allowRow" class="btn btn-primary" type="button">요청수락</button>
+			</td>
+		</div>	
+		</tr>
+	</tfoot>
+</table>
+		<div class="d-flex justify-content-center mb-3">
+			${paging.pagingHTML }
+		</div>
+<!-- 검색조건 받기 -->		
+<form:form id="searchForm" modelAttribute="simpleCondition" method="get">
+	<input type="hidden" name="college" id="college" />
+	<input type="hidden" name="dtCd" id="dtCd" />
+	<input type="hidden" name="classfication" id="classfication" />
+	<input type="hidden" name="grade" id="grade" />
+	<input type="hidden" name="semester" id="semester" />
+	
+	<form:hidden path="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<!-- 검색조건내에 조건걸기 -->
+<script>
+ 	let $dtCd = $('[name="dtCd"]');
+ 	$('[name="college"]').on("change", function(event){
+ 		let colgeCd = $(this).val();
+		if(colgeCd){
+			$dtCd.find("option").hide();
+			$dtCd.find(`option:first`).show();
+ 			$dtCd.find(`option.\${colgeCd}`).show();
+ 		}else{
+ 			$dtCd.find("option").show();
+ 		}
+ 	}).trigger("change");
+</script>
+<!-- pagination -->
+<script>
+	function fn_paging(page){
+		searchForm.page.value = page;
+		searchForm.requestSubmit();
+	}
+	$(searchBtn).on("click", function(event){
+		$(searchUI).find(":input[name]").each(function(idx, input){
+			let name = input.name;
+			let value = $(input).val();
+			$(searchForm).find(`[name=\${name}]`).val(value);
+		});
+		let college = $("select[name='college']").val();
+		let dtCd = $("select[name='dtCd']").val();
+		let classfication = $("select[name='classfication']").val();
+		let grade = $("select[name='grade']").val();
+		let semester = $("select[name='semester']").val();
+		$("#searchForm input[name='college']").val(college);
+    	$("#searchForm input[name='dtCd']").val(dtCd);
+		$("#classfication").val(classfication);
+		$("#grade").val(grade);
+		$("#semester").val(semester);
+		
+		$(searchForm).submit();
+	});
+</script>
+<!--강의상세보기 -->
+<!-- <script> -->
+//     document.addEventListener("DOMContentLoaded", function() {
+//         var clickableRows = document.querySelectorAll(".clickable-row");
+//         clickableRows.forEach(function(row) {
+//             row.addEventListener("click", function() {
+//                 var id = this.getAttribute("data-id");
+<%--                 window.location.href = "<%=request.getContextPath()%>/lecture/lectureView.do?lecCd=" + id; --%>
+//             });
+//         });
+//     });
+<!-- </script> -->
+<script>
+<!--요청 수락 버튼-->
+$('#allowRow').on('click',function(){
+	event.preventDefault();
+    let $checkLecCd= $("input:checked").parent('td').siblings('.lecCd');
+    let lecCd=[];
+    for(let i = 0;i<$checkLecCd.length;i++){
+    	lecCd.push($checkLecCd[i].innerText);
+    }
+    let setting = {
+       url : "/oryuUniversity/lecture/lectureAllow.do",
+       method : "post",
+       dataType : "text",
+       traditional: true,
+       data : {
+    	   lecCd : lecCd
+       },
+       success : function(resp) {
+          if(resp=="success"){
+            alert("상태수정 성공")
+            window.location.href="<%=request.getContextPath()%>/lecture/lectureList.do";
+          }else{
+			alert("상태수정 실패");
+          }
+       },
+       error : function(jqXHR, status, error) {
+          console.log(jqXHR)
+          console.log(status)
+          console.log(error)
+       }
+    }
+
+    $.ajax(setting);
+ })
+</script>

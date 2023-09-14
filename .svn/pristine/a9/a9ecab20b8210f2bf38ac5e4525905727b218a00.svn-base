@@ -1,0 +1,12 @@
+package kr.or.ddit.lectureContents.exam.service;
+
+import java.util.List;
+
+import kr.or.ddit.lectureContents.vo.ExamVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+
+public interface ExamService {
+	public List<ExamVO> retrieveExamList(String lecCd);
+	
+	public ServiceResult registerExam(ExamVO exam);
+}

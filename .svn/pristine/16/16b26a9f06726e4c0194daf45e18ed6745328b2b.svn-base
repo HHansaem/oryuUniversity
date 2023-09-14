@@ -1,0 +1,392 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400&display=swap"
+	rel="stylesheet">
+<style>
+.gradInfo {
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 20px;
+	padding-right: 40px;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.gradInfo-header {
+	margin: 20px 0 11px 40px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.gradInfo-body {
+	margin: -13px 11px 20px 40px;
+	font-size: 12px;
+}
+
+.span-title {
+	font-weight: bold;
+	color: #248AFD;
+	margin-right: 12px;
+}
+
+.table-padding {
+	padding: 0 50px 0 50px;
+}
+.table td {
+    padding-top: 20px;
+    padding-bottom: 20px; 
+}
+select {
+    padding: 0;
+    display: inline-block; 
+    vertical-align: middle; 
+}
+button {
+ 	margin-left: 10px;
+}
+</style>
+
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-110">
+		<div class="card gradInfo">
+			<div class="gradInfo-header">
+				<i class="mdi mdi-check-circle" style="color: green;"></i> 성적 반영 비율
+				정보
+				<hr style="border-color: black;">
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">강의계획서 성적 반영 비율</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;출석 ${gradeRate.grAttend }%, 과제
+				${gradeRate.grAssi }%, 중간고사 ${gradeRate.grMid }%, 기말고사
+				${gradeRate.grFinal }% 로 반영된 점수입니다.
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">현재 학기 등급 정보</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A : 30%,&nbsp;&nbsp;B :
+				40%,&nbsp;&nbsp;그 외 30%,&nbsp;&nbsp;F학점은 교수 재량으로 부여합니다.
+			</div>
+			<div class="gradInfo-body">
+				<span class="span-title">수강 인원</span>
+				|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;해당 강의의 수강 인원은 총
+				${gradeRate.enrollmentCount }명입니다.
+			</div>
+			<div class="gradInfo-body" id="gradeStudents"></div>
+			<div style="display: flex; justify-content: flex-end; width: 100%; margin-top: -50px;">
+		        <button onclick="toggleGradeEditMode(false)" class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;">등급 자동 분배</button>
+		        <button onclick="toggleGradeEditMode(true)" class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;">등급 수정</button>
+		        <button onclick="confirmAllGrades(studentGrade)" onclick="return confirmStatus(event)" 
+		        		class="btn btn-outline-info mb-3" style="padding: 12px; border-radius: 10px;">전체 확정</button>
+		    </div>
+		</div>
+		<div class="table-padding">
+			<table class="table" style="margin-bottom: 20px;">
+				<thead class="table-light">
+					<tr>
+						<th>NO</th>
+						<th>이름</th>
+						<th>학번</th>
+						<th>학과</th>
+						<th>과제점수</th>
+						<th>출석점수</th>
+						<th>중간점수</th>
+						<th>기말점수</th>
+						<th>총점</th>
+						<th>평점</th>
+						<th>등급</th>
+						<th>상태</th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:set var="gradeList" value="${paging.dataList }" />
+					<c:choose>
+						<c:when test="${empty gradeList }">
+							<tr>
+								<td colspan="12">본 강의를 수강하는 학생이 없습니다.</td>
+							</tr>
+						</c:when>
+						<c:otherwise>
+							<c:forEach items="${gradeList }" var="grade">
+								<tr id="gradeSelect"${grade.rnum } data-stCd="${grade.stCd }"
+									data-graFinalTotal="${grade.graFinalTotal }"
+									data-graStatus="${grade.graStatus }"
+									data-graRating="${grade.graRating }"
+									data-graAvgScore="${grade.graAvgScore }"
+									data-lecCd="${grade.lecCd}">
+									<td>${grade.rnum }</td>
+									<td>${grade.stNm }</td>
+									<td>${grade.stCd }</td>
+									<td>${grade.dtNm }</td>
+									<td>${grade.graAssiScore } / ${grade.assiScore }</td>
+									<td>${grade.graAttendScore } / 10</td>
+									<td>${grade.graMidScore } / ${grade.midScore }</td>
+									<td>${grade.graFinalScore } / ${grade.finalScore }</td>
+									<td>${grade.graFinalTotal } / 100</td>
+									<td>${grade.graAvgScore }</td>
+									<td><span>${grade.graRating}</span></td>
+									<c:if test="${grade.graStatus eq '미확정'}">
+										<td style="color: red;">${grade.graStatus }</td>
+									</c:if>
+									<c:if test="${grade.graStatus eq '확정'}">
+										<td style="color: green;">${grade.graStatus }</td>
+									</c:if>
+								</tr>
+							</c:forEach>
+						</c:otherwise>
+					</c:choose>
+				</tbody>
+			</table>
+<!-- 			<div class="d-flex justify-content-center mb-3 mt-4"> -->
+<%-- 				${paging.pagingHTML } --%>
+<!-- 			</div> -->
+		</div>
+	</div>
+</div>
+
+<script>
+	var enrollmentCount = ${gradeRate.enrollmentCount };
+	console.log("enrollmentCount",enrollmentCount);
+	
+	// A, B, C 학생 수 계산 (반올림)
+	var aGradeStudents = Math.round(enrollmentCount * 0.3);
+	var bGradeStudents = Math.round(enrollmentCount * 0.4);
+	var cGradeStudents = enrollmentCount - aGradeStudents - bGradeStudents;
+	
+	var gradeInfo = "A :&nbsp;"+aGradeStudents+"명,&nbsp;&nbsp;B : &nbsp;"+bGradeStudents+"명,&nbsp;&nbsp;그 외&nbsp;"+cGradeStudents+"명";
+	console.log("gradeInfo",gradeInfo);
+	var gradInfoBody = document.querySelector("#gradeStudents");
+	gradInfoBody.innerHTML = 
+		'<span class="span-title">등급 부여 인원</span>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;해당 과목에서 부여 가능한 최대 등급 수는&nbsp;'+gradeInfo+"입니다.";
+
+	var isEditMode = false;
+	// 자동 등급 분배
+	function toggleGradeEditMode(editMode) {
+	    if (editMode) {
+	        var gradeElements = document.querySelectorAll('tr[id^="gradeSelect"]');
+	        // '등급 수정' 버튼을 눌렀을 때의 처리
+	    
+		    var gradeList = [];
+		    var lecCD;
+	
+	        gradeElements.forEach(function (element) {
+	            var stCd = $(element).data("stcd");
+	            lecCd = $(element).data("leccd");
+	            var graFinalTotal = $(element).data("grafinaltotal");
+	            var graStatus = $(element).data("grastatus");
+	            var graRating = $(element).data("grarating");
+	            gradeList.push({ lecCd: lecCd, stCd: stCd, graFinalTotal: graFinalTotal, graStatus: graStatus, graRating: graRating });
+	        });
+	        gradeList.sort(function (a, b) {
+	            return b.graFinalTotal - a.graFinalTotal;
+	        });
+	        
+	        gradeList.forEach(function (student, index) {
+	        	var graRating = student.graRating;
+	        	if (graRating === '-') {
+	        	console.log("index",index,":",graRating);
+	                if (index < aGradeStudents) {
+	                	graRating = 'A0';
+	                } else if (index < aGradeStudents + bGradeStudents) {
+	                	graRating = 'B0';
+	                } else {
+	                	graRating = 'C0';
+	                }
+	            }
+	        	student.gradeList = graRating;
+            });
+	        
+	        gradeElements.forEach(function (element) {
+	            var stCd = $(element).data("stcd");
+	            var student = gradeList.find(function (item) {
+	                return item.stCd === stCd;
+	            });
+	
+	            if (student) {
+	                var currentRating = student.gradeList;
+	                
+	                var gradeValueElement = element.querySelector('td:nth-child(11) span');
+	                
+	                if(student.graStatus === '확정'){
+	                	gradeValueElement.textContent = currentRating;
+	                }else{
+	                	var selectBox = document.createElement('select');
+	                	
+	                	var options = ['A+', 'A0', 'A-', 'B+', 'B0', 'B-', 'C+', 'C0', 'C-', 'D+', 'D0', 'D-', 'F'];
+		                options.forEach(function(option) {
+		                    var optionElement = document.createElement('option');
+		                    optionElement.value = option;
+		                    optionElement.textContent = option;
+		                    selectBox.appendChild(optionElement);
+		                });
+		                
+		                selectBox.value = currentRating;
+		                
+// 		                var gradeValueElement = element.querySelector('td:nth-child(12) span');
+// 		                gradeValueElement.textContent = '';
+// 		                gradeValueElement.appendChild(selectBox);
+						gradeValueElement.textContent = '';
+                    	gradeValueElement.appendChild(selectBox);
+		                
+		                selectBox.addEventListener('change', function() {
+		                    var newRating = selectBox.value;
+		                    student.grade = newRating;
+		                });
+	                }
+	            }
+	        });
+	    } else {
+	        // '등급 자동 분배' 버튼을 눌렀을 때의 처리
+	        var gradeElements = document.querySelectorAll('tr[id^="gradeSelect"]');
+	    
+	        var gradeList = [];
+	        var lecCD;
+	
+	        gradeElements.forEach(function (element) {
+	            var stCd = $(element).data("stcd");
+	            lecCd = $(element).data("leccd");
+	            var graFinalTotal = $(element).data("grafinaltotal");
+	            gradeList.push({ lecCd: lecCd, stCd: stCd, graFinalTotal: graFinalTotal });
+	        });
+	        gradeList.sort(function (a, b) {
+	            return b.graFinalTotal - a.graFinalTotal;
+	        });
+	        
+	        gradeList.forEach(function (student, index) {
+	            if (index < aGradeStudents) {
+	                student.grade = 'A0';
+	            } else if (index < aGradeStudents + bGradeStudents) {
+	                student.grade = 'B0';
+	            } else {
+	                student.grade = 'C0';
+	            }
+	        });
+	        
+	        gradeElements.forEach(function (element) {
+	            var stCd = $(element).data("stcd");
+	            var student = gradeList.find(function (item) {
+	                return item.stCd === stCd;
+	            });
+	
+	            if (student) {
+	                var currentRating = student.grade;
+	                
+	                var gradeValueElement = element.querySelector('td:nth-child(11) span');
+	                if (gradeValueElement) {
+	                    gradeValueElement.textContent = currentRating;
+	                }
+	            }
+	        });
+	    }
+	}
+
+	
+	function updateGrade(stCd, graRating, lecCd, graStatus, graAvgScore) {
+		var data = {
+				lecCd: lecCd,
+		        stCd: stCd,
+		        graRating: graRating,
+		        graAvgScore: graAvgScore,
+		        graStatus: graStatus
+		    };
+		$.ajax({
+			url: "<c:url value='/enrollment/gradeUpdate.do'/>",
+			type: 'POST',
+			async: false, //동기로 보내기
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			success: function(response){
+				console.log("등급 업데이트 성공", response);
+			},
+			error: function(err){
+				console.error("등급 업데이트 실패", err);
+			}
+		});
+	}
+	
+	var studentGrade = '';
+	
+	function toggleStatus(element) {
+	    var row = element.closest('tr'); 
+	    var gradeValueElement = row.querySelector('td:nth-child(12)');
+	    var gradeStatusElement = row.querySelector('td:nth-child(11) span');
+	    var gradeAvgScoreElement = row.querySelector('td:nth-child(10)');
+        var stCd = row.getAttribute('data-stcd');
+        var lecCd = row.getAttribute('data-leccd');
+        var graRating = row.getAttribute('data-grarating');
+        var graStatus = row.getAttribute('data-grastatus');
+        var graAvgScore = row.getAttribute('data-graavgscore');
+        if(element.cellIndex === 11){
+	        if (graStatus === '미확정') {
+	        	 gradeValueElement.textContent = '확정';
+	             gradeValueElement.style.color = 'green';
+	             
+	             row.setAttribute('data-grarating', '확정');
+	             var updatedGrade = row.querySelector('td:nth-child(11) select').value;
+	             var updatedAvgScore = row.querySelector('td:nth-child(10)');
+	             
+	            updateGrade(stCd, updatedGrade, lecCd, graStatus, graAvgScore);
+	            
+	            gradeStatusElement.textContent = updatedGrade;
+	            gradeAvgScoreElement.textContent =
+	            row.setAttribute('data-grastatus', '확인');
+	        }
+        }
+	}
+
+	var tbody = document.querySelector("table tbody");
+
+	tbody.addEventListener("click", function(event) {
+		if (event.target.tagName === "TD") {
+	           toggleStatus(event.target);
+	       }
+	});
+	
+	function confirmAllGrades(studentGrade) {
+	    var gradeElements = document.querySelectorAll('tr[id^="gradeSelect"]');
+	    
+	    gradeElements.forEach(function (element) {
+	        var stCd = $(element).data("stcd");
+	        var lecCd = $(element).data("leccd");
+	        var graStatus = $(element).data("grastatus");
+	        
+	        if (graStatus === '미확정') {
+	            var selectElement = element.querySelector('td:nth-child(11) select');
+	            var selectElement2 = element.querySelector('td:nth-child(11) span');
+	            
+	            if (selectElement) {
+	                var updatedGrade = selectElement.value;
+	                updateGrade(stCd, updatedGrade, lecCd, '확정');
+	                
+	                var gradeValueElement = element.querySelector('td:nth-child(11) span');
+	                gradeValueElement.textContent = updatedGrade;
+	                element.setAttribute('data-grarating', '확정');
+	            }else {
+	            	var gradeValueElement = element.querySelector('td:nth-child(11) span');
+	                var currentGrade = gradeValueElement.textContent;
+	                updateGrade(stCd, currentGrade, lecCd, '확정');
+	            }
+	            
+	            
+	            var gradeStatusElement = element.querySelector('td:nth-child(12)');
+	            gradeStatusElement.textContent = '확정';
+	            gradeStatusElement.style.color = 'green';
+	            element.setAttribute('data-grarating', '확정');
+	            
+	        }
+	    });
+	}
+	
+	function confirmStatus(event) {
+        var result = confirm("전체 성적 정보를 확정하시겠습니까?");
+        if (!result) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+</script>
+
+
+

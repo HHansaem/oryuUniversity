@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.common.dao.CommonDAO">
+	
+	<select id="selectClassificationList" resultType="kr.or.ddit.common.vo.ClassificationVO">
+		SELECT *
+		FROM CLASSIFICATION
+	</select>
+	
+	<select id="selectClassRoomList" resultType="kr.or.ddit.common.vo.ClassRoomVO">
+		SELECT *
+		FROM CLASSROOM
+	</select>
+	
+	<select id="selectDaytimeScheduleList" resultType="kr.or.ddit.common.vo.DaytimeScheduleVO">
+		SELECT *
+		FROM DAYTIMESCHEDULE
+	</select>
+	
+	<select id="selectBuildingList" resultType="kr.or.ddit.common.vo.BuildingVO">
+		SELECT *
+		FROM BUILDING
+	</select>
+	
+	<select id="selectStudentList">
+		SELECT *
+		FROM STUDENT
+	</select>
+	
+	<select id="selectProfessorList">
+		SELECT *
+		FROM PROFESSOR
+	</select>
+	
+	<select id="selectStaffList">
+		SELECT *
+		FROM TEACHING_STAFF
+	</select>
+	
+	<select id="selectProfList" resultType="kr.or.ddit.professor.vo.ProfessorVO" parameterType="String">
+		SELECT *
+		FROM PROFESSOR
+		WHERE DT_CD = #{String}
+	</select>
+	
+	<select id="profInfo" resultType="kr.or.ddit.department.vo.DepartmentVO" parameterType="String">
+		SELECT P.PR_CD, P.PR_NM, D.DT_NM, D.DT_CD, C.COLGE_NM
+		FROM DEPARTMENT D
+		LEFT JOIN COLLEGE C ON D.COLGE_CD = C.COLGE_CD
+		LEFT JOIN PROFESSOR P ON D.DT_CD = P.DT_CD
+		WHERE P.PR_CD = #{String}
+	</select>
+	
+	<select id="subjectList" resultType="kr.or.ddit.subject.vo.SubjectVO" parameterType="String">
+		SELECT S.SUBJ_NM,S.SUBJ_CD
+		FROM SUBJECT S
+		LEFT JOIN LECTURE L ON L.SUBJ_CD = S.SUBJ_CD
+		LEFT JOIN DEPARTMENT D ON D.DT_CD = S.DT_CD
+		WHERE D.DT_CD = #{String}
+	</select>
+	
+	<select id="selectSchedule" resultType="kr.or.ddit.schedule.vo.AcademicScheduleVO">
+		SELECT AS_START, AS_END
+		FROM ACA_SCHEDULE
+		WHERE AS_CD = (
+		    SELECT MAX(TO_NUMBER(AS_CD))
+		    FROM ACA_SCHEDULE
+		    WHERE AS_DISTINCTION = '수강신청일정'
+		)
+
+	</select>
+</mapper>

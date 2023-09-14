@@ -1,0 +1,68 @@
+package kr.or.ddit.student.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.department.vo.DepartmentVO;
+import kr.or.ddit.serviceresult.ServiceResult;
+import kr.or.ddit.student.dao.OthersDAO;
+import kr.or.ddit.student.service.StudentService;
+import kr.or.ddit.student.vo.StudentVO;
+
+@Controller
+@RequestMapping("/student/studentUpdate.do")
+public class StudentUpdateController {
+	
+	@Inject
+	private StudentService service;
+	@Inject
+	private OthersDAO othersDAO;
+	
+	@ModelAttribute("departmentList")
+	public List<DepartmentVO> departmentList() {
+		return othersDAO.selectDepartmentList();
+	}
+
+	@GetMapping
+	public String updateForm(
+		Model model
+		, @RequestParam("who") String stCd
+	) {
+		StudentVO student = service.retrieveStudent(stCd);
+		model.addAttribute("student", student);
+		
+		return "student/studentEdit";
+	}
+	
+	@PostMapping
+	public ResponseEntity<String> updateProcess(
+		@ModelAttribute("student") StudentVO student
+		, BindingResult errors
+	) {
+		String responseMessage;
+		
+		if(!errors.hasErrors()) {
+			ServiceResult result = service.modifyStudent(student);
+			if(ServiceResult.OK == result) {
+				responseMessage = "ok";
+			}else {
+				responseMessage = "fail";
+			}
+		}else {
+			responseMessage = "fail";
+		}
+		return ResponseEntity.ok(responseMessage);
+	}
+	
+}

@@ -1,0 +1,69 @@
+package kr.or.ddit.internshipAPC.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.internshipAPC.service.InternshipAPCService;
+
+@Controller
+public class InternshipAPCPass {
+	@Inject
+	private InternshipAPCService service;
+	
+	// 신청서 합격 처리
+	@RequestMapping("/internshipAPC/internshipAPCPass.do")
+	public String internAPCPass(
+			@RequestParam(name="what") String iaCd 
+			,@RequestParam(name="stat") String iaStat
+			,Model model
+			) {
+		String pass = "합격";
+		String logicalViewName = null;
+			if(iaStat.equals("신청"))
+			{
+				int result = service.internshipAPCPass(iaCd,pass);
+				if(result>0) {
+					logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+				}
+				else {
+					model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하세요");
+					logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+				}
+			}else {
+				model.addAttribute("message", "신청처리가 완료 된 문서입니다.");
+				logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+			}
+	return logicalViewName;
+		
+	}
+	// 신청서 불합격 처리
+	@RequestMapping("/internshipAPC/internshipAPCNopass.do")
+	public String internAPCNoPass(
+			@RequestParam(name="what") String iaCd
+			,@RequestParam(name="stat") String iaStat
+			,Model model
+			) {
+		String pass = "불합격";
+		String logicalViewName = null;
+			if(iaStat.equals("신청"))
+			{
+				int result = service.internshipAPCPass(iaCd,pass);
+				if(result>0) {
+					logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+				}
+				else {
+					model.addAttribute("message", "서버 오류, 잠시 뒤 다시 시도하세요");
+					logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+				}
+			}else {
+				model.addAttribute("message", "신청처리가 완료 된 문서입니다.");
+				logicalViewName = "redirect:/internshipAPC/StaffInternshipAPCList.do";
+			}
+	return logicalViewName;
+	}
+	
+}

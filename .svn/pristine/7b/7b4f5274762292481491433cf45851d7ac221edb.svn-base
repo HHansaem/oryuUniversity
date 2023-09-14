@@ -1,0 +1,290 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<style>
+#curve_chart {
+    margin-top: -288px;
+	float: left;
+	width: 50%;
+	margin-left: 50px
+}
+
+.avgInfo {
+	background-color: rgba(0, 0, 0, 0.03);
+	margin: 20px;
+	padding-right: 40px;
+	width: 51%;
+	padding: 20px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin-top: 14px;
+}
+
+.avgInfo-header {
+	color: slategray;
+	font-size: 23px;
+	font-weight: bold;
+	margin-left: -100px
+}
+
+.avgInfo-body {
+	font-size: 12px;
+}
+
+.icon {
+	margin-right: 15px;
+	font-size: 21px;
+}
+
+#searchUI {
+	border: 1px solid black;
+	width: 44%;
+}
+
+#barchart_values {
+	width: 50%;
+    margin-top: -295px;
+    height: 400px;
+    border: 1px solid black;
+}
+.table-padding{
+	margin-top: -20px;
+}
+</style>
+<div class="card box-shadow d-flex m-4" style="min-height: 87%;">
+	<div class="h-100">
+		<div class="card-header"
+			style="border-radius: 20px 20px 0 0; background-color: #154FA9; font-weight: bold; color: white;">
+			전체 성적 조회</div>
+		<div class="d-flex flex-row">
+			<div class="card avgInfo"></div>
+			<div id="searchUI" class="row justify-content-center">
+				<div class="col-auto">
+					<%-- 			<form:select path="simpleCondition.searchType" class="form-select"> --%>
+					<%-- 				<form:option value="" label="전체" /> --%>
+					<%-- 				<form:option value="writer" label="년도" /> --%>
+					<%-- 				<form:option value="title" label="학기" /> --%>
+					<%-- 				<form:option value="content" label="내용" /> --%>
+					<%-- 			</form:select> --%>
+				</div>
+				<div class="col-auto">
+					<%-- 			<form:input path="simpleCondition.searchWord" class="form-control"/> --%>
+				</div>
+				<div class="col-auto">
+					<input type="button" value="검색" id="searchBtn"
+						class="btn btn-success" />
+				</div>
+			</div>
+		</div>
+		<div class="d-flex flex-row">
+			<div id="curve_chart"></div>
+		
+<!-- 		</div> -->
+		
+		<div class="card-body">
+			<div class="table-padding">
+				<div class="flex-container">
+					<table class="table box-shadow" style="width: 45%; float: left;">
+						<thead class="table-light">
+							<tr>
+								<th>년도</th>
+								<th>학기</th>
+								<th>과목</th>
+								<th>이수구분</th>
+								<th>학점</th>
+								<th>등급</th>
+								<th>평점</th>
+								<th>취득여부</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:set var="myGradeList" value="${stdAllGradeList}" />
+							<c:choose>
+								<c:when test="${empty myGradeList }">
+									<tr>
+										<td colspan="8">수강신청된 과목이 없습니다.</td>
+									</tr>
+								</c:when>
+								<c:otherwise>
+									<c:forEach items="${myGradeList}" var="stdGrade">
+										<tr>
+											<td>${stdGrade.enrollmentYear }</td>
+											<td>${stdGrade.semester }</td>
+											<td>${stdGrade.lecLectTitle }</td>
+											<td>${stdGrade.subjComType }</td>
+											<td>${stdGrade.lecLectCred }</td>
+											<td>${stdGrade.graRating }</td>
+											<td>${stdGrade.graAvgScore }</td>
+											<td><c:choose>
+													<c:when test="${stdGrade.graRating eq '-'}">
+											            미취득
+											        </c:when>
+													<c:otherwise>
+											            취득
+											        </c:otherwise>
+												</c:choose></td>
+										</tr>
+									</c:forEach>
+								</c:otherwise>
+							</c:choose>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		</div>
+		<div id="barchart_values"></div>
+	</div>
+</div>
+
+<script type="text/javascript"
+	src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+var chart;
+var gradeChart;
+
+// 평균 차트 그리기
+function drawChart() {
+  var avgGradeListJson = ${avgGradeListJson};
+  var MajorAvgGradeListJson = ${MajorAvgGradeListJson};
+  var data = new google.visualization.DataTable();
+
+  data.addColumn('string', 'Year');
+  data.addColumn('number', '전공');
+  data.addColumn('number', '전체');
+
+  for (var i = 0; i < avgGradeListJson.length; i++) {
+    var enrollmentYear = avgGradeListJson[i].enrollmentYear + '년 ' + avgGradeListJson[i].semester + "학기";
+    var avgGrade = parseFloat(avgGradeListJson[i].avgGrade);
+    var majorAvgGrade = MajorAvgGradeListJson[i] ? parseFloat(MajorAvgGradeListJson[i].majorAvgGrade) : 0.0;
+    data.addRow([enrollmentYear, majorAvgGrade, avgGrade]);
+  }
+  
+  var options = {
+    title: '',  //연도별 학점 평균
+    curveType: 'none',
+    legend: {
+      position: 'top'
+    },
+    vAxis: {
+      viewWindow: {
+        min: 0,
+        max: 5
+      },
+      format: '0.0',
+      ticks: [0, 1, 2, 3, 4, 5],
+      gridlines: {
+        count: 1
+      }
+    },
+    pointSize: 5,
+    colors: ['#F16767', '#FFB84C'],
+    chartArea: {
+      width: '90%', 
+      height: '30%',
+    },
+    backgroundColor: 'transparent',
+  };
+  
+  chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+  chart.draw(data, options);
+  
+  google.visualization.events.addListener(chart, 'select', selectHandler);
+
+	  function selectHandler() {
+	  console.log("작동!!");
+	  var selection = chart.getSelection();
+	  console.log("selection!!",selection);
+	  var message='';
+	  if (selection.length > 0) {
+	    var selectedItemYear = data.getValue(selection[0].row, 0);
+	    var selectedItemMajor  = data.getValue(selection[0].row, 1);
+	    var selectedItemTotal  = data.getValue(selection[0].row, 2);
+	    var infoDiv = document.getElementById('barchart_values');
+	    infoDiv.innerHTML = '선택한 항목: ' + selectedItemYear + ', 전공: ' + selectedItemMajor + ', 전체: ' + selectedItemTotal;
+	  }
+	}
+}
+
+   
+   
+   var avgGradeListJson = ${avgGradeListJson};
+   var majorAvgGradeListJson = ${MajorAvgGradeListJson};
+   
+   // 전체 평균 계산을 위한 함수
+    function totalAverage(dataList) {
+       var total = 0;
+       var count = 0; // 빈 값을 무시하기 위한 카운터 변수
+       for (var i = 0; i < dataList.length; i++) {
+           var avgGrade = parseFloat(dataList[i].avgGrade);
+           if (!isNaN(avgGrade)) { // 빈 값이 아닌 경우에만 계산
+               total += avgGrade;
+               count++;
+           }
+       }
+       if (count === 0) {
+           return 0; 
+       }
+       return (total / count).toFixed(2); // 소수점 둘째 자리까지
+   }
+
+   // 전공 평균 계산을 위한 함수
+    function majorAverage(dataList) {
+       var total = 0;
+       var count = 0; // 빈 값을 무시하기 위한 카운터 변수
+       for (var i = 0; i < dataList.length; i++) {
+           var majorAvgGrade = parseFloat(dataList[i].majorAvgGrade);
+           if (!isNaN(majorAvgGrade)) { // 빈 값이 아닌 경우에만 계산
+               total += majorAvgGrade;
+               count++;
+           }
+       }
+       if (count === 0) {
+           return 0; 
+       }
+       return (total / count).toFixed(2); // 소수점 둘째 자리까지
+   }
+   
+    var stdGradeList = ${stdGradeListJson};
+    var totalLectCred = stdGradeList[0].totalLectCred;
+    var avgGradeAverage = totalAverage(avgGradeListJson);
+    var majorAvgGradeAverage = majorAverage(majorAvgGradeListJson);
+
+    var avgInfoDiv = document.querySelector('.avgInfo');
+
+    for (var i = 0; i < 3; i++) { 
+        var avgInfoHeaderDiv = document.createElement('div');
+        avgInfoHeaderDiv.className = 'avgInfo-header';
+
+        var avgInfoBodyDiv = document.createElement('div');
+        avgInfoBodyDiv.className = 'avgInfo-body';
+
+        switch (i) {
+            case 0:
+                avgInfoBodyDiv.innerHTML = '<i class="mdi mdi-information icon" style="color: slategray; vertical-align: middle;"></i>총 전체평균&nbsp;&nbsp;&nbsp;|';
+                avgInfoHeaderDiv.innerHTML = avgGradeAverage;
+                break;
+            case 1:
+                avgInfoBodyDiv.innerHTML = "총 전공평균&nbsp;&nbsp;&nbsp;|";
+                avgInfoHeaderDiv.innerHTML = majorAvgGradeAverage;
+                avgInfoBodyDiv.style.marginTop = "4px";
+                break;
+            case 2:
+                avgInfoBodyDiv.innerHTML = "총 이수학점&nbsp;&nbsp;&nbsp;|";
+                avgInfoHeaderDiv.innerHTML = totalLectCred;
+                avgInfoBodyDiv.style.marginTop = "4px";
+                break;
+            default:
+                break;
+        }
+
+        avgInfoDiv.appendChild(avgInfoBodyDiv);
+        avgInfoDiv.appendChild(avgInfoHeaderDiv);
+    }
+
+</script>

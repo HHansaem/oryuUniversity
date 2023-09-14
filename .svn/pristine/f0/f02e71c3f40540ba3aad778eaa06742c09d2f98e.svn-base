@@ -1,0 +1,31 @@
+package kr.or.ddit.schedule.vo.adapter;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+
+public abstract class FullCalendarEvent<T> {
+	
+	private T adaptee;
+	public FullCalendarEvent(T adaptee) {
+		super();
+		this.adaptee = adaptee;
+	}
+	
+//	@JsonFormat(shape = Shape.NUMBER_INT)
+	public abstract String getId();
+	public abstract String getTitle();
+	public abstract LocalDateTime getStart();
+	public abstract LocalDateTime getEnd();
+	
+	public T getData() {
+		return adaptee;
+	}
+	
+	public Map<String, Object> getExtendedProps() {
+		return Collections.singletonMap("data", getData());
+	}
+}

@@ -1,0 +1,20 @@
+package kr.or.ddit.email.service;
+
+import kr.or.ddit.email.vo.MailVO;
+
+public interface MailService {
+	/**
+	 * 메일 자동 로그인
+	 */
+	public MailVO mailAutoLogin(String id);
+
+	/**
+	 * 메일 아이디 등록
+	 */
+	public int mailIDInsert(MailVO mail);
+		
+	/**
+	 * 아이디 체크
+	 */
+	public int mailCheck(String id);
+}
